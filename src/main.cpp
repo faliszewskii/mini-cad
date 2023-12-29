@@ -9,17 +9,26 @@
 #include "logic/opengl/OpenGLInstance.h"
 #include "logic/io/IOUtils.h"
 #include "logic/importer/AssetImporter.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void processInput(GLFWwindow *window);
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
+bool cameraMode = false;
+
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera cameraAnchor(CameraType::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
+Camera cameraFree(CameraType::FREE, glm::vec3(0.0f, 0.0f, 3.0f));
+Camera *currentCamera = &cameraAnchor;
+
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -31,9 +40,9 @@ float lastFrame = 0.0f;
 int main()
 {
     OpenGLInstance openGlInstance;
-    openGlInstance.init(SCR_WIDTH, SCR_HEIGHT, mouse_callback, scroll_callback);
+    openGlInstance.init(SCR_WIDTH, SCR_HEIGHT, mouse_callback, mouse_button_callback, scroll_callback);
 
-    // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'slash' problem
+    // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
     Shader ourShader(IOUtils::getResource("shaders/t.vert").c_str(), IOUtils::getResource("shaders/t.frag").c_str());
 
     AssetImporter assetImporter;
@@ -41,10 +50,18 @@ int main()
     assetImporter.importModel(IOUtils::getResource("models/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX"), &model3d);
 //    assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"), &model3d);
 
+    ImGui::CreateContext();
+    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplGlfw_InitForOpenGL(openGlInstance.getWindow(), true);
+
     // render loop
     // -----------
     while (openGlInstance.isRunning())
     {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
         // per-frame time logic
         // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -64,19 +81,25 @@ int main()
         ourShader.use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(currentCamera->zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
 
         // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 view = currentCamera->getViewMatrix();
         ourShader.setMat4("view", view);
 
         model3d->draw(ourShader);
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         openGlInstance.swapBuffers();
         openGlInstance.pollEvents();
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
@@ -87,23 +110,36 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
+    if (ImGui::GetIO().WantCaptureKeyboard) return;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        currentCamera = &cameraFree;
+    if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        currentCamera = &cameraAnchor;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        currentCamera->processKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        currentCamera->processKeyboard(BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        currentCamera->processKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        currentCamera->processKeyboard(RIGHT, deltaTime);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+        cameraMode = true;
+    else
+        cameraMode = false;
 }
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
@@ -120,12 +156,16 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+
+    if (cameraMode) {
+        currentCamera->processMouseMovement(xoffset, yoffset);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
+    currentCamera->processMouseScroll(static_cast<float>(yoffset));
 }

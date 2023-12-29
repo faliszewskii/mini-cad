@@ -11,7 +11,7 @@
 class OpenGLInstance {
     GLFWwindow* window;
 public:
-    int init(int screenWidth, int screenHeight, void (*mouseCallback)(GLFWwindow *, double, double), void (*scrollCallback)(GLFWwindow *, double, double));
+    int init(int screenWidth, int screenHeight, void (*mouseCallback)(GLFWwindow *, double, double), void (*mouseButtonCallback)(GLFWwindow* , int , int, int), void (*scrollCallback)(GLFWwindow *, double, double));
 
     bool isRunning();
 

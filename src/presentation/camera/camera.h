@@ -7,6 +7,11 @@
 
 #include <vector>
 
+enum CameraType {
+    FREE,
+    ANCHOR
+};
+
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -19,34 +24,41 @@ enum Camera_Movement {
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.1f;
+const float SENSITIVITY =  0.01f;
 const float ZOOM        =  45.0f;
 
 
 class Camera
 {
 public:
+    CameraType cameraType;
     // camera Attributes
-    glm::vec3 Position;
-    glm::vec3 Front;
-    glm::vec3 Up;
-    glm::vec3 Right;
-    glm::vec3 WorldUp;
+    glm::vec3 position;
+    glm::vec3 front;
+    glm::vec3 up;
+    glm::vec3 right;
+    glm::vec3 worldUp;
+    glm::vec3 anchor;
     // euler Angles
-    float Yaw;
-    float Pitch;
+    float yaw;
+    float pitch;
     // camera options
-    float MovementSpeed;
-    float MouseSensitivity;
-    float Zoom;
+    float movementSpeed;
+    float mouseSensitivity;
+    float zoom;
 
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
-    glm::mat4 GetViewMatrix();
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime);
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
-    void ProcessMouseScroll(float yoffset);
+    Camera(
+            CameraType cameraType = FREE,
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
+            float yaw = YAW, float pitch = PITCH);
+    glm::mat4 getViewMatrix();
+    void processKeyboard(Camera_Movement direction, float deltaTime);
+    void processMouseMovement(float xoffset, float yoffset);
+    void processMouseScroll(float yoffset);
 private:
-    void updateCameraVectors();
+    void processMouseMovementFree(float xoffset, float yoffset);
+    void processMouseMovementAnchor(float xoffset, float yoffset);
 };
 #endif
