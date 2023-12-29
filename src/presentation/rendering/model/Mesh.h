@@ -9,6 +9,7 @@
 #include <glm/vec2.hpp>
 #include <string>
 #include <vector>
+#include <optional>
 #include "../shader/shader.h"
 
 //#define MAX_BONE_INFLUENCE 4
@@ -31,12 +32,14 @@ struct Texture {
 
 class Mesh {
 public:
-    // mesh data
-    std::vector<Vertex>       vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture>      textures;
+    std::vector<Vertex>                         vertices;
+    std::optional<std::vector<unsigned int>>    indices;
+    std::optional<std::vector<Texture>>         textures;
+    int drawingMode;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    Mesh(std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {},
+     std::optional<std::vector<Texture>> textures = {}, int drawingMode = GL_TRIANGLES);
+
     void draw(Shader &shader);
 private:
     //  render data

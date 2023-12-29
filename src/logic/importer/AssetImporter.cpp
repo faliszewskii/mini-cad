@@ -131,7 +131,7 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
 //    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, textures);
+    return {vertices, std::optional(indices), std::optional(textures)};
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)
@@ -155,7 +155,7 @@ std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiText
         if(!skip)
         {   // if texture hasn't been loaded already, load it
             Texture texture;
-            texture.id = textureFromFile(str.C_Str(), this->directory);
+            texture.id = textureFromFile(str.C_Str());
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
@@ -165,7 +165,7 @@ std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiText
     return textures;
 }
 
-unsigned int AssetImporter::textureFromFile(const char *path, const std::string &directory)
+unsigned int AssetImporter::textureFromFile(const char *path)
 {
     std::string filename = std::string(path);
     std::replace( filename.begin(), filename.end(), '\\', '/');
