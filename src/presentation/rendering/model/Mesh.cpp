@@ -2,20 +2,23 @@
 // Created by faliszewskii on 28.12.23.
 //
 
+#define UUID_SYSTEM_GENERATOR
+#include "../../lib/uuid/uuid.h"
 #include "Mesh.h"
 
 #include <utility>
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices,
+Mesh::Mesh(std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices,
            std::optional<std::vector<Texture>> textures, int drawingMode) :
            vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures)),
-           drawingMode(drawingMode)
+           material(std::move(material)), drawingMode(drawingMode), uniqueObjectId(uuids::uuid_system_generator{}())
 {
     setupMesh();
 }
 
-void Mesh::draw(Shader &shader) {
+void Mesh::render(Shader &shader) {
     if(textures) {
+        shader.setBool("useTexture", true);
         for(unsigned int i = 0; i < textures.value().size(); i++)
         {
             // TODO Possible handling of multiple textures of the same type.
@@ -24,7 +27,10 @@ void Mesh::draw(Shader &shader) {
             glBindTexture(GL_TEXTURE_2D, textures.value()[i].id);
         }
         glActiveTexture(GL_TEXTURE0);
+    } else {
+        shader.setBool("useTexture", false);
     }
+    shader.setVec4("albedo", material.albedo);
 
     // draw mesh
     glBindVertexArray(VAO);

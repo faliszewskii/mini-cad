@@ -44,7 +44,7 @@ int OpenGLInstance::init(
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Glad initialization
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -55,6 +55,8 @@ int OpenGLInstance::init(
 
     // Enables section
     glEnable(GL_DEPTH_TEST);
+
+    return 0;
 }
 
 bool OpenGLInstance::isRunning() {

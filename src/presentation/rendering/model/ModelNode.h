@@ -11,6 +11,8 @@
 #include "Mesh.h"
 
 class ModelNode {
+    uuids::uuid uniqueObjectId;
+    std::string name;
     std::vector<Mesh> meshes;
     std::vector<ModelNode> children;
     glm::mat4 transformation;
@@ -19,8 +21,13 @@ class ModelNode {
 //    glm::vec3 scale;
 
 public:
-    ModelNode(std::vector<Mesh> meshes, std::vector<ModelNode> children, glm::mat4 mat);
-    void draw(Shader &shader, glm::mat4 model);
+    ModelNode(std::string name);
+    ModelNode(std::string name, std::vector<Mesh> meshes, std::vector<ModelNode> children, glm::mat4 mat);
+    void render(Shader &shader, glm::mat4 model);
+    std::vector<ModelNode>& getChildren() { return children; };
+    std::vector<Mesh>& getMeshes() { return meshes; };
+    std::string getName() { return name; };
+    uuids::uuid getUuid() { return uniqueObjectId; };
 };
 
 

@@ -10,22 +10,23 @@
 #include "AssetImporter.h"
 #include "../io/stb_image.h"
 
-int AssetImporter::importModel(std::string resourcePath, Model** result) {
+std::optional<ModelNode> AssetImporter::importModel(std::string resourcePath) {
     Assimp::Importer import;
     const aiScene *scene = import.ReadFile(resourcePath, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-    std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-    return -1;
+        std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+        return {};
     }
     directory = resourcePath.substr(0, resourcePath.find_last_of('/'));
 
-    ModelNode rootNode = processNode(scene->mRootNode, scene);
-    *result = new Model(rootNode);
+    return std::move(ModelNode(processNode(scene->mRootNode, scene)));
 }
 
 ModelNode AssetImporter::processNode(aiNode *node, const aiScene *scene) {
+    std::string name = node->mName.C_Str();
+
     std::vector<Mesh> meshes;
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -40,12 +41,6 @@ ModelNode AssetImporter::processNode(aiNode *node, const aiScene *scene) {
             t.a3, t.b3, t.c3, t.d3,
             t.a4, t.b4, t.c4, t.d4
     );
-//    glm::mat4 transformation(
-//            t.a1, t.a2, t.a3, t.a4,
-//            t.b1, t.b2, t.b3, t.b4,
-//            t.c1, t.c2, t.c3, t.c4,
-//            t.d1, t.d2, t.d3, t.d4
-//            );
 
     std::vector<ModelNode> children;
     for(unsigned int i = 0; i < node->mNumChildren; i++)
@@ -53,7 +48,7 @@ ModelNode AssetImporter::processNode(aiNode *node, const aiScene *scene) {
         children.push_back(processNode(node->mChildren[i], scene));
     }
 
-    return ModelNode(meshes, children, transformation);
+    return {name, meshes, children, transformation};
 }
 
 Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
@@ -63,7 +58,7 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
 
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        Vertex vertex;
+        Vertex vertex{};
         glm::vec3 vector;
         // positions
         vector.x = mesh->mVertices[i].x;
@@ -130,8 +125,15 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
 //    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 //    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+    glm::vec4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
+    C_STRUCT aiColor4D _diffuse;
+    if(AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &_diffuse))
+        color4_to_vec4(&_diffuse, diffuse);
+
+    Material meshMaterial(diffuse);
+
     // return a mesh object created from the extracted mesh data
-    return {vertices, std::optional(indices), std::optional(textures)};
+    return {vertices, meshMaterial, std::optional(indices), std::optional(textures)};
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)
@@ -204,4 +206,11 @@ unsigned int AssetImporter::textureFromFile(const char *path)
     }
 
     return textureID;
+}
+
+void AssetImporter::color4_to_vec4(aiColor4D *color, glm::vec4 p) {
+    p[0] = color->r;
+    p[1] = color->g;
+    p[2] = color->b;
+    p[3] = color->a;
 }

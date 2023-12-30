@@ -11,6 +11,7 @@
 #include <vector>
 #include <optional>
 #include "../shader/shader.h"
+#include "../../../../lib/uuid/uuid.h"
 
 //#define MAX_BONE_INFLUENCE 4
 
@@ -30,22 +31,31 @@ struct Texture {
     std::string path;
 };
 
+struct Material {
+    glm::vec4 albedo;
+};
+
 class Mesh {
 public:
+    uuids::uuid uniqueObjectId;
     std::vector<Vertex>                         vertices;
     std::optional<std::vector<unsigned int>>    indices;
     std::optional<std::vector<Texture>>         textures;
+    Material                                    material;
     int drawingMode;
 
-    Mesh(std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {},
+    Mesh(std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices = {},
      std::optional<std::vector<Texture>> textures = {}, int drawingMode = GL_TRIANGLES);
 
-    void draw(Shader &shader);
+    void render(Shader &shader);
+
+    uuids::uuid getUuid() { return uniqueObjectId; };
 private:
     //  render data
     unsigned int VAO, VBO, EBO;
 
     void setupMesh();
+
 };
 
 

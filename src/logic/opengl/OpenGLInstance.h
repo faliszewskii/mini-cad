@@ -5,8 +5,7 @@
 #ifndef OPENGL_SANDBOX_OPENGLINSTANCE_H
 #define OPENGL_SANDBOX_OPENGLINSTANCE_H
 
-
-#include <GLFW/glfw3.h>
+#include "../../lib/glad/glad_glfw.h"
 
 class OpenGLInstance {
     GLFWwindow* window;

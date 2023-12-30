@@ -36,14 +36,21 @@ add_executable(opengl-sandbox main.cpp
         logic/importer/AssetImporter.h
         presentation/rendering/model/Mesh.cpp
         presentation/rendering/model/Mesh.h
-        presentation/rendering/model/Model.cpp
-        presentation/rendering/model/Model.h
         presentation/rendering/model/ModelNode.cpp
         presentation/rendering/model/ModelNode.h
+        logic/generator/ModelGenerator.cpp
+        logic/generator/ModelGenerator.h
+        logic/algebra/AlgebraUtils.cpp
+        logic/algebra/AlgebraUtils.h
+        presentation/gui/GUI.cpp
+        presentation/gui/GUI.h
+        logic/ApplicationState.h
+        ../lib/glad/glad_glfw.h
+        ../lib/uuid/uuid.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)
-set(LDFLAGS -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lassimp)
+set(LDFLAGS -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lassimp -luuid nfd)
 
 target_include_directories(opengl-sandbox PRIVATE ../lib/imgui)
 target_compile_options(opengl-sandbox PUBLIC ${CFLAGS})

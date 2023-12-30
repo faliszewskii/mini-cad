@@ -1,9 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include "../../lib/glad/glad_glfw.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "logic/io/stb_image.h"
 
-#include <iostream>
 #include "presentation/rendering/shader/shader.h"
 #include "presentation/camera/camera.h"
 #include "logic/opengl/OpenGLInstance.h"
@@ -12,6 +11,9 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "logic/generator/ModelGenerator.h"
+#include "presentation/gui/GUI.h"
+#include "logic/ApplicationState.h"
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -25,8 +27,8 @@ const unsigned int SCR_HEIGHT = 1080;
 bool cameraMode = false;
 
 // camera
-Camera cameraAnchor(CameraType::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
-Camera cameraFree(CameraType::FREE, glm::vec3(0.0f, 0.0f, 3.0f));
+Camera cameraAnchor(CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
+Camera cameraFree(CameraMode::FREE, glm::vec3(0.0f, 0.0f, 3.0f));
 Camera *currentCamera = &cameraAnchor;
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -39,29 +41,34 @@ float lastFrame = 0.0f;
 
 int main()
 {
-    OpenGLInstance openGlInstance;
+    OpenGLInstance openGlInstance{};
     openGlInstance.init(SCR_WIDTH, SCR_HEIGHT, mouse_callback, mouse_button_callback, scroll_callback);
 
     // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
     Shader ourShader(IOUtils::getResource("shaders/t.vert").c_str(), IOUtils::getResource("shaders/t.frag").c_str());
 
     AssetImporter assetImporter;
-    Model *model3d;
-    assetImporter.importModel(IOUtils::getResource("models/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX"), &model3d);
-//    assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"), &model3d);
 
-    ImGui::CreateContext();
-    ImGui_ImplOpenGL3_Init();
-    ImGui_ImplGlfw_InitForOpenGL(openGlInstance.getWindow(), true);
+    ApplicationState appState;
+
+    appState.rootModelNode.getChildren().push_back(ModelGenerator::generateAxis());
+
+    auto result = assetImporter.importModel(IOUtils::getResource("models/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX"));
+    if(result) appState.rootModelNode.getChildren().push_back(result.value());
+
+    result = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
+    if(result) appState.rootModelNode.getChildren().push_back(result.value());
+
+    GUI gui(openGlInstance.getWindow(), appState);
 
     // render loop
     // -----------
     while (openGlInstance.isRunning())
     {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+        openGlInstance.pollEvents();
+        gui.newFrame();
+
+
         // per-frame time logic
         // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -72,29 +79,28 @@ int main()
         // -----
         processInput(openGlInstance.getWindow());
 
+
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // activate shader
         ourShader.use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(currentCamera->zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(ZOOM), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
 
         // camera/view transformation
         glm::mat4 view = currentCamera->getViewMatrix();
         ourShader.setMat4("view", view);
 
-        model3d->draw(ourShader);
+//        axis->draw(ourShader,  glm::translate(glm::mat4(1.0f), currentCamera->anchor));
+        appState.rootModelNode.render(ourShader, glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        gui.render();
 
         openGlInstance.swapBuffers();
-        openGlInstance.pollEvents();
     }
 
     ImGui_ImplOpenGL3_Shutdown();
