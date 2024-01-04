@@ -1,7 +1,9 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#define UUID_SYSTEM_GENERATOR
 #include "../../lib/glad/glad_glfw.h"
+#include "../../../../lib/uuid/uuid.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -9,16 +11,25 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <utility>
 
 class Shader
 {
+    uuids::uuid uniqueObjectId;
+    std::string name;
 public:
     unsigned int ID;
+    std::string vertexPath;
+    std::string fragmentPath;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
-    Shader(const char* vertexPath, const char* fragmentPath)
-    {
-        // 1. retrieve the vertex/fragment source code from filePath
+    Shader(std::string name, std::string vertexShaderPath, std::string fragmentShaderPath) : name(std::move(name)),
+    vertexPath(std::move(vertexShaderPath)), fragmentPath(std::move(fragmentShaderPath)),
+    uniqueObjectId(uuids::uuid_system_generator{}()) {
+        initShader(vertexPath, fragmentPath);
+    }
+
+    void initShader(std::string vertexShaderPath, std::string fragmentShaderPath) {// 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
         std::ifstream vShaderFile;
@@ -29,8 +40,8 @@ public:
         try
         {
             // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(vertexShaderPath);
+            fShaderFile.open(fragmentShaderPath);
             std::stringstream vShaderStream, fShaderStream;
             // read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();
@@ -70,16 +81,22 @@ public:
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
-    // activate the shader
+
     // ------------------------------------------------------------------------
+    // Activate the shader
     void use()
     {
         glUseProgram(ID);
     }
-    // utility uniform functions
+    // ------------------------------------------------------------------------
+    // Hot-reload the shader
+    void hotReload() {
+        glDeleteProgram(ID);
+        initShader(vertexPath, fragmentPath);
+        // What about uniforms that have to be set on init (like color in flat).
+    }
     // ------------------------------------------------------------------------
     // utility uniform functions
-    // ------------------------------------------------------------------------
     void setBool(const std::string &name, bool value) const
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
@@ -137,6 +154,8 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
+    uuids::uuid getUuid() { return uniqueObjectId; }
+    std::string getName() { return name; }
 
 private:
     // utility function for checking shader compilation/linking errors.

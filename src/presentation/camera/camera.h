@@ -23,11 +23,9 @@ enum CameraMovement {
 };
 
 // Default camera values
-const float YAW         = -90.0f;
-const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.01f;
-const float ZOOM        =  45.0f;
+const float ZOOM_SENSITIVITY =  0.1f;
 
 
 class Camera
@@ -41,7 +39,7 @@ private:
 
     float movementSpeed;
     float mouseSensitivity;
-    float zoom;
+    float zoomSensitivity; // TODO Maybe change based on how close anchor to
     glm::vec3 front;
     glm::vec3 up;
     glm::vec3 right;

@@ -7,7 +7,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
-GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state.rootModelNode, state.selectedModelNodes){
+GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
 
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
@@ -25,13 +25,16 @@ void GUI::render() {
 
     renderMenuBar();
     renderDebugOverlay();
-    renderMainWindow();
+
+    if(guiState.activeViewsMask & ViewsMask::ModelsView) renderModelWindow();
+    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
+
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GUI::renderMenuBar() const {
+void GUI::renderMenuBar() {
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -40,17 +43,19 @@ void GUI::renderMenuBar() const {
                 NFD_Init();
 
                 nfdchar_t *outPath;
-                nfdfilteritem_t filterItem[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
-                nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, NULL);
+                nfdfilteritem_t filterItem[1] {{ "3D models", "gltf,fbx,FBX,obj" } };
+                nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
                 if (result == NFD_OKAY)
                 {
-                    puts("Success!");
-                    puts(outPath);
+                    std::optional<ModelNode> model = guiState.assetImporter.importModel(outPath);
+                    if(model)
+                        guiState.rootModelNode.getChildren().push_back(model.value());
+                    else
+                        printf("Failed to load a file: %s", outPath); // TODO log message board
                     NFD_FreePath(outPath);
                 }
                 else if (result == NFD_CANCEL)
                 {
-                    puts("User pressed cancel.");
                 }
                 else
                 {
@@ -99,12 +104,12 @@ void GUI::renderDebugOverlay() {
     ImGui::End();
 }
 
-void GUI::renderMainWindow() {
+void GUI::renderModelWindow() {
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
     ImGuiWindowFlags window_flags = 0;
-    if (!ImGui::Begin("OpenGl Sandbox", nullptr, window_flags))
+    if (!ImGui::Begin("Models View", nullptr, window_flags))
     {
         ImGui::End();
         return;
@@ -112,26 +117,44 @@ void GUI::renderMainWindow() {
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 //    ImGui::Spacing();
 
-    renderModelView();
+    renderModelTreeView();
 
     ImGui::PopItemWidth();
     ImGui::End();
 }
 
-void GUI::renderModelView() {
-    ImGui::Text("Model view");
+void GUI::renderShaderWindow() {
+    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+    ImGuiWindowFlags window_flags = 0;
+    if (!ImGui::Begin("Shaders View", nullptr, window_flags))
+    {
+        ImGui::End();
+        return;
+    }
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+//    ImGui::Spacing();
 
+    renderShaderListView();
+
+    ImGui::PopItemWidth();
+    ImGui::End();
+}
+
+void GUI::renderModelTreeView() {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
     ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-    traverseModeNode(guiState.rootModelNode, base_flags);
+    traverseModelNode(guiState.rootModelNode, base_flags);
 
     // 'selection_mask' is dumb representation of what may be user-side selection state.
     //  You may retain selection state inside or outside your objects in whatever format you see fit.
     // 'node_clicked' is temporary storage of what node we have clicked to process selection at the end
     /// of the loop. May be a pointer to your own node type, etc.
+    /*
     static int selection_mask = (1 << 2);
     int node_clicked = -1;
     for (int i = 0; i < 6; i++)
@@ -185,20 +208,20 @@ void GUI::renderModelView() {
             selection_mask ^= (1 << node_clicked);          // CTRL+click to toggle
         else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
             selection_mask = (1 << node_clicked);           // Click to single-select
-    }
+    }*/
 
     ImGui::EndChild();
     ImGui::PopStyleVar();
 }
 
-void GUI::traverseModeNode(ModelNode &node, ImGuiTreeNodeFlags flags) {
+void GUI::traverseModelNode(ModelNode &node, ImGuiTreeNodeFlags flags) {
     std::string nodeName = node.getName().empty()? "[Unnamed node]": node.getName();
     bool node_open = ImGui::TreeNodeEx(uuids::to_string(node.getUuid()).c_str(), flags, "%s", nodeName.c_str());
 
     flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
     if(node_open) {
         for(ModelNode& child : node.getChildren())
-            traverseModeNode(child, flags);
+            traverseModelNode(child, flags);
         ImGui::TreePop();
 
         int meshCounter = 0;
@@ -208,4 +231,22 @@ void GUI::traverseModeNode(ModelNode &node, ImGuiTreeNodeFlags flags) {
         }
     }
 
+}
+
+void GUI::renderShaderListView() {
+    if (ImGui::BeginListBox("available shader listing", ImVec2(-FLT_MIN, guiState.availableShaders.size() * ImGui::GetTextLineHeightWithSpacing())))
+    {
+        for (auto & shader : guiState.availableShaders) {
+            const bool is_selected = ( std::addressof(shader) == std::addressof(*guiState.globalShader));
+            ImGui::PushID(to_string(shader.getUuid()).c_str());
+            if (ImGui::Selectable(shader.getName().c_str(), is_selected))
+                guiState.globalShader = &shader;
+            ImGui::PopID();
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndListBox();
+    }
+    if(ImGui::SmallButton("Hot reload"))
+        guiState.globalShader->hotReload();
 }

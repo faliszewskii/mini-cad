@@ -7,7 +7,7 @@
 ModelNode ModelGenerator::generateAxis(glm::vec3 xAxis, glm::vec3 yAxis, bool isRightHanded) {
     Mesh xAxisModel = generateLine(glm::vec3(), glm::normalize(xAxis), glm::vec4(1,0,0,1));
     Mesh yAxisModel = generateLine(glm::vec3(), glm::normalize(yAxis), glm::vec4(0,1,0,1));
-    Mesh zAxisModel = generateLine(glm::vec3(), glm::normalize(glm::cross(xAxis, yAxis))*=(isRightHanded?-1:1), glm::vec4(0,0,1,1));
+    Mesh zAxisModel = generateLine(glm::vec3(), glm::normalize(glm::cross(xAxis, yAxis))*=(isRightHanded?1:-1), glm::vec4(0,0,1,1));
     return ModelNode("Axis", std::vector{xAxisModel, yAxisModel, zAxisModel}, std::vector<ModelNode>(), glm::mat4(1.0f));
 }
 

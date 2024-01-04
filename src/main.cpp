@@ -45,21 +45,21 @@ int main()
     openGlInstance.init(SCR_WIDTH, SCR_HEIGHT, mouse_callback, mouse_button_callback, scroll_callback);
 
     // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
-    Shader ourShader(IOUtils::getResource("shaders/t.vert").c_str(), IOUtils::getResource("shaders/t.frag").c_str());
+    Shader albedoShader("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
+    Shader monoShader("mono", IOUtils::getResource("shaders/basic/mono.vert"), IOUtils::getResource("shaders/basic/mono.frag"));
+    monoShader.use(); // TODO Init somewhere else
+    monoShader.setVec4("color", glm::vec4(1, 0, 1, 0.5f));
+    Shader whiteShader("white", IOUtils::getResource("shaders/basic/white.vert"), IOUtils::getResource("shaders/basic/white.frag"));
+    std::vector<Shader> defaultShaders{albedoShader, monoShader, whiteShader};
+    auto* appState = new ApplicationState(defaultShaders);
+
+    appState->rootModelNode.getChildren().push_back(ModelGenerator::generateAxis());
 
     AssetImporter assetImporter;
-
-    ApplicationState appState;
-
-    appState.rootModelNode.getChildren().push_back(ModelGenerator::generateAxis());
-
     auto result = assetImporter.importModel(IOUtils::getResource("models/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX"));
-    if(result) appState.rootModelNode.getChildren().push_back(result.value());
+    if(result) appState->rootModelNode.getChildren().push_back(result.value());
 
-    result = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
-    if(result) appState.rootModelNode.getChildren().push_back(result.value());
-
-    GUI gui(openGlInstance.getWindow(), appState);
+    GUI gui(openGlInstance.getWindow(), *appState);
 
     // render loop
     // -----------
@@ -85,18 +85,18 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // activate shader
-        ourShader.use();
+        appState->globalShader->use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(ZOOM), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f); // TODO configurable
+        appState->globalShader->setMat4("projection", projection);
 
         // camera/view transformation
         glm::mat4 view = currentCamera->getViewMatrix();
-        ourShader.setMat4("view", view);
+        appState->globalShader->setMat4("view", view);
 
-//        axis->draw(ourShader,  glm::translate(glm::mat4(1.0f), currentCamera->anchor));
-        appState.rootModelNode.render(ourShader, glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
+//        axis->draw(albedoShader,  glm::translate(glm::mat4(1.0f), currentCamera->anchor));
+        appState->rootModelNode.render(*appState->globalShader, glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
 
         gui.render();
 
@@ -109,6 +109,9 @@ int main()
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
+
+    delete appState;
+
     return 0;
 }
 

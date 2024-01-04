@@ -7,7 +7,7 @@
 
 Camera::Camera(CameraMode cameraMode, glm::vec3 position, glm::vec3 anchor, glm::quat orientation) :
         cameraType(cameraMode), position(position), anchor(anchor), orientation(orientation),
-        movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM) {
+        movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoomSensitivity(ZOOM_SENSITIVITY) {
     updateDirections();
 }
 
@@ -45,6 +45,7 @@ void Camera::processMouseMovementAnchor(float xoffset, float yoffset)
 
 void Camera::processMouseScroll(float yoffset)
 {
+    yoffset *= zoomSensitivity;
     position += front * yoffset;
 }
 
