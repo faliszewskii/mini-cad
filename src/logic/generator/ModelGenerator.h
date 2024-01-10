@@ -6,14 +6,14 @@
 #define OPENGL_SANDBOX_MODELGENERATOR_H
 
 
-#include <glm/vec3.hpp>
-#include "../../presentation/rendering/model/Mesh.h"
-#include "../../presentation/rendering/model/ModelNode.h"
+#include <glm/glm.hpp>
+#include "../../presentation/scene/tree/SceneTreeNode.h"
+#include "../../presentation/scene/nodes/mesh/Mesh.h"
 
 class ModelGenerator {
 public:
-    static ModelNode generateAxis(glm::vec3 xAxis = glm::vec3(1,0,0), glm::vec3 yAxis = glm::vec3(0,1,0), bool isRightHanded = true);
-    static Mesh generateLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
+    static std::unique_ptr<SceneTreeNode> generateAxis(glm::vec3 xAxis = glm::vec3(1,0,0), glm::vec3 yAxis = glm::vec3(0,1,0), bool isRightHanded = true);
+    static std::unique_ptr<Mesh> generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color);
 };
 
 

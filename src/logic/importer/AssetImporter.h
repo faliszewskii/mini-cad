@@ -9,18 +9,18 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "../../presentation/rendering/model/Mesh.h"
-#include "../../presentation/rendering/model/ModelNode.h"
+#include "../../presentation/scene/tree/SceneTreeNode.h"
+#include "../../presentation/scene/nodes/mesh/Mesh.h"
 
 class AssetImporter {
 public:
-    std::optional<ModelNode> importModel(std::string resourcePath);
+    std::optional<std::unique_ptr<SceneTreeNode>> importModel(const std::string& resourcePath);
 private:
     std::vector<Texture> textures_loaded;
     std::string directory;
 
-    ModelNode processNode(aiNode *node, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+    std::unique_ptr<SceneTreeNode> processNode(aiNode *node, const aiScene *scene);
+    Mesh processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName);
 
     unsigned int textureFromFile(const char *path);

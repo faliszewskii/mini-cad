@@ -1,36 +1,41 @@
+//
+// Created by faliszewskii on 07.01.24.
+//
+
+#include "Camera.h"
+#include "../../../../logic/algebra/AlgebraUtils.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/detail/type_quat.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "camera.h"
-#include "../../logic/algebra/AlgebraUtils.h"
+#include <utility>
 
 
-CameraOld::CameraOld(CameraModeOld cameraMode, glm::vec3 position, glm::vec3 anchor, glm::quat orientation) :
-        cameraType(cameraMode), position(position), anchor(anchor), orientation(orientation),
-        movementSpeed(SPEEDOld), mouseSensitivity(SENSITIVITYOld), zoomSensitivity(ZOOM_SENSITIVITYOld) {
+Camera::Camera(std::string name, CameraMode cameraMode, glm::vec3 position, glm::vec3 anchor, glm::quat orientation) :
+        SceneNode(std::move(name)), cameraType(cameraMode), position(position), anchor(anchor), orientation(orientation),
+        movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoomSensitivity(ZOOM_SENSITIVITY) {
     updateDirections();
 }
 
-void CameraOld::updateDirections() {
+void Camera::updateDirections() {
     front = AlgebraUtils::getFront(orientation);
     up = AlgebraUtils::getUp(orientation);
     right = AlgebraUtils::getRight(orientation);
 }
 
-glm::mat4 CameraOld::getViewMatrix()
+glm::mat4 Camera::getViewMatrix()
 {
     return glm::lookAt(position, position + front, up);
 }
 
-void CameraOld::processKeyboard(CameraMovementOld direction, float deltaTime) {
+void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
     (this->*keyboardHandlerMapping[cameraType])(direction, deltaTime);
 }
 
-void CameraOld::processMouseMovement(float xoffset, float yoffset) {
+void Camera::processMouseMovement(float xoffset, float yoffset) {
     (this->*mouseHandlerMapping[cameraType])(xoffset, yoffset);
 }
 
-void CameraOld::processMouseMovementAnchor(float xoffset, float yoffset)
+void Camera::processMouseMovementAnchor(float xoffset, float yoffset)
 {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
@@ -43,13 +48,13 @@ void CameraOld::processMouseMovementAnchor(float xoffset, float yoffset)
     updateDirections();
 }
 
-void CameraOld::processMouseScroll(float yoffset)
+void Camera::processMouseScroll(float yoffset)
 {
     yoffset *= zoomSensitivity;
     position += front * yoffset;
 }
 
-void CameraOld::processMouseMovementFree(float xoffset, float yoffset) {
+void Camera::processMouseMovementFree(float xoffset, float yoffset) {
     // TODO
 //    xoffset *= mouseSensitivity;
 //    yoffset *= mouseSensitivity;
@@ -70,7 +75,7 @@ void CameraOld::processMouseMovementFree(float xoffset, float yoffset) {
 //    right = glm::normalize(glm::cross(front, worldUp));
 }
 
-void CameraOld::processKeyboardFree(CameraMovementOld direction, float deltaTime) {
+void Camera::processKeyboardFree(CameraMovement direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
         position += front * velocity;
@@ -82,7 +87,7 @@ void CameraOld::processKeyboardFree(CameraMovementOld direction, float deltaTime
         position += right * velocity;
 }
 
-void CameraOld::processKeyboardAnchor(CameraMovementOld direction, float deltaTime) {
+void Camera::processKeyboardAnchor(CameraMovement direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
         anchor += front * velocity;
@@ -97,3 +102,10 @@ void CameraOld::processKeyboardAnchor(CameraMovementOld direction, float deltaTi
     updateDirections();
 }
 
+int Camera::acceptVisit(SceneNodeVisitor& visitor) {
+    return visitor.visitCamera(*this);
+}
+
+int Camera::acceptLeave(SceneNodeVisitor &visitor) {
+    return visitor.leaveCamera(*this);
+}

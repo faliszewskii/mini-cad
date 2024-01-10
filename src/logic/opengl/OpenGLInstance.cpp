@@ -1,6 +1,7 @@
 #include <iostream>
 #include "glad/glad.h"
 #include "OpenGLInstance.h"
+#include "imgui.h"
 
 /**
  * Function to initialize GLFW, Glad, create a GLFWwindow instance and enable OpenGL functions.
@@ -11,10 +12,7 @@
  * @return Success status.
  */
 int OpenGLInstance::init(
-        int screenWidth, int screenHeight,
-        void (*mouseCallback)(GLFWwindow *, double, double),
-        void (*mouseButtonCallback)(GLFWwindow* , int , int, int),
-        void (*scrollCallback)(GLFWwindow *, double, double)
+        int screenWidth, int screenHeight
         ) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -39,9 +37,6 @@ int OpenGLInstance::init(
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouseCallback);
-    glfwSetScrollCallback(window, scrollCallback);
-    glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
     // tell GLFW to capture our mouse
 //    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -74,5 +69,4 @@ void OpenGLInstance::swapBuffers() {
 void OpenGLInstance::pollEvents() {
     glfwPollEvents();
 }
-
 

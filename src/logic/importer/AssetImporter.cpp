@@ -4,16 +4,17 @@
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <iostream>
 
 #include "AssetImporter.h"
 #include "../io/stb_image.h"
+#include "../../presentation/scene/nodes/transformation/Transformation.h"
 
-std::optional<ModelNode> AssetImporter::importModel(std::string resourcePath) {
+std::optional<std::unique_ptr<SceneTreeNode>> AssetImporter::importModel(const std::string& resourcePath) {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(resourcePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    import.SetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, true);
 
+    const aiScene *scene = import.ReadFile(resourcePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_ValidateDataStructure);
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
@@ -21,18 +22,11 @@ std::optional<ModelNode> AssetImporter::importModel(std::string resourcePath) {
     }
     directory = resourcePath.substr(0, resourcePath.find_last_of('/'));
 
-    return std::move(ModelNode(processNode(scene->mRootNode, scene)));
+    return processNode(scene->mRootNode, scene);
 }
 
-ModelNode AssetImporter::processNode(aiNode *node, const aiScene *scene) {
+std::unique_ptr<SceneTreeNode> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
     std::string name = node->mName.C_Str();
-
-    std::vector<Mesh> meshes;
-    for(unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
-    }
 
     aiMatrix4x4t<ai_real> t = node->mTransformation;
     glm::mat4 transformation(
@@ -42,16 +36,21 @@ ModelNode AssetImporter::processNode(aiNode *node, const aiScene *scene) {
             t.a4, t.b4, t.c4, t.d4
     );
 
-    std::vector<ModelNode> children;
-    for(unsigned int i = 0; i < node->mNumChildren; i++)
+    std::unique_ptr<SceneTreeNode> transformationNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation(name, transformation)))));
+
+    for(unsigned int i = 0; i < node->mNumMeshes; i++)
     {
-        children.push_back(processNode(node->mChildren[i], scene));
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        transformationNode->addChild(std::make_unique<Mesh>(processMesh(mesh, scene, i)));
     }
 
-    return {name, meshes, children, transformation};
+    for(unsigned int i = 0; i < node->mNumChildren; i++)
+        transformationNode->addChild(processNode(node->mChildren[i], scene));
+
+    return transformationNode;
 }
 
-Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -133,7 +132,7 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene) {
     Material meshMaterial(diffuse);
 
     // return a mesh object created from the extracted mesh data
-    return {vertices, meshMaterial, std::optional(indices), std::optional(textures)};
+    return {std::string("mesh.") + std::to_string(index), vertices, meshMaterial, std::optional(indices), std::optional(textures)};
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)

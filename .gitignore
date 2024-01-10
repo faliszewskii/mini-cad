@@ -1,4 +1,5 @@
 cmake-build-debug/
+/resources/models/
 
 ### C++ template
 # Compiled Object files
@@ -77,6 +78,3 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-
-/resources/models/Cerberus_by_Andrew_Maximov/
-/resources/models/spitfire_mini/

@@ -5,12 +5,14 @@
 #ifndef OPENGL_SANDBOX_OPENGLINSTANCE_H
 #define OPENGL_SANDBOX_OPENGLINSTANCE_H
 
+#include <memory>
 #include "../../lib/glad/glad_glfw.h"
+#include "../ApplicationState.h"
 
 class OpenGLInstance {
     GLFWwindow* window;
 public:
-    int init(int screenWidth, int screenHeight, void (*mouseCallback)(GLFWwindow *, double, double), void (*mouseButtonCallback)(GLFWwindow* , int , int, int), void (*scrollCallback)(GLFWwindow *, double, double));
+    int init(int screenWidth, int screenHeight);
 
     bool isRunning();
 
@@ -18,7 +20,7 @@ public:
 
     void swapBuffers();
 
-    void pollEvents();
+    static void pollEvents();
 };
 
 

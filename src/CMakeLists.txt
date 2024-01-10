@@ -47,6 +47,28 @@ add_executable(opengl-sandbox main.cpp
         logic/ApplicationState.h
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
+        presentation/scene/tree/SceneNode.h
+        presentation/scene/tree/SceneTreeNode.h
+        presentation/scene/visitor/SceneNodeVisitor.h
+        presentation/rendering/renderVisitor/RenderSceneVisitor.cpp
+        presentation/rendering/renderVisitor/RenderSceneVisitor.h
+        presentation/scene/nodes/light/Light.cpp
+        presentation/scene/nodes/light/Light.h
+        presentation/scene/nodes/light/pointLight/PointLight.cpp
+        presentation/scene/nodes/light/pointLight/PointLight.h
+        presentation/scene/nodes/transformation/Transformation.cpp
+        presentation/scene/nodes/transformation/Transformation.h
+        presentation/scene/nodes/mesh/Mesh.cpp
+        presentation/scene/nodes/mesh/Mesh.h
+        presentation/scene/nodes/camera/Camera.cpp
+        presentation/scene/nodes/camera/Camera.h
+        presentation/gui/tree/TreeViewVisitor.cpp
+        presentation/gui/tree/TreeViewVisitor.h
+        presentation/scene/tree/SceneTreeNode.cpp
+        presentation/gui/properties/PropertiesViewVisitor.cpp
+        presentation/gui/properties/PropertiesViewVisitor.h
+        logic/input/InputHandler.cpp
+        logic/input/InputHandler.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)

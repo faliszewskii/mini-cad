@@ -15,7 +15,7 @@
 
 //#define MAX_BONE_INFLUENCE 4
 
-struct Vertex {
+struct VertexOld {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
@@ -25,27 +25,27 @@ struct Vertex {
 //    float m_Weights[MAX_BONE_INFLUENCE];
 };
 
-struct Texture {
+struct TextureOld {
     unsigned int id;
     std::string type;
     std::string path;
 };
 
-struct Material {
+struct MaterialOld {
     glm::vec4 albedo;
 };
 
-class Mesh {
+class MeshOld {
 public:
     uuids::uuid uniqueObjectId;
-    std::vector<Vertex>                         vertices;
+    std::vector<VertexOld>                         vertices;
     std::optional<std::vector<unsigned int>>    indices;
-    std::optional<std::vector<Texture>>         textures;
-    Material                                    material;
+    std::optional<std::vector<TextureOld>>         textures;
+    MaterialOld                                    material;
     int drawingMode;
 
-    Mesh(std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices = {},
-     std::optional<std::vector<Texture>> textures = {}, int drawingMode = GL_TRIANGLES);
+    MeshOld(std::vector<VertexOld> vertices, MaterialOld material, std::optional<std::vector<unsigned int>> indices = {},
+     std::optional<std::vector<TextureOld>> textures = {}, int drawingMode = GL_TRIANGLES);
 
     void render(Shader &shader);
 

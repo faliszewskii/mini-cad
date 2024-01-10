@@ -6,6 +6,7 @@
 #include "GUI.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
+#include "tree/TreeViewVisitor.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
 
@@ -47,9 +48,9 @@ void GUI::renderMenuBar() {
                 nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
                 if (result == NFD_OKAY)
                 {
-                    std::optional<ModelNode> model = guiState.assetImporter.importModel(outPath);
+                    auto model = guiState.assetImporter.importModel(outPath);
                     if(model)
-                        guiState.rootModelNode.getChildren().push_back(model.value());
+                        guiState.rootSceneNode.addChild(std::move(model.value()));
                     else
                         printf("Failed to load a file: %s", outPath); // TODO log message board
                     NFD_FreePath(outPath);
@@ -147,8 +148,9 @@ void GUI::renderModelTreeView() {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
-    ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-    traverseModelNode(guiState.rootModelNode, base_flags);
+    TreeViewVisitor treeViewVisitor{};
+    guiState.rootSceneNode.visitTree(treeViewVisitor);
+//    traverseModelNode(guiState.rootSceneNode, base_flags);
 
     // 'selection_mask' is dumb representation of what may be user-side selection state.
     //  You may retain selection state inside or outside your objects in whatever format you see fit.
@@ -214,33 +216,14 @@ void GUI::renderModelTreeView() {
     ImGui::PopStyleVar();
 }
 
-void GUI::traverseModelNode(ModelNode &node, ImGuiTreeNodeFlags flags) {
-    std::string nodeName = node.getName().empty()? "[Unnamed node]": node.getName();
-    bool node_open = ImGui::TreeNodeEx(uuids::to_string(node.getUuid()).c_str(), flags, "%s", nodeName.c_str());
-
-    flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
-    if(node_open) {
-        for(ModelNode& child : node.getChildren())
-            traverseModelNode(child, flags);
-        ImGui::TreePop();
-
-        int meshCounter = 0;
-        for(Mesh& mesh : node.getMeshes()) {
-            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-            ImGui::TreeNodeEx(uuids::to_string(mesh.getUuid()).c_str(), flags, "%s.mesh.%d", node.getName().c_str(), meshCounter++);
-        }
-    }
-
-}
-
 void GUI::renderShaderListView() {
     if (ImGui::BeginListBox("available shader listing", ImVec2(-FLT_MIN, guiState.availableShaders.size() * ImGui::GetTextLineHeightWithSpacing())))
     {
         for (auto & shader : guiState.availableShaders) {
-            const bool is_selected = ( std::addressof(shader) == std::addressof(*guiState.globalShader));
+            const bool is_selected = ( std::addressof(shader) == std::addressof(guiState.globalShader.get()));
             ImGui::PushID(to_string(shader.getUuid()).c_str());
             if (ImGui::Selectable(shader.getName().c_str(), is_selected))
-                guiState.globalShader = &shader;
+                guiState.globalShader.get() = shader;
             ImGui::PopID();
             if (is_selected)
                 ImGui::SetItemDefaultFocus();
@@ -248,5 +231,5 @@ void GUI::renderShaderListView() {
         ImGui::EndListBox();
     }
     if(ImGui::SmallButton("Hot reload"))
-        guiState.globalShader->hotReload();
+        guiState.globalShader.get().hotReload();
 }

@@ -13,7 +13,7 @@
 class ModelNode {
     uuids::uuid uniqueObjectId;
     std::string name;
-    std::vector<Mesh> meshes;
+    std::vector<MeshOld> meshes;
     std::vector<ModelNode> children;
     glm::mat4 transformation;
 //    glm::vec3 translation;
@@ -22,10 +22,10 @@ class ModelNode {
 
 public:
     ModelNode(std::string name);
-    ModelNode(std::string name, std::vector<Mesh> meshes, std::vector<ModelNode> children, glm::mat4 mat);
+    ModelNode(std::string name, std::vector<MeshOld> meshes, std::vector<ModelNode> children, glm::mat4 mat);
     void render(Shader &shader, glm::mat4 model);
     std::vector<ModelNode>& getChildren() { return children; };
-    std::vector<Mesh>& getMeshes() { return meshes; };
+    std::vector<MeshOld>& getMeshes() { return meshes; };
     std::string getName() { return name; };
     uuids::uuid getUuid() { return uniqueObjectId; };
 };

@@ -16,17 +16,16 @@ struct ViewsMask {
 
 struct GUIApplicationState {
 
-    explicit GUIApplicationState(ApplicationState& appState) : rootModelNode(appState.rootModelNode),
-    selectedModelNodes(appState.selectedModelNodes), assetImporter(appState.assetImporter),
-    availableShaders(appState.availableShaders), globalShader(appState.globalShader) {
+    explicit GUIApplicationState(ApplicationState& appState) : assetImporter(appState.assetImporter),
+    availableShaders(appState.availableShaders), globalShader(appState.globalShader), rootSceneNode(appState.rootSceneNode) {
         activeViewsMask = ViewsMask::ModelsView | ViewsMask::ShadersView; // TODO Get from last user settings.
     }
     // ApplicationState
     AssetImporter &assetImporter;
-    ModelNode &rootModelNode;
-    std::vector<ModelNode*> &selectedModelNodes;
+//    std::vector<ModelNode*> &selectedModelNodes;
+    SceneTreeNode &rootSceneNode;
     std::vector<Shader> &availableShaders;
-    Shader* &globalShader;
+    std::reference_wrapper<Shader> &globalShader;
     // this
     unsigned int activeViewsMask;
 
@@ -47,8 +46,6 @@ private:
     void renderModelWindow();
 
     void renderModelTreeView();
-
-    void traverseModelNode(ModelNode &node, ImGuiTreeNodeFlags flags);
 
     void renderShaderWindow();
 

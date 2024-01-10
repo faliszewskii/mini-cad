@@ -9,13 +9,13 @@
 #include <vector>
 #include <map>
 
-enum CameraMode {
+enum CameraModeOld {
     FREE,
     ANCHOR
 };
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum CameraMovement {
+enum CameraMovementOld {
     FORWARD,
     BACKWARD,
     LEFT,
@@ -23,15 +23,15 @@ enum CameraMovement {
 };
 
 // Default camera values
-const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.01f;
-const float ZOOM_SENSITIVITY =  0.1f;
+const float SPEEDOld       =  2.5f;
+const float SENSITIVITYOld =  0.01f;
+const float ZOOM_SENSITIVITYOld =  0.1f;
 
 
-class Camera
+class CameraOld
 {
 private:
-    CameraMode cameraType;
+    CameraModeOld cameraType;
 
     glm::quat orientation;
     glm::vec3 position;
@@ -45,17 +45,17 @@ private:
     glm::vec3 right;
 
 public:
-    std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping {
-            {CameraMode::FREE,   &Camera::processMouseMovementFree},
-            {CameraMode::ANCHOR, &Camera::processMouseMovementAnchor}
+    std::map<CameraModeOld, void (CameraOld::*)(float, float)> mouseHandlerMapping {
+            {CameraModeOld::FREE,   &CameraOld::processMouseMovementFree},
+            {CameraModeOld::ANCHOR, &CameraOld::processMouseMovementAnchor}
     };
-    std::map<CameraMode, void (Camera::*)(CameraMovement direction, float)> keyboardHandlerMapping {
-            {CameraMode::FREE,   &Camera::processKeyboardFree},
-            {CameraMode::ANCHOR, &Camera::processKeyboardAnchor}
+    std::map<CameraModeOld, void (CameraOld::*)(CameraMovementOld direction, float)> keyboardHandlerMapping {
+            {CameraModeOld::FREE,   &CameraOld::processKeyboardFree},
+            {CameraModeOld::ANCHOR, &CameraOld::processKeyboardAnchor}
     };
 
-    explicit Camera(
-            CameraMode cameraMode = FREE,
+    explicit CameraOld(
+            CameraModeOld cameraMode = FREE,
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::quat orientation = glm::quat(1,0,0,0)
@@ -64,7 +64,7 @@ public:
 
     glm::mat4 getViewMatrix();
 
-    void processKeyboard(CameraMovement direction, float deltaTime);
+    void processKeyboard(CameraMovementOld direction, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);
     void processMouseScroll(float yoffset);
 
@@ -72,8 +72,8 @@ private:
 
     void processMouseMovementFree(float xoffset, float yoffset);
     void processMouseMovementAnchor(float xoffset, float yoffset);
-    void processKeyboardFree(CameraMovement direction, float deltaTime);
-    void processKeyboardAnchor(CameraMovement direction, float deltaTime);
+    void processKeyboardFree(CameraMovementOld direction, float deltaTime);
+    void processKeyboardAnchor(CameraMovementOld direction, float deltaTime);
 
     void updateDirections();
 };

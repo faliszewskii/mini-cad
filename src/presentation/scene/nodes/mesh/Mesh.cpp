@@ -1,22 +1,19 @@
 //
-// Created by faliszewskii on 28.12.23.
+// Created by faliszewskii on 07.01.24.
 //
-
-#define UUID_SYSTEM_GENERATOR
-#include "../../lib/uuid/uuid.h"
-#include "Mesh.h"
-
 #include <utility>
 
-MeshOld::MeshOld(std::vector<VertexOld> vertices, MaterialOld material, std::optional<std::vector<unsigned int>> indices,
-           std::optional<std::vector<TextureOld>> textures, int drawingMode) :
-           vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures)),
-           material(std::move(material)), drawingMode(drawingMode), uniqueObjectId(uuids::uuid_system_generator{}())
+#include "Mesh.h"
+
+Mesh::Mesh(std::string name, std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices,
+           std::optional<std::vector<Texture>> textures, int drawingMode) : SceneNode(std::move(name)),
+        vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures)),
+        material(std::move(material)), drawingMode(drawingMode)
 {
     setupMesh();
 }
 
-void MeshOld::render(Shader &shader) {
+void Mesh::render(Shader &shader, glm::mat4 model) {
     if(textures) {
         shader.setBool("useTexture", true);
         for(unsigned int i = 0; i < textures.value().size(); i++)
@@ -31,7 +28,7 @@ void MeshOld::render(Shader &shader) {
         shader.setBool("useTexture", false);
     }
     shader.setVec4("albedo", material.albedo);
-
+    shader.setMat4("model", model);
     // draw mesh
     glBindVertexArray(VAO);
     if(indices)
@@ -41,14 +38,14 @@ void MeshOld::render(Shader &shader) {
     glBindVertexArray(0);
 }
 
-void MeshOld::setupMesh() {
+void Mesh::setupMesh() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexOld), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
     if(indices) {
         glGenBuffers(1, &EBO);
@@ -58,13 +55,21 @@ void MeshOld::setupMesh() {
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexOld), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexOld), (void*)offsetof(VertexOld, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexOld), (void*)offsetof(VertexOld, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
     glBindVertexArray(0);
+}
+
+int Mesh::acceptVisit(SceneNodeVisitor &visitor) {
+    return visitor.visitMesh(*this);
+}
+
+int Mesh::acceptLeave(SceneNodeVisitor &visitor) {
+    return visitor.leaveMesh(*this);
 }
