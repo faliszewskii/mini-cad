@@ -12,7 +12,7 @@
 #include "../ApplicationState.h"
 
 struct InputHandlerState {
-    std::reference_wrapper<Camera> &currentCamera;
+    std::optional<std::reference_wrapper<Camera>> &currentCamera;
     bool guiFocus;
 };
 

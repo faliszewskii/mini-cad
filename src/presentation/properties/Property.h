@@ -10,6 +10,8 @@
 
 class Property {
 public:
+    virtual std::string getPropertyName() = 0;
+
     virtual void acceptVisit(PropertyVisitor& visitor) = 0;
 };
 

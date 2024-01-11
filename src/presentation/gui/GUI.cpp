@@ -8,6 +8,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "tree/TreeViewVisitor.h"
 #include "properties/PropertyViewVisitor.h"
+#include "node/NodeDetailsVisitor.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
 
@@ -28,8 +29,8 @@ void GUI::render() {
     renderMenuBar();
     renderDebugOverlay();
 
-    if(guiState.activeViewsMask & ViewsMask::ModelsView) renderModelWindow();
-    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
+    if(guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
+//    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
 
 
     ImGui::Render();
@@ -90,7 +91,7 @@ void GUI::renderDebugOverlay() {
     ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
     ImVec2 work_size = viewport->WorkSize;
     ImVec2 window_pos, window_pos_pivot;
-    window_pos.x = work_pos.x + PAD;
+    window_pos.x = work_pos.x + PAD + guiState.guiWidth;
     window_pos.y = work_pos.y + work_size.y - PAD;
     window_pos_pivot.x = 0.0f;
     window_pos_pivot.y = 1.0f;
@@ -106,18 +107,17 @@ void GUI::renderDebugOverlay() {
     ImGui::End();
 }
 
-void GUI::renderModelWindow() {
+void GUI::renderMainWindow() {
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
-    ImGuiWindowFlags window_flags = 0;
-    if (!ImGui::Begin("Models View", nullptr, window_flags))
+    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y));
+    ImGui::SetNextWindowSize(ImVec2(guiState.guiWidth, main_viewport->WorkSize.y));
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize;
+    if (!ImGui::Begin("Main View", nullptr, window_flags))
     {
         ImGui::End();
         return;
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-//    ImGui::Spacing();
 
     renderModelTreeView();
 
@@ -136,9 +136,6 @@ void GUI::renderShaderWindow() {
         return;
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-//    ImGui::Spacing();
-
-    renderShaderListView();
 
     ImGui::PopItemWidth();
     ImGui::End();
@@ -149,7 +146,7 @@ void GUI::renderModelTreeView() {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
-    TreeViewVisitor treeViewVisitor(guiState.selectedNode);
+    TreeViewVisitor treeViewVisitor(guiState.selectedNode, guiState.selectedProperty);
     guiState.rootSceneNode.visitTree(treeViewVisitor);
 
 //    traverseModelNode(guiState.rootSceneNode, base_flags);
@@ -218,26 +215,53 @@ void GUI::renderModelTreeView() {
     ImGui::PopStyleVar();
 
     if(guiState.selectedNode) {
-        PropertyViewVisitor visitor;
+        ImGui::Text("%s \"%s\"", guiState.selectedNode->get().getTypeName().c_str(), guiState.selectedNode->get().getName().c_str());
+        NodeDetailsVisitor nodeDetailsVisitor;
+        guiState.selectedNode.value().get().acceptVisit(nodeDetailsVisitor);
+
+        ImGui::SeparatorText("Properties##separatorText");
+        auto properties = guiState.selectedNode->get().getProperties();
+        if (ImGui::BeginListBox("##PropertyListbox", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
+        {
+            for (int n = 0; n < properties.size(); n++)
+            {
+                const bool is_selected = (guiState.selectedProperty == n);
+                ImGui::PushID(n);
+                if (ImGui::Selectable(properties[n].get().getPropertyName().c_str(), is_selected))
+                    guiState.selectedProperty = n;
+                ImGui::PopID();
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndListBox();
+        }
+
+        PropertyViewVisitor propertyViewVisitor;
         for (const auto &property: guiState.selectedNode->get().getProperties())
-            property.get().acceptVisit(visitor);
+            property.get().acceptVisit(propertyViewVisitor);
     }
 }
 
-void GUI::renderShaderListView() {
-    if (ImGui::BeginListBox("available shader listing", ImVec2(-FLT_MIN, guiState.availableShaders.size() * ImGui::GetTextLineHeightWithSpacing())))
-    {
-        for (auto & shader : guiState.availableShaders) {
-            const bool is_selected = ( std::addressof(shader) == std::addressof(guiState.globalShader.get()));
-            ImGui::PushID(to_string(shader.getUuid()).c_str());
-            if (ImGui::Selectable(shader.getName().c_str(), is_selected))
-                guiState.globalShader.get() = shader;
-            ImGui::PopID();
-            if (is_selected)
-                ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndListBox();
-    }
-    if(ImGui::SmallButton("Hot reload"))
-        guiState.globalShader.get().hotReload();
+GUI::~GUI() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
+//
+//void GUI::renderShaderListView() {
+//    if (ImGui::BeginListBox("available shader listing", ImVec2(-FLT_MIN, guiState.availableShaders.size() * ImGui::GetTextLineHeightWithSpacing())))
+//    {
+//        for (auto & shader : guiState.availableShaders) {
+//            const bool is_selected = ( std::addressof(shader) == std::addressof(guiState.globalShader.get()));
+//            ImGui::PushID(to_string(shader.getUuid()).c_str());
+//            if (ImGui::Selectable(shader.getName().c_str(), is_selected))
+//                guiState.globalShader.get() = shader;
+//            ImGui::PopID();
+//            if (is_selected)
+//                ImGui::SetItemDefaultFocus();
+//        }
+//        ImGui::EndListBox();
+//    }
+//    if(ImGui::SmallButton("Hot reload"))
+//        guiState.globalShader.get().hotReload();
+//}

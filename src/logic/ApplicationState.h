@@ -13,27 +13,14 @@
 #include "../presentation/scene/nodes/camera/Camera.h"
 
 struct ApplicationState {
-
-    Camera &setupCamera() {
-        auto camera = std::make_unique<Camera>("camera", CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
-        Camera* p = camera.get();
-        rootSceneNode.addChild(std::move(camera));
-        return *p;
-    }
-
-    explicit ApplicationState(std::vector<Shader> defaultShaders) :
-    rootSceneNode(SceneTreeNode(std::make_unique<Transformation>(Transformation("root")))),
-    globalShader(defaultShaders[0]), currentCamera(setupCamera()){
-        this->availableShaders = std::move(defaultShaders);
-    }
+    explicit ApplicationState() :
+    rootSceneNode(SceneTreeNode(std::make_unique<Transformation>(Transformation("root")))) {}
 
     AssetImporter assetImporter;
     SceneTreeNode rootSceneNode;
-    std::vector<Shader> availableShaders;
 
     std::optional<std::reference_wrapper<SceneNode>> selectedNode;
-    std::reference_wrapper<Shader> globalShader;
-    std::reference_wrapper<Camera> currentCamera;
+    std::optional<std::reference_wrapper<Camera>> currentCamera;
 
     /* TODO
      * Currently all uniforms that will be used have to be set. Find solution for loading an arbitrary shader.

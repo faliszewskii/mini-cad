@@ -10,7 +10,8 @@
 #include <utility>
 
 
-Camera::Camera(std::string name, CameraMode cameraMode, glm::vec3 position, glm::vec3 anchor, glm::quat orientation) :
+Camera::Camera(std::string name, int screenWidth, int screenHeight, CameraMode cameraMode, glm::vec3 position,
+               glm::vec3 anchor, glm::quat orientation) : screenWidth(screenWidth), screenHeight(screenHeight),
         SceneNode(std::move(name)), cameraType(cameraMode), position(position), anchor(anchor), orientation(orientation),
         movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoomSensitivity(ZOOM_SENSITIVITY) {
     // TODO Set orientation to anchor

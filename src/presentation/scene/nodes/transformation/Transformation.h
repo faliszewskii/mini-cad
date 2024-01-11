@@ -18,6 +18,7 @@ public:
     Transformation(std::string name, glm::vec3 position, glm::quat orientation, glm::vec3 scale);
 
     glm::mat4 getTransformation() { return transformationProperty.getTransformation(); };
+    std::string getTypeName() override { return "Transformation"; };
 
     std::vector<std::reference_wrapper<Property>> getProperties() override;
     int acceptVisit(SceneNodeVisitor& visitor) override;

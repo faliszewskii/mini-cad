@@ -5,7 +5,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "logic/io/stb_image.h"
 
-#include "presentation/rendering/shader/shader.h"
 #include "logic/opengl/OpenGLInstance.h"
 #include "logic/io/IOUtils.h"
 #include "imgui.h"
@@ -27,50 +26,42 @@ int main()
     OpenGLInstance openGlInstance{};
     openGlInstance.init(SCR_WIDTH, SCR_HEIGHT);
 
-    // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
-    Shader albedoShader("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
-    Shader monoShader("mono", IOUtils::getResource("shaders/basic/mono.vert"), IOUtils::getResource("shaders/basic/mono.frag"));
-    monoShader.use(); // TODO Init somewhere else
-    monoShader.setVec4("color", glm::vec4(1, 0, 1, 0.5f));
-    Shader whiteShader("white", IOUtils::getResource("shaders/basic/white.vert"), IOUtils::getResource("shaders/basic/white.frag"));
-    std::vector<Shader> defaultShaders{albedoShader, monoShader, whiteShader};
-    std::unique_ptr<ApplicationState> appState = std::make_unique<ApplicationState>(defaultShaders);
+    auto appState = std::make_unique<ApplicationState>();
+
     InputHandler inputHandler(appState);
     inputHandler.setupCallbacks(openGlInstance.getWindow());
 
-    appState->rootSceneNode.addChild(ModelGenerator::generateAxis());
-
-    GUI gui(openGlInstance.getWindow(), *appState);
-
-    while (openGlInstance.isRunning())
     {
-        OpenGLInstance::pollEvents();
-        gui.newFrame();
+        GUI gui(openGlInstance.getWindow(), *appState);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // activate shader
-        appState->globalShader.get().use();
+        // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
+        auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
+        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(shader)));
 
-        // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f); // TODO configurable
-        appState->globalShader.get().setMat4("projection", projection);
+        auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
+        appState->currentCamera = *camera.get();
+        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(camera)));
 
-        // camera/view transformation
-        glm::mat4 view = appState->currentCamera.get().getViewMatrix();
-        appState->globalShader.get().setMat4("view", view);
+        appState->rootSceneNode.addChild(ModelGenerator::generateAxis());
 
-        RenderSceneVisitor renderSceneVisitor(appState->globalShader);
-        appState->rootSceneNode.visitTree(renderSceneVisitor);
+        while (openGlInstance.isRunning()) {
+            OpenGLInstance::pollEvents();
+            gui.newFrame();
 
-        gui.render();
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        openGlInstance.swapBuffers();
+            glViewport(gui.getGuiWidth(), 0, SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT);
+            RenderSceneVisitor renderSceneVisitor{};
+            appState->rootSceneNode.visitTree(renderSceneVisitor);
+
+            glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+            gui.render();
+
+            openGlInstance.swapBuffers();
+        }
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
     glfwTerminate();
     return 0;
 }

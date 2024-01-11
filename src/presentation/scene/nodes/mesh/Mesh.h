@@ -7,7 +7,7 @@
 
 
 #include "../../tree/SceneNode.h"
-#include "../../../rendering/shader/shader.h"
+#include "../shader/Shader.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -39,6 +39,7 @@ public:
 
     Mesh(std::string name, std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices = {},
          std::optional<std::vector<Texture>> textures = {}, int drawingMode = GL_TRIANGLES);
+    std::string getTypeName() override { return "Mesh"; };
 
     void render(Shader &shader, glm::mat4 mat);
 

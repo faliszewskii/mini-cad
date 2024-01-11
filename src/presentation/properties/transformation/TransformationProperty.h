@@ -8,6 +8,7 @@
 
 #include <glm/vec3.hpp>
 #include <glm/ext/quaternion_float.hpp>
+#include <string>
 #include "../Property.h"
 
 class TransformationProperty : public Property {
@@ -18,6 +19,7 @@ class TransformationProperty : public Property {
 public:
     TransformationProperty();
     TransformationProperty(glm::vec3 position, glm::quat orientation, glm::vec3 scale);
+    std::string getPropertyName() override { return "Transformation"; };
 
     glm::mat4 getTransformation();
 

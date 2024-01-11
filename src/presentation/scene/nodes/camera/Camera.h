@@ -61,11 +61,14 @@ public:
 
     explicit Camera(
             std::string name,
+            int screenWidth,
+            int screenHeight,
             CameraMode cameraMode = FREE,
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::quat orientation = glm::quat(1,0,0,0)
     );
+    std::string getTypeName() override { return "Camera"; };
 
 
     glm::mat4 getViewMatrix();
@@ -76,6 +79,9 @@ public:
 
     int acceptVisit(SceneNodeVisitor& visitor) override;
     int acceptLeave(SceneNodeVisitor& visitor) override;
+
+    int screenWidth;
+    int screenHeight;
 private:
 
     void processMouseMovementFree(float xoffset, float yoffset);

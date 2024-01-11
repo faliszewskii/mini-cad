@@ -34,18 +34,19 @@ void InputHandler::keyCallback(GLFWwindow* window, int key, int scancode, int ac
 {
     static auto deltaTime = static_cast<float>(glfwGetTime());
     deltaTime = static_cast<float>(glfwGetTime()) - deltaTime;
+    if(!inputHandlerState.currentCamera) return;
 
     if (ImGui::GetIO().WantCaptureKeyboard) return;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (key == GLFW_KEY_W && action == GLFW_PRESS)
-        inputHandlerState.currentCamera.get().processKeyboard(FORWARD, deltaTime);
+        inputHandlerState.currentCamera.value().get().processKeyboard(FORWARD, deltaTime);
     if (key == GLFW_KEY_S && action == GLFW_PRESS)
-        inputHandlerState.currentCamera.get().processKeyboard(BACKWARD, deltaTime);
+        inputHandlerState.currentCamera.value().get().processKeyboard(BACKWARD, deltaTime);
     if (key == GLFW_KEY_A && action == GLFW_PRESS)
-        inputHandlerState.currentCamera.get().processKeyboard(LEFT, deltaTime);
+        inputHandlerState.currentCamera.value().get().processKeyboard(LEFT, deltaTime);
     if (key == GLFW_KEY_D && action == GLFW_PRESS)
-        inputHandlerState.currentCamera.get().processKeyboard(RIGHT, deltaTime);
+        inputHandlerState.currentCamera.value().get().processKeyboard(RIGHT, deltaTime);
 }
 
 void InputHandler::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -79,8 +80,8 @@ void InputHandler::mouseCallback(GLFWwindow* window, double xposIn, double yposI
     lastX = xpos;
     lastY = ypos;
 
-    if (!inputHandlerState.guiFocus) {
-        inputHandlerState.currentCamera.get().processMouseMovement(xoffset, yoffset);
+    if (inputHandlerState.currentCamera && !inputHandlerState.guiFocus) {
+        inputHandlerState.currentCamera.value().get().processMouseMovement(xoffset, yoffset);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
@@ -89,5 +90,6 @@ void InputHandler::mouseCallback(GLFWwindow* window, double xposIn, double yposI
 // ----------------------------------------------------------------------
 void InputHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    inputHandlerState.currentCamera.get().processMouseScroll(static_cast<float>(yoffset));
+    if(!inputHandlerState.currentCamera || ImGui::GetIO().WantCaptureMouse) return;
+    inputHandlerState.currentCamera.value().get().processMouseScroll(static_cast<float>(yoffset));
 }

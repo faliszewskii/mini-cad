@@ -22,11 +22,12 @@ public:
     }
     uuids::uuid getUuid() { return uniqueObjectId; };
     std::string getName() { return name; };
+    virtual std::string getTypeName() = 0;
 
     virtual std::vector<std::reference_wrapper<Property>> getProperties() { return {}; }; // TODO sorted by some key.
 
     virtual int acceptVisit(SceneNodeVisitor& visitor) = 0;
-    virtual int acceptLeave(SceneNodeVisitor& visitor) = 0;
+    virtual int acceptLeave(SceneNodeVisitor& visitor) { return 0; };
 
     friend bool operator== (SceneNode & lhs, SceneNode & rhs ) {
         return std::addressof(lhs) == std::addressof(rhs);

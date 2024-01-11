@@ -20,18 +20,14 @@ set(IMGUI
         ../lib/imgui/backends/imgui_impl_opengl3.h
         ../lib/imgui/misc/cpp/imgui_stdlib.cpp
         ../lib/imgui/misc/cpp/imgui_stdlib.h
-        presentation/properties/transformation/TransformationProperty.cpp
-        presentation/properties/transformation/TransformationProperty.h
-        presentation/properties/Property.cpp
-        presentation/properties/Property.h
-        presentation/properties/visitor/PropertyVisitor.cpp
-        presentation/properties/visitor/PropertyVisitor.h
+        ../lib/imguizmo/ImGuizmo.cpp
+        ../lib/imguizmo/ImGuizmo.h
 )
 
 add_executable(opengl-sandbox main.cpp
         ${IMGUI}
         ../lib/glad/glad.c
-        presentation/rendering/shader/shader.h
+        presentation/scene/nodes/shader/Shader.h
         presentation/camera/camera.cpp
         presentation/camera/camera.h
         logic/opengl/OpenGLInstance.cpp
@@ -40,10 +36,6 @@ add_executable(opengl-sandbox main.cpp
         logic/io/IOUtils.h
         logic/importer/AssetImporter.cpp
         logic/importer/AssetImporter.h
-        presentation/rendering/model/Mesh.cpp
-        presentation/rendering/model/Mesh.h
-        presentation/rendering/model/ModelNode.cpp
-        presentation/rendering/model/ModelNode.h
         logic/generator/ModelGenerator.cpp
         logic/generator/ModelGenerator.h
         logic/algebra/AlgebraUtils.cpp
@@ -75,6 +67,14 @@ add_executable(opengl-sandbox main.cpp
         presentation/gui/properties/PropertyViewVisitor.h
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
+        presentation/properties/transformation/TransformationProperty.cpp
+        presentation/properties/transformation/TransformationProperty.h
+        presentation/properties/Property.cpp
+        presentation/properties/Property.h
+        presentation/properties/visitor/PropertyVisitor.cpp
+        presentation/properties/visitor/PropertyVisitor.h
+        presentation/gui/node/NodeDetailsVisitor.cpp
+        presentation/gui/node/NodeDetailsVisitor.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)

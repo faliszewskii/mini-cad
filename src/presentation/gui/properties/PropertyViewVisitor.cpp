@@ -9,10 +9,18 @@
 #include "glm/gtc/type_ptr.hpp"
 
 void PropertyViewVisitor::visitTransformationParameter(TransformationProperty &transformation) {
-    ImGui::Text("Transformation Property");
-    ImGui::DragFloat("x", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+0, 0.01f);
-    ImGui::DragFloat("y", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+1, 0.01f);
-    ImGui::DragFloat("z", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+2, 0.01f);
-    ImGui::DragFloat4("orientation", static_cast<float*>(glm::value_ptr(transformation.getOrientationRef())), 0.01f);
-    ImGui::DragFloat3("scale", static_cast<float*>(glm::value_ptr(transformation.getScaleRef())), 0.01f);
+    ImGui::SeparatorText("Transformation Property");
+    ImGui::Text("Position:");
+    ImGui::DragFloat("x##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+0, 0.01f);
+    ImGui::DragFloat("y##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+1, 0.01f);
+    ImGui::DragFloat("z##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+2, 0.01f);
+    ImGui::Text("Orientation:");
+    ImGui::DragFloat("x##orientation", static_cast<float*>(glm::value_ptr(transformation.getOrientationRef()))+0, 0.01f);
+    ImGui::DragFloat("y##orientation", static_cast<float*>(glm::value_ptr(transformation.getOrientationRef()))+1, 0.01f);
+    ImGui::DragFloat("z##orientation", static_cast<float*>(glm::value_ptr(transformation.getOrientationRef()))+2, 0.01f);
+    ImGui::DragFloat("w", static_cast<float*>(glm::value_ptr(transformation.getOrientationRef()))+3, 0.01f);
+    ImGui::Text("Scale:");
+    ImGui::DragFloat("x##scale", static_cast<float*>(glm::value_ptr(transformation.getScaleRef()))+0, 0.001f);
+    ImGui::DragFloat("y##scale", static_cast<float*>(glm::value_ptr(transformation.getScaleRef()))+1, 0.001f);
+    ImGui::DragFloat("z##scale", static_cast<float*>(glm::value_ptr(transformation.getScaleRef()))+2, 0.001f);
 }
