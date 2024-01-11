@@ -7,15 +7,18 @@
 
 
 #include <stack>
+#include <optional>
 #include "imgui.h"
 #include "../../scene/visitor/SceneNodeVisitor.h"
+#include "../../scene/tree/SceneNode.h"
 
 class TreeViewVisitor : public SceneNodeVisitor {
     std::stack<bool> nodeOpenStack;
     ImGuiTreeNodeFlags flags;
+    std::optional<std::reference_wrapper<SceneNode>>& selectedNode;
     // TODO Add icons to gui to identify SceneNode type
 public:
-    TreeViewVisitor();
+    TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>>& selectedNode);
 
     int visitTransformation(Transformation& transformation) override;
     int visitMesh(Mesh& mesh) override;

@@ -7,6 +7,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "tree/TreeViewVisitor.h"
+#include "properties/PropertyViewVisitor.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
 
@@ -148,8 +149,9 @@ void GUI::renderModelTreeView() {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
-    TreeViewVisitor treeViewVisitor{};
+    TreeViewVisitor treeViewVisitor(guiState.selectedNode);
     guiState.rootSceneNode.visitTree(treeViewVisitor);
+
 //    traverseModelNode(guiState.rootSceneNode, base_flags);
 
     // 'selection_mask' is dumb representation of what may be user-side selection state.
@@ -214,6 +216,12 @@ void GUI::renderModelTreeView() {
 
     ImGui::EndChild();
     ImGui::PopStyleVar();
+
+    if(guiState.selectedNode) {
+        PropertyViewVisitor visitor;
+        for (const auto &property: guiState.selectedNode->get().getProperties())
+            property.get().acceptVisit(visitor);
+    }
 }
 
 void GUI::renderShaderListView() {

@@ -9,6 +9,7 @@
 #define UUID_SYSTEM_GENERATOR
 #include "../../../../lib/uuid/uuid.h"
 #include "../visitor/SceneNodeVisitor.h"
+#include "../../properties/Property.h"
 #include <string>
 
 
@@ -22,8 +23,14 @@ public:
     uuids::uuid getUuid() { return uniqueObjectId; };
     std::string getName() { return name; };
 
+    virtual std::vector<std::reference_wrapper<Property>> getProperties() { return {}; }; // TODO sorted by some key.
+
     virtual int acceptVisit(SceneNodeVisitor& visitor) = 0;
     virtual int acceptLeave(SceneNodeVisitor& visitor) = 0;
+
+    friend bool operator== (SceneNode & lhs, SceneNode & rhs ) {
+        return std::addressof(lhs) == std::addressof(rhs);
+    }
 
     virtual ~SceneNode() = default;
 protected:

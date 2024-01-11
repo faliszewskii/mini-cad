@@ -20,6 +20,12 @@ set(IMGUI
         ../lib/imgui/backends/imgui_impl_opengl3.h
         ../lib/imgui/misc/cpp/imgui_stdlib.cpp
         ../lib/imgui/misc/cpp/imgui_stdlib.h
+        presentation/properties/transformation/TransformationProperty.cpp
+        presentation/properties/transformation/TransformationProperty.h
+        presentation/properties/Property.cpp
+        presentation/properties/Property.h
+        presentation/properties/visitor/PropertyVisitor.cpp
+        presentation/properties/visitor/PropertyVisitor.h
 )
 
 add_executable(opengl-sandbox main.cpp
@@ -65,8 +71,8 @@ add_executable(opengl-sandbox main.cpp
         presentation/gui/tree/TreeViewVisitor.cpp
         presentation/gui/tree/TreeViewVisitor.h
         presentation/scene/tree/SceneTreeNode.cpp
-        presentation/gui/properties/PropertiesViewVisitor.cpp
-        presentation/gui/properties/PropertiesViewVisitor.h
+        presentation/gui/properties/PropertyViewVisitor.cpp
+        presentation/gui/properties/PropertyViewVisitor.h
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
 )

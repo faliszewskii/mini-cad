@@ -79,7 +79,6 @@ void InputHandler::mouseCallback(GLFWwindow* window, double xposIn, double yposI
     lastX = xpos;
     lastY = ypos;
 
-
     if (!inputHandlerState.guiFocus) {
         inputHandlerState.currentCamera.get().processMouseMovement(xoffset, yoffset);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

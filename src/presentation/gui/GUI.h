@@ -17,12 +17,13 @@ struct ViewsMask {
 struct GUIApplicationState {
 
     explicit GUIApplicationState(ApplicationState& appState) : assetImporter(appState.assetImporter),
-    availableShaders(appState.availableShaders), globalShader(appState.globalShader), rootSceneNode(appState.rootSceneNode) {
+    availableShaders(appState.availableShaders), globalShader(appState.globalShader),
+    rootSceneNode(appState.rootSceneNode), selectedNode(appState.selectedNode) {
         activeViewsMask = ViewsMask::ModelsView | ViewsMask::ShadersView; // TODO Get from last user settings.
     }
     // ApplicationState
     AssetImporter &assetImporter;
-//    std::vector<ModelNode*> &selectedModelNodes;
+    std::optional<std::reference_wrapper<SceneNode>>& selectedNode;
     SceneTreeNode &rootSceneNode;
     std::vector<Shader> &availableShaders;
     std::reference_wrapper<Shader> &globalShader;

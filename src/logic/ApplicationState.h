@@ -15,7 +15,7 @@
 struct ApplicationState {
 
     Camera &setupCamera() {
-        auto camera = std::make_unique<Camera>("camera", CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
+        auto camera = std::make_unique<Camera>("camera", CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
         Camera* p = camera.get();
         rootSceneNode.addChild(std::move(camera));
         return *p;
@@ -29,10 +29,12 @@ struct ApplicationState {
 
     AssetImporter assetImporter;
     SceneTreeNode rootSceneNode;
-//    std::vector<ModelNode*> selectedModelNodes;
     std::vector<Shader> availableShaders;
+
+    std::optional<std::reference_wrapper<SceneNode>> selectedNode;
     std::reference_wrapper<Shader> globalShader;
     std::reference_wrapper<Camera> currentCamera;
+
     /* TODO
      * Currently all uniforms that will be used have to be set. Find solution for loading an arbitrary shader.
      * Keep in memorywhich uniforms were set so that glGetActiveUniform can check if shader can be displayed.

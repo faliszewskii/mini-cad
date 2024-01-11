@@ -1,16 +1,23 @@
 //
 // Created by faliszewskii on 07.01.24.
 //
-
 #include "Transformation.h"
+#include "../../../../logic/algebra/AlgebraUtils.h"
 
 #include <utility>
 
 
-Transformation::Transformation(std::string name) : SceneNode(std::move(name)), transformation(glm::mat4(1.0f)) {}
+Transformation::Transformation(std::string name) : SceneNode(std::move(name)), transformationProperty() {}
 
-Transformation::Transformation(std::string name, glm::mat4 transformation) : SceneNode(std::move(name)), transformation(transformation) {
+Transformation::Transformation(std::string name, glm::vec3 position, glm::quat orientation, glm::vec3 scale) :
+        SceneNode(std::move(name)), transformationProperty(position, orientation, scale) {}
 
+Transformation::Transformation(std::string name, glm::mat4 transformation): SceneNode(std::move(name)) {
+    glm::vec3 scale; glm::quat rotation; glm::vec3 translation;
+    AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
+    transformationProperty.setPosition(translation);
+    transformationProperty.setOrientation(rotation);
+    transformationProperty.setScale(scale);
 }
 
 int Transformation::acceptVisit(SceneNodeVisitor &visitor) {
@@ -19,4 +26,9 @@ int Transformation::acceptVisit(SceneNodeVisitor &visitor) {
 
 int Transformation::acceptLeave(SceneNodeVisitor &visitor) {
     return visitor.leaveTransformation(*this);
+}
+
+std::vector<std::reference_wrapper<Property>> Transformation::getProperties() {
+    std::vector<std::reference_wrapper<Property>> vec{transformationProperty};
+    return vec;
 }
