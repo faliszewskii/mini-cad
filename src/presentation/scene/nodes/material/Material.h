@@ -17,18 +17,24 @@ struct Texture {
 };
 
 class Material : public SceneNode {
+    float shininess;
+    glm::vec4 albedo;
+    std::optional<Texture> diffuseTexture;
+    std::string hint;
 public:
-    explicit Material(std::string name, const glm::vec4 &albedo = glm::vec4(1.0f), std::optional<Texture> diffuseTexture = {});
+    explicit Material(std::string name, const glm::vec4 &albedo = glm::vec4(1.0f), std::optional<Texture> diffuseTexture = {},
+                      float shininess = 0, std::string hint = "");
 
     std::string getTypeName() override { return "Material"; };
     std::optional<Texture> getDiffuseTexture();
     glm::vec4 getAlbedo();
+    float getShininess();
+    std::string getHint();
 
     virtual int acceptVisit(SceneNodeVisitor& visitor) override;
     virtual int acceptLeave(SceneNodeVisitor& visitor) override;
-private:
-    glm::vec4 albedo;
-    std::optional<Texture> diffuseTexture;
+
+
 };
 
 

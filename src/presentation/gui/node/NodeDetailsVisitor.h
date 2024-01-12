@@ -13,6 +13,8 @@
 class NodeDetailsVisitor : public SceneNodeVisitor {
 public:
     int visitShader(Shader& shader) override;
+    int visitLight(Light& light) override;
+    int visitMaterial(Material &material) override;
 };
 
 

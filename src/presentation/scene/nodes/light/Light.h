@@ -12,8 +12,10 @@
 #include "../../../properties/light/PointLightProperty.h"
 
 class Light : public SceneNode {
+public: //TODO Remove public
     std::optional<PointLightProperty> pointLightProperty;
     std::reference_wrapper<LightTypeProperty> currentLightType;
+    float strength = 1; // TODO
     // TODO rest of light types
 public:
     explicit Light(std::string name, glm::vec3 position);

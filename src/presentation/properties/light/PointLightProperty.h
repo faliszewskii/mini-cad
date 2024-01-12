@@ -20,6 +20,7 @@ public:
 
     std::string getPropertyName() override;
     glm::vec3& getPositionRef() { return position; };
+    glm::vec3 getPosition() { return position; };
 
     void acceptVisit(PropertyVisitor& visitor) override;
 };

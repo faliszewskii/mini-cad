@@ -72,6 +72,7 @@ public:
 
 
     glm::mat4 getViewMatrix();
+    glm::vec3 getViewPosition();
 
     void processKeyboard(CameraMovement direction, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);

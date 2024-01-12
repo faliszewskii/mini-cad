@@ -9,6 +9,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <map>
 #include "../../presentation/scene/tree/SceneTreeNode.h"
 #include "../../presentation/scene/nodes/mesh/Mesh.h"
 
@@ -26,6 +27,21 @@ private:
     unsigned int textureFromFile(const char *path);
 
     void color4_to_vec4(aiColor4D *color, glm::vec4 p);
+
+
+    std::map<aiShadingMode, std::string> shadingModelMap {
+            {aiShadingMode_Flat, "Flat"},
+            {aiShadingMode_Gouraud, "Gouraud"},
+            {aiShadingMode_Phong, "Phong"},
+            {aiShadingMode_Blinn, "Blinn-Phong"},
+            {aiShadingMode_Toon, "Toon"},
+            {aiShadingMode_OrenNayar, "Oren-Nayar"},
+            {aiShadingMode_Minnaert, "Minnaert"},
+            {aiShadingMode_CookTorrance, "Cook-Torrance"},
+            {aiShadingMode_NoShading, "No Shading"},
+            {aiShadingMode_Fresnel, "Fresnel"},
+            {aiShadingMode_PBR_BRDF, "PBR BRDF"}
+    };
 };
 
 

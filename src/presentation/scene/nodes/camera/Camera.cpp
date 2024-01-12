@@ -111,3 +111,7 @@ int Camera::acceptVisit(SceneNodeVisitor& visitor) {
 int Camera::acceptLeave(SceneNodeVisitor &visitor) {
     return visitor.leaveCamera(*this);
 }
+
+glm::vec3 Camera::getViewPosition() {
+    return position;
+}

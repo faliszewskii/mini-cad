@@ -6,6 +6,7 @@
 #include "../../scene/nodes/transformation/Transformation.h"
 #include "../../scene/nodes/mesh/Mesh.h"
 #include "../../scene/nodes/camera/Camera.h"
+#include "../../scene/nodes/light/Light.h"
 #include "RenderSceneVisitor.h"
 
 RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {
@@ -22,7 +23,11 @@ int RenderSceneVisitor::visitShader(Shader &shader) {
 
 int RenderSceneVisitor::visitLight(Light &light) {
     if(!activeShader) return 1;
-//    activeShader.value().get().setVec4();
+    // TODO Here property visitor on chosen light type.
+    // TODO pointLightCounter
+    activeShader->get().setFloat("pointLight.strength", light.strength); // TODO
+    activeShader->get().setVec3("pointLight.position", light.pointLightProperty->getPosition());
+    activeShader->get().setVec3("pointLight.color", glm::vec3(1.0f)); // TODO
     return 0;
 }
 
@@ -34,13 +39,15 @@ int RenderSceneVisitor::visitTransformation(Transformation &transformation) {
 int RenderSceneVisitor::visitMaterial(Material &material) {
     if(!activeShader) return 1;
     if(material.getDiffuseTexture()) {
-        activeShader->get().setBool("useTexture", true);
+        activeShader->get().setBool("material.useAlbedoTexture", true);
         glActiveTexture(GL_TEXTURE0);
+        activeShader->get().setInt("material.textureAlbedo", 0);
         glBindTexture(GL_TEXTURE_2D, material.getDiffuseTexture()->id);
     } else {
-        activeShader->get().setBool("useTexture", false);
+        activeShader->get().setBool("material.useAlbedoTexture", false);
     }
-    activeShader->get().setVec4("albedo", material.getAlbedo());
+    activeShader->get().setVec4("material.albedo", material.getAlbedo());
+    activeShader->get().setFloat("material.shininess", material.getShininess());
     return 0;
 }
 
@@ -55,12 +62,12 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 int RenderSceneVisitor::visitCamera(Camera &camera) {
+    if(!activeShader) return 1;
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)camera.screenWidth / (float)camera.screenHeight, 0.1f, 100.0f); // TODO configurable
-    if(activeShader) activeShader.value().get().setMat4("projection", projection);
-
+    activeShader.value().get().setMat4("projection", projection);
     glm::mat4 view = camera.getViewMatrix();
-    if(activeShader) activeShader.value().get().setMat4("view", view);
-
+    activeShader.value().get().setMat4("view", view);
+    activeShader.value().get().setVec3("viewPos", camera.getViewPosition());
     // TODO Draw some representation of camera ?
     return 0;
 }

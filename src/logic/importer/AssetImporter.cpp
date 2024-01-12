@@ -55,6 +55,10 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const ai
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
+    aiString meshName = mesh->mName;
+    if(meshName == aiString())
+        meshName = std::string("mesh.") + std::to_string(index);
+
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex{};
@@ -103,6 +107,7 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const ai
         for(unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
+    // TODO global table of materials and SceneTreeNode only has reference to SceneNodes.
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
     // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
@@ -132,16 +137,18 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const ai
     aiString materialName;
     if(AI_SUCCESS != material->Get(AI_MATKEY_NAME, materialName))
         materialName = std::string("material.")+ std::to_string(index);
-    aiString meshName = mesh->mName;
-    if(meshName == aiString())
-        meshName = std::string("mesh.") + std::to_string(index);
+    aiShadingMode shadingMode = aiShadingMode_Gouraud;
+    if(AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {}
+    float shininess = 0;
+    if(AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess)) {}
 
     // TODO Multiple textures
-    std::unique_ptr<SceneTreeNode> materialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>(materialName.C_Str(), diffuse, textures[0]))));
+    std::unique_ptr<Material> materialNode(std::make_unique<Material>(materialName.C_Str(), diffuse, !textures.empty()? textures[0] : std::optional<Texture>(), shininess, shadingModelMap[shadingMode]));
+    std::unique_ptr<SceneTreeNode> materialSceneNode(std::make_unique<SceneTreeNode>((std::move(materialNode))));
 
     std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(Mesh(meshName.C_Str(), vertices, indices));
-    materialNode->addChild(std::move(meshNode));
-    return materialNode;
+    materialSceneNode->addChild(std::move(meshNode));
+    return materialSceneNode;
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)

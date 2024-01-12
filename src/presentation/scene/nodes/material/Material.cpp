@@ -5,9 +5,12 @@
 #include "Material.h"
 
 #include <utility>
+#include <iostream>
 
-Material::Material(std::string name, const glm::vec4 &albedo, std::optional<Texture> diffuseTexture) : SceneNode(std::move(name)),
-albedo(albedo), diffuseTexture(std::move(diffuseTexture)) {}
+Material::Material(std::string name, const glm::vec4 &albedo, std::optional<Texture> diffuseTexture,
+                   float shininess, std::string hint) :
+                   SceneNode(std::move(name)), albedo(albedo), diffuseTexture(std::move(diffuseTexture)),
+                   shininess(shininess), hint(std::move(hint)) {}
 
 std::optional<Texture> Material::getDiffuseTexture() {
     return diffuseTexture;
@@ -17,10 +20,18 @@ glm::vec4 Material::getAlbedo() {
     return albedo;
 }
 
+float Material::getShininess() {
+    return shininess;
+}
+
 int Material::acceptVisit(SceneNodeVisitor &visitor) {
     return visitor.visitMaterial(*this);
 }
 
 int Material::acceptLeave(SceneNodeVisitor &visitor) {
     return visitor.leaveMaterial(*this);
+}
+
+std::string Material::getHint() {
+    return hint;
 }
