@@ -25,18 +25,25 @@ bool TreeViewVisitor::renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode& s
     return nodeOpen;
 }
 
-int TreeViewVisitor::visitShader(Shader &shader) {
-    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, shader, "[S] %s");
-    return 0;
-}
-
 int TreeViewVisitor::visitTransformation(Transformation &transformation) {
     bool nodeOpen = renderTreeNode(flags, transformation, "[T] %s");
     nodeOpenStack.push(nodeOpen);
     flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
     if(nodeOpen) return 0;
     return 1;
+}
+
+int TreeViewVisitor::leaveTransformation(Transformation &transformation) {
+    if(nodeOpenStack.top())
+        ImGui::TreePop();
+    nodeOpenStack.pop();
+    return 0;
+}
+
+int TreeViewVisitor::visitShader(Shader &shader) {
+    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    renderTreeNode(localFlags, shader, "[S] %s");
+    return 0;
 }
 
 int TreeViewVisitor::visitMesh(Mesh &mesh) {
@@ -49,27 +56,17 @@ int TreeViewVisitor::visitMesh(Mesh &mesh) {
 int TreeViewVisitor::visitLight(Light &light) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     renderTreeNode(localFlags, light, "[L] %s");
-
     return 0;
 }
 
 int TreeViewVisitor::visitPointLight(PointLight &pointLight) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     renderTreeNode(localFlags, pointLight, "[PL] %s");
-
     return 0;
 }
 
 int TreeViewVisitor::visitCamera(Camera &camera) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     renderTreeNode(localFlags, camera, "[C] %s");
-
-    return 0;
-}
-
-int TreeViewVisitor::leaveTransformation(Transformation &transformation) {
-    if(nodeOpenStack.top())
-        ImGui::TreePop();
-    nodeOpenStack.pop();
     return 0;
 }
