@@ -5,12 +5,13 @@
 #ifndef OPENGL_SANDBOX_PROPERTYVISITOR_H
 #define OPENGL_SANDBOX_PROPERTYVISITOR_H
 
-
 class TransformationProperty;
+class PointLightProperty;
 
 class PropertyVisitor {
 public:
-    virtual void visitTransformationParameter(TransformationProperty& transformation) {};
+    virtual void visitTransformationProperty(TransformationProperty& transformation) {};
+    virtual void visitPointLightProperty(PointLightProperty& transformation) {};
 protected:
     PropertyVisitor() = default;
 };

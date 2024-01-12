@@ -4,8 +4,6 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include "TransformationProperty.h"
-#include <glm/gtx/string_cast.hpp>
-#include <iostream>
 
 TransformationProperty::TransformationProperty(): position(), orientation(1, 0, 0, 0), scale(1.0f) {}
 

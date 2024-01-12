@@ -33,7 +33,7 @@ public:
     glm::vec3& getScaleRef() { return scale; };
 
     void acceptVisit(PropertyVisitor& visitor) override {
-        visitor.visitTransformationParameter(*this);
+        visitor.visitTransformationProperty(*this);
     }
 
 };

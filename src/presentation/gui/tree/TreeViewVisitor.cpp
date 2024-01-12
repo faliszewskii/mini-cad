@@ -45,10 +45,25 @@ int TreeViewVisitor::visitShader(Shader &shader) {
     return 0;
 }
 
+int TreeViewVisitor::visitMaterial(Material &material) {
+    bool nodeOpen = renderTreeNode(flags, material, "[Ma] %s");
+    nodeOpenStack.push(nodeOpen);
+    flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
+    if(nodeOpen) return 0;
+    return 1;
+}
+
+int TreeViewVisitor::leaveMaterial(Material &transformation) {
+    if(nodeOpenStack.top())
+        ImGui::TreePop();
+    nodeOpenStack.pop();
+    return 0;
+}
+
+
 int TreeViewVisitor::visitMesh(Mesh &mesh) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, mesh, "[M] %s");
-
+    renderTreeNode(localFlags, mesh, "[Me] %s");
     return 0;
 }
 

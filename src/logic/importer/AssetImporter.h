@@ -20,7 +20,7 @@ private:
     std::string directory;
 
     std::unique_ptr<SceneTreeNode> processNode(aiNode *node, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
+    std::unique_ptr<SceneTreeNode> processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName);
 
     unsigned int textureFromFile(const char *path);

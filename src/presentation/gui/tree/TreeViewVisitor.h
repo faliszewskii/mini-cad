@@ -26,8 +26,10 @@ public:
     int visitLight(Light& light) override;
     int visitCamera(Camera& camera) override;
     int visitShader(Shader &shader) override;
+    int visitMaterial(Material& material) override;
 
     int leaveTransformation(Transformation& transformation) override;
+    int leaveMaterial(Material& transformation) override;
 
     bool renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &sceneNode, const char *fmt);
 };

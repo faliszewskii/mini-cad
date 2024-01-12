@@ -13,7 +13,7 @@
 class ModelGenerator {
 public:
     static std::unique_ptr<SceneTreeNode> generateAxis(glm::vec3 xAxis = glm::vec3(1,0,0), glm::vec3 yAxis = glm::vec3(0,1,0), bool isRightHanded = true);
-    static std::unique_ptr<Mesh> generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color);
+    static std::unique_ptr<SceneTreeNode> generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string& materialName);
 };
 
 

@@ -15,15 +15,19 @@ class RenderSceneVisitor : public SceneNodeVisitor {
 private:
     std::optional<std::reference_wrapper<Shader>> activeShader; // TODO Log error if tried to draw something without shader.
     std::stack<glm::mat4> transformationStack;
+    int pointLightCounter; // TODO Not bigger than the maxcap in shader
 public:
     explicit RenderSceneVisitor();
 
     int visitTransformation(Transformation& transformation) override;
+    int visitLight(Light &light) override;
     int visitMesh(Mesh& mesh) override;
     int visitCamera(Camera& camera) override;
     int visitShader(Shader& shader) override;
+    int visitMaterial(Material &material) override;
 
     int leaveTransformation(Transformation& transformation) override;
+
 };
 
 

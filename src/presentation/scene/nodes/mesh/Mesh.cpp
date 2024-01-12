@@ -4,30 +4,16 @@
 #include <utility>
 
 #include "Mesh.h"
+#include "../material/Material.h"
 
-Mesh::Mesh(std::string name, std::vector<Vertex> vertices, Material material, std::optional<std::vector<unsigned int>> indices,
-           std::optional<std::vector<Texture>> textures, int drawingMode) : SceneNode(std::move(name)),
-        vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures)),
-        material(std::move(material)), drawingMode(drawingMode)
+Mesh::Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices,
+           int drawingMode) : SceneNode(std::move(name)),
+        vertices(std::move(vertices)), indices(std::move(indices)), drawingMode(drawingMode)
 {
     setupMesh();
 }
 
 void Mesh::render(Shader &shader, glm::mat4 model) {
-    if(textures) {
-        shader.setBool("useTexture", true);
-        for(unsigned int i = 0; i < textures.value().size(); i++)
-        {
-            // TODO Possible handling of multiple textures of the same type.
-            glActiveTexture(GL_TEXTURE0 + i);
-            shader.setInt(/*"material." + */textures.value()[i].type, i);
-            glBindTexture(GL_TEXTURE_2D, textures.value()[i].id);
-        }
-        glActiveTexture(GL_TEXTURE0);
-    } else {
-        shader.setBool("useTexture", false);
-    }
-    shader.setVec4("albedo", material.albedo);
     shader.setMat4("model", model);
     // draw mesh
     glBindVertexArray(VAO);

@@ -41,7 +41,7 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processNode(aiNode *node, const ai
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        transformationNode->addChild(std::make_unique<Mesh>(processMesh(mesh, scene, i)));
+        transformationNode->addChild(processMesh(mesh, scene, i));
     }
 
     for(unsigned int i = 0; i < node->mNumChildren; i++)
@@ -50,7 +50,7 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processNode(aiNode *node, const ai
     return transformationNode;
 }
 
-Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
+std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -114,6 +114,7 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int
     // 1. diffuse maps
     std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    // TODO Multiple textures
 //    // 2. specular maps
 //    vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 //    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -128,11 +129,19 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int
     C_STRUCT aiColor4D _diffuse;
     if(AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &_diffuse))
         color4_to_vec4(&_diffuse, diffuse);
+    aiString materialName;
+    if(AI_SUCCESS != material->Get(AI_MATKEY_NAME, materialName))
+        materialName = std::string("material.")+ std::to_string(index);
+    aiString meshName = mesh->mName;
+    if(meshName == aiString())
+        meshName = std::string("mesh.") + std::to_string(index);
 
-    Material meshMaterial(diffuse);
+    // TODO Multiple textures
+    std::unique_ptr<SceneTreeNode> materialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>(materialName.C_Str(), diffuse, textures[0]))));
 
-    // return a mesh object created from the extracted mesh data
-    return {std::string("mesh.") + std::to_string(index), vertices, meshMaterial, std::optional(indices), std::optional(textures)};
+    std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(Mesh(meshName.C_Str(), vertices, indices));
+    materialNode->addChild(std::move(meshNode));
+    return materialNode;
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)

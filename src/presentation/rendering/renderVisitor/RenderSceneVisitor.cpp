@@ -8,7 +8,7 @@
 #include "../../scene/nodes/camera/Camera.h"
 #include "RenderSceneVisitor.h"
 
-RenderSceneVisitor::RenderSceneVisitor(){
+RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {
     std::stack<glm::mat4> stack{};
     stack.emplace(1.0f);
     transformationStack = stack;
@@ -17,10 +17,30 @@ RenderSceneVisitor::RenderSceneVisitor(){
 int RenderSceneVisitor::visitShader(Shader &shader) {
     activeShader = shader;
     shader.use();
+    return 0;
+}
+
+int RenderSceneVisitor::visitLight(Light &light) {
+    if(!activeShader) return 1;
+//    activeShader.value().get().setVec4();
+    return 0;
 }
 
 int RenderSceneVisitor::visitTransformation(Transformation &transformation) {
     transformationStack.push(transformationStack.top() * transformation.getTransformation());
+    return 0;
+}
+
+int RenderSceneVisitor::visitMaterial(Material &material) {
+    if(!activeShader) return 1;
+    if(material.getDiffuseTexture()) {
+        activeShader->get().setBool("useTexture", true);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, material.getDiffuseTexture()->id);
+    } else {
+        activeShader->get().setBool("useTexture", false);
+    }
+    activeShader->get().setVec4("albedo", material.getAlbedo());
     return 0;
 }
 

@@ -22,6 +22,11 @@ set(IMGUI
         ../lib/imgui/misc/cpp/imgui_stdlib.h
         ../lib/imguizmo/ImGuizmo.cpp
         ../lib/imguizmo/ImGuizmo.h
+        presentation/properties/light/LightTypeProperty.h
+        presentation/properties/light/PointLightProperty.cpp
+        presentation/properties/light/PointLightProperty.h
+        presentation/scene/nodes/material/Material.cpp
+        presentation/scene/nodes/material/Material.h
 )
 
 add_executable(opengl-sandbox main.cpp
@@ -42,8 +47,7 @@ add_executable(opengl-sandbox main.cpp
         logic/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
         presentation/gui/GUI.h
-        logic/ApplicationState.h        presentation/scene/nodes/light/pointLight/PointLight.h
-
+        logic/ApplicationState.h
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
         presentation/scene/tree/SceneNode.h

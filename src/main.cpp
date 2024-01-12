@@ -15,6 +15,7 @@
 #include "logic/ApplicationState.h"
 #include "presentation/rendering/renderVisitor/RenderSceneVisitor.h"
 #include "presentation/scene/nodes/camera/Camera.h"
+#include "presentation/scene/nodes/light/Light.h"
 #include "logic/input/InputHandler.h"
 
 // settings
@@ -37,6 +38,9 @@ int main()
         // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
         auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
         appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(shader)));
+
+        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(3.0f));
+        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(pointLight)));
 
         auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
         appState->currentCamera = *camera.get();

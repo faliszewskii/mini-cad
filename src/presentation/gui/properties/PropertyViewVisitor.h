@@ -10,7 +10,8 @@
 #include "../../properties/visitor/PropertyVisitor.h"
 
 class PropertyViewVisitor : public PropertyVisitor {
-    void visitTransformationParameter(TransformationProperty& transformation) override;
+    void visitTransformationProperty(TransformationProperty& transformation) override;
+    void visitPointLightProperty(PointLightProperty& transformation) override;
 };
 
 
