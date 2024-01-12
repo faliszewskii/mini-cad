@@ -53,6 +53,8 @@ private:
     void renderShaderWindow();
 
     void renderShaderListView();
+
+    void renderLogOverlay();
 };
 
 

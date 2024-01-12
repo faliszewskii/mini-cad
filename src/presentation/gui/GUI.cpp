@@ -28,6 +28,7 @@ void GUI::render() {
 
     renderMenuBar();
     renderDebugOverlay();
+    renderLogOverlay();
 
     if(guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
 //    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
@@ -103,6 +104,29 @@ void GUI::renderDebugOverlay() {
         ImGui::Text("FPS: TODO");
         ImGui::Separator();
         ImGui::Text("mSPF: TODO");
+    }
+    ImGui::End();
+}
+
+void GUI::renderLogOverlay() {
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+    const float PAD = 10.0f;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
+    ImVec2 work_size = viewport->WorkSize;
+    ImVec2 window_pos, window_pos_pivot;
+    window_pos.x = work_pos.x + work_size.x - PAD;
+    window_pos.y = work_pos.y + work_size.y - PAD;
+    window_pos_pivot.x = 1.0f;
+    window_pos_pivot.y = 1.0f;
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    window_flags |= ImGuiWindowFlags_NoMove;
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGui::SetNextWindowSize(ImVec2(600, 50));
+    if (ImGui::Begin("Log Overlay", nullptr, window_flags))
+    {
+        ImGui::Text("Log messages will go here");
     }
     ImGui::End();
 }
