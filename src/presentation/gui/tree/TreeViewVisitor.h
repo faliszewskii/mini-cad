@@ -24,13 +24,10 @@ public:
     int visitTransformation(Transformation& transformation) override;
     int visitMesh(Mesh& mesh) override;
     int visitLight(Light& light) override;
-    int visitPointLight(PointLight& pointLight) override;
     int visitCamera(Camera& camera) override;
     int visitShader(Shader &shader) override;
 
     int leaveTransformation(Transformation& transformation) override;
-
-    int renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &sceneNode, std::string format);
 
     bool renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &sceneNode, const char *fmt);
 };

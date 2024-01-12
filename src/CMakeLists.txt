@@ -42,7 +42,8 @@ add_executable(opengl-sandbox main.cpp
         logic/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
         presentation/gui/GUI.h
-        logic/ApplicationState.h
+        logic/ApplicationState.h        presentation/scene/nodes/light/pointLight/PointLight.h
+
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
         presentation/scene/tree/SceneNode.h
@@ -52,8 +53,6 @@ add_executable(opengl-sandbox main.cpp
         presentation/rendering/renderVisitor/RenderSceneVisitor.h
         presentation/scene/nodes/light/Light.cpp
         presentation/scene/nodes/light/Light.h
-        presentation/scene/nodes/light/pointLight/PointLight.cpp
-        presentation/scene/nodes/light/pointLight/PointLight.h
         presentation/scene/nodes/transformation/Transformation.cpp
         presentation/scene/nodes/transformation/Transformation.h
         presentation/scene/nodes/mesh/Mesh.cpp

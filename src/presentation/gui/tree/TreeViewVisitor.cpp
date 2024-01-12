@@ -6,7 +6,6 @@
 #include "../../scene/nodes/transformation/Transformation.h"
 #include "../../scene/nodes/mesh/Mesh.h"
 #include "../../scene/nodes/light/Light.h"
-#include "../../scene/nodes/light/pointLight/PointLight.h"
 #include "../../scene/nodes/camera/Camera.h"
 
 TreeViewVisitor::TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>>& selectedNode, int &selectedProperty) :
@@ -56,12 +55,6 @@ int TreeViewVisitor::visitMesh(Mesh &mesh) {
 int TreeViewVisitor::visitLight(Light &light) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     renderTreeNode(localFlags, light, "[L] %s");
-    return 0;
-}
-
-int TreeViewVisitor::visitPointLight(PointLight &pointLight) {
-    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, pointLight, "[PL] %s");
     return 0;
 }
 

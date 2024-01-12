@@ -20,7 +20,6 @@ public:
 
     int visitTransformation(Transformation& transformation) override;
     int visitMesh(Mesh& mesh) override;
-    int visitPointLight(PointLight& pointLight) override;
     int visitCamera(Camera& camera) override;
     int visitShader(Shader& shader) override;
 

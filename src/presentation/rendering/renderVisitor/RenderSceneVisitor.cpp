@@ -30,13 +30,6 @@ int RenderSceneVisitor::visitMesh(Mesh &mesh) {
     return 0;
 }
 
-int RenderSceneVisitor::visitPointLight(PointLight &pointLight) {
-    // Ignore this node
-    // TODO Draw some representation of pointLight or light?
-    return 0;
-}
-
-
 // settings // TODO decide what to do about screen width and perspective in camera.
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
