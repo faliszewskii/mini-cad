@@ -16,7 +16,7 @@ int NodeDetailsVisitor::visitShader(Shader &shader) {
 }
 
 int NodeDetailsVisitor::visitLight(Light &light) {
-    ImGui::DragFloat("strength", &light.strength, 0.01f);
+    ImGui::DragFloat("strength", &light.getStrengthRef(), 0.01f);
     ImGui::Text("Color:");
     ImGui::DragFloat("r##light", static_cast<float*>(glm::value_ptr(light.getColorRef()))+0, 0.01f, 0, 1);
     ImGui::DragFloat("g##light", static_cast<float*>(glm::value_ptr(light.getColorRef()))+1, 0.01f, 0, 1);
@@ -28,7 +28,7 @@ int NodeDetailsVisitor::visitLight(Light &light) {
 int NodeDetailsVisitor::visitMaterial(Material &material) {
     if(!material.getHint().empty())
         ImGui::Text("AssImp hint: %s", material.getHint().c_str());
-    ImGui::DragFloat("shininess", &material.shininess, 0.01f, 0); // TODO To Phong property.
+    ImGui::DragFloat("shininess", &material.getShininessRef(), 0.01f, 0); // TODO To Phong property.
     return 0;
 }
 

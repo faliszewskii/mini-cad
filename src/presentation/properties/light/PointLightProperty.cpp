@@ -4,6 +4,8 @@
 
 #include "PointLightProperty.h"
 
+#include <utility>
+
 std::string PointLightProperty::getPropertyName() {
     return "Point Light";
 }
@@ -12,7 +14,5 @@ void PointLightProperty::acceptVisit(PropertyVisitor &visitor) {
     visitor.visitPointLightProperty(*this);
 }
 
-PointLightProperty::PointLightProperty() {}
-
-PointLightProperty::PointLightProperty(glm::vec3 position) : position(position) {}
+PointLightProperty::PointLightProperty(Bindable<glm::vec3> position) : position(std::move(position)) {}
 

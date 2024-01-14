@@ -29,6 +29,7 @@ public:
     std::optional<Texture> getDiffuseTexture();
     glm::vec4 getAlbedo();
     float getShininess();
+    float& getShininessRef();
     std::string getHint();
 
     virtual int acceptVisit(SceneNodeVisitor& visitor) override;

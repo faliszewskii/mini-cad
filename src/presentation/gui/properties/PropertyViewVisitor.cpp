@@ -12,12 +12,6 @@
 void PropertyViewVisitor::visitTransformationProperty(TransformationProperty &transformation) {
     ImGui::SeparatorText("Transformation Property");
     ImGui::Text("Position:");
-//    ImGui::PushButtonRepeat(true); // TODO arrows for properties
-//    if (ImGui::ArrowButton("##left", ImGuiDir_Left)) { counter--; }
-//    ImGui::SameLine(0.0f, spacing);
-//    if (ImGui::ArrowButton("##right", ImGuiDir_Right)) { counter++; }
-//    ImGui::PopButtonRepeat();
-//    ImGui::SameLine();
 // TODO grey-out on bind.
     ImGui::DragFloat("x##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+0, 0.01f);
     ImGui::DragFloat("y##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+1, 0.01f);

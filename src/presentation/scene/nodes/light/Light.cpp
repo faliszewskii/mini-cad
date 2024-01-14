@@ -8,7 +8,7 @@
 #include "../../../properties/light/PointLightProperty.h"
 
 Light::Light(std::string name, glm::vec3 position) : SceneNode(std::move(name)), pointLightProperty(position),
-                                                     currentLightType(std::ref(pointLightProperty.value())){}
+                                                     currentLightType(std::ref(pointLightProperty)){}
 
 int Light::acceptVisit(SceneNodeVisitor &visitor) {
     return visitor.visitLight(*this);

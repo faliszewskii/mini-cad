@@ -35,3 +35,7 @@ int Material::acceptLeave(SceneNodeVisitor &visitor) {
 std::string Material::getHint() {
     return hint;
 }
+
+float& Material::getShininessRef() {
+    return shininess;
+}
