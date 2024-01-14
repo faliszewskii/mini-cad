@@ -22,19 +22,12 @@ set(IMGUI
         ../lib/imgui/misc/cpp/imgui_stdlib.h
         ../lib/imguizmo/ImGuizmo.cpp
         ../lib/imguizmo/ImGuizmo.h
-        presentation/properties/light/LightTypeProperty.h
-        presentation/properties/light/PointLightProperty.cpp
-        presentation/properties/light/PointLightProperty.h
-        presentation/scene/nodes/material/Material.cpp
-        presentation/scene/nodes/material/Material.h
 )
 
 add_executable(opengl-sandbox main.cpp
         ${IMGUI}
         ../lib/glad/glad.c
         presentation/scene/nodes/shader/Shader.h
-        presentation/camera/camera.cpp
-        presentation/camera/camera.h
         logic/opengl/OpenGLInstance.cpp
         logic/opengl/OpenGLInstance.h
         logic/io/IOUtils.cpp
@@ -78,6 +71,11 @@ add_executable(opengl-sandbox main.cpp
         presentation/properties/visitor/PropertyVisitor.h
         presentation/gui/node/NodeDetailsVisitor.cpp
         presentation/gui/node/NodeDetailsVisitor.h
+        presentation/properties/light/LightTypeProperty.h
+        presentation/properties/light/PointLightProperty.cpp
+        presentation/properties/light/PointLightProperty.h
+        presentation/scene/nodes/material/Material.cpp
+        presentation/scene/nodes/material/Material.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)
