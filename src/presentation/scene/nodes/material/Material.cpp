@@ -7,7 +7,7 @@
 #include <utility>
 #include <iostream>
 
-Material::Material(std::string name, const glm::vec4 &albedo, std::optional<Texture> diffuseTexture,
+Material::Material(std::string name, Bindable<glm::vec4> albedo, std::optional<Texture> diffuseTexture,
                    float shininess, std::string hint) :
                    SceneNode(std::move(name)), albedo(albedo), diffuseTexture(std::move(diffuseTexture)),
                    shininess(shininess), hint(std::move(hint)) {}
@@ -17,7 +17,7 @@ std::optional<Texture> Material::getDiffuseTexture() {
 }
 
 glm::vec4 Material::getAlbedo() {
-    return albedo;
+    return albedo.get();
 }
 
 float Material::getShininess() {

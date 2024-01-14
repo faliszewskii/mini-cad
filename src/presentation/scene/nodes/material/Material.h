@@ -9,6 +9,7 @@
 #include <string>
 #include <optional>
 #include "../../tree/SceneNode.h"
+#include "../../tree/Bindable.h"
 
 struct Texture {
     unsigned int id;
@@ -17,11 +18,11 @@ struct Texture {
 };
 
 class Material : public SceneNode {
-    glm::vec4 albedo;
+    Bindable<glm::vec4> albedo;
     std::optional<Texture> diffuseTexture;
     std::string hint;
 public:
-    explicit Material(std::string name, const glm::vec4 &albedo = glm::vec4(1.0f), std::optional<Texture> diffuseTexture = {},
+    explicit Material(std::string name, Bindable<glm::vec4> albedo = Bindable<glm::vec4>(glm::vec4(1.0f)), std::optional<Texture> diffuseTexture = {},
                       float shininess = 0, std::string hint = "");
 
     std::string getTypeName() override { return "Material"; };

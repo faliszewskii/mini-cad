@@ -3,15 +3,16 @@
 //
 
 #include <glm/gtc/quaternion.hpp>
+#include <utility>
 #include "TransformationProperty.h"
 
 TransformationProperty::TransformationProperty(): position(), orientation(1, 0, 0, 0), scale(1.0f) {}
 
-TransformationProperty::TransformationProperty(glm::vec3 position, glm::quat orientation, glm::vec3 scale) :
-position(position), orientation(orientation), scale(scale) {}
+TransformationProperty::TransformationProperty(Bindable<glm::vec3> position, glm::quat orientation, glm::vec3 scale) :
+position(std::move(position)), orientation(orientation), scale(scale) {}
 
 glm::mat4 TransformationProperty::getTransformation() {
-    return glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), scale) * glm::mat4_cast(orientation);
+    return glm::translate(glm::mat4(1.0f), position.get()) * glm::scale(glm::mat4(1.0f), scale) * glm::mat4_cast(orientation);
 }
 
 void TransformationProperty::setPosition(glm::vec3 newPosition) {

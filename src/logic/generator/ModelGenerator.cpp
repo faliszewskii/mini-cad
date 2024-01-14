@@ -6,6 +6,7 @@
 
 #include <utility>
 #include "../../presentation/scene/nodes/transformation/Transformation.h"
+#include "../../presentation/scene/nodes/light/Light.h"
 #include "../io/IOUtils.h"
 #include "../../presentation/scene/nodes/camera/Camera.h"
 
@@ -27,7 +28,8 @@ std::unique_ptr<SceneTreeNode> ModelGenerator::generateLine(std::string name, gl
 }
 
 std::unique_ptr<SceneTreeNode> ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::unique_ptr<Light>> light) {
-    auto mainNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation("Point light representation")))));
+    Bindable<glm::vec3> lightPosition([&lightVar= *light.get()](){return lightVar.getPosition();});
+    auto mainNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation("Point light representation", lightPosition)))));
 
     auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
     auto shaderNode = std::make_unique<SceneTreeNode>(std::move(shader));
@@ -35,13 +37,13 @@ std::unique_ptr<SceneTreeNode> ModelGenerator::generatePointLightRepresentation(
     auto sourceTransformation = std::make_unique<Transformation>(Transformation("Light source"));
     sourceTransformation->setScale(glm::vec3(0.02));
     auto sourceNode(std::make_unique<SceneTreeNode>(std::move(sourceTransformation)));
-    auto sourceMaterialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>("White", glm::vec4(1,1,0,1))))); // TODO Bind material color to light color
+    Bindable<glm::vec4> albedo([&lightVar= *light.get()](){return glm::vec4(lightVar.getColor(), 1.f);});
+    auto sourceMaterialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>("White", albedo)))); // TODO Bind material color to light color
     auto sourceMeshNode = generateSphere(10, 10);
     sourceMaterialNode->addChild(std::move(sourceMeshNode));
     sourceNode->addChild(std::move(sourceMaterialNode));
 
     auto bulbTransformation = std::make_unique<Transformation>(Transformation("Bulb"));
-    // TODO Bind transformation position to light position.
     bulbTransformation->setScale(glm::vec3(0.1));
     auto bulbNode(std::make_unique<SceneTreeNode>(std::move(bulbTransformation)));
     auto bulbMaterialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>("Bulb material", glm::vec4(1,1,1,0.2f)))));

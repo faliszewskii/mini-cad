@@ -76,6 +76,7 @@ add_executable(opengl-sandbox main.cpp
         presentation/properties/light/PointLightProperty.h
         presentation/scene/nodes/material/Material.cpp
         presentation/scene/nodes/material/Material.h
+        presentation/scene/tree/Bindable.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)

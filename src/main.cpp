@@ -47,6 +47,10 @@ int main()
         appState->currentCamera = *camera.get();
         auto cameraNode = std::make_unique<SceneTreeNode>(std::move(camera));
 
+        AssetImporter assetImporter;
+        auto result = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
+        if(result) pointLightNode->addChild(std::move(result.value()));
+
         pointLightNode->addChild(ModelGenerator::generateAxis());
         pointLightNode->addChild(std::move(pointLightModel));
         cameraNode->addChild(std::move(pointLightNode));

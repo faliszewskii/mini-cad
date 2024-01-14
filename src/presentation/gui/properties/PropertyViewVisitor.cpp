@@ -18,6 +18,7 @@ void PropertyViewVisitor::visitTransformationProperty(TransformationProperty &tr
 //    if (ImGui::ArrowButton("##right", ImGuiDir_Right)) { counter++; }
 //    ImGui::PopButtonRepeat();
 //    ImGui::SameLine();
+// TODO grey-out on bind.
     ImGui::DragFloat("x##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+0, 0.01f);
     ImGui::DragFloat("y##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+1, 0.01f);
     ImGui::DragFloat("z##position", static_cast<float*>(glm::value_ptr(transformation.getPositionRef()))+2, 0.01f);

@@ -2,6 +2,7 @@
 // Created by faliszewskii on 11.01.24.
 //
 
+#include <glm/gtc/type_ptr.hpp>
 #include "NodeDetailsVisitor.h"
 #include "../../scene/nodes/shader/Shader.h"
 #include "../../scene/nodes/light/Light.h"
@@ -16,6 +17,11 @@ int NodeDetailsVisitor::visitShader(Shader &shader) {
 
 int NodeDetailsVisitor::visitLight(Light &light) {
     ImGui::DragFloat("strength", &light.strength, 0.01f);
+    ImGui::Text("Color:");
+    ImGui::DragFloat("r##scale", static_cast<float*>(glm::value_ptr(light.getColorRef()))+0, 0.01f);
+    ImGui::DragFloat("g##scale", static_cast<float*>(glm::value_ptr(light.getColorRef()))+1, 0.01f);
+    ImGui::DragFloat("b##scale", static_cast<float*>(glm::value_ptr(light.getColorRef()))+2, 0.01f);
+
     return 0;
 }
 

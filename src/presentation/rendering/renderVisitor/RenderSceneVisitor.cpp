@@ -26,7 +26,7 @@ int RenderSceneVisitor::visitLight(Light &light) {
     // TODO pointLightCounter
     uniformMap["pointLight.strength"].emplace(light.strength); // TODO Research light attenuation.
     uniformMap["pointLight.position"].emplace(light.pointLightProperty->getPosition());
-    uniformMap["pointLight.color"].emplace(glm::vec3(1.0f));
+    uniformMap["pointLight.color"].emplace(light.color);
     return 0;
 }
 

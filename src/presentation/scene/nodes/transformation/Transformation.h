@@ -15,7 +15,7 @@ class Transformation : public SceneNode {
 public:
     explicit Transformation(std::string name);
     Transformation(std::string name, glm::mat4 transformation);
-    Transformation(std::string name, glm::vec3 position, glm::quat orientation, glm::vec3 scale);
+    Transformation(std::string name, Bindable<glm::vec3> position, glm::quat orientation = glm::quat(1,0,0,0), glm::vec3 scale = glm::vec3(1.0f));
 
     glm::mat4 getTransformation() { return transformationProperty.getTransformation(); };
     void setPosition(glm::vec3 position) { transformationProperty.setPosition(position); }

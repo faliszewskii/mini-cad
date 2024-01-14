@@ -10,15 +10,16 @@
 #include <glm/ext/quaternion_float.hpp>
 #include <string>
 #include "../Property.h"
+#include "../../scene/tree/Bindable.h"
 
 class TransformationProperty : public Property {
-    glm::vec3 position;
+    Bindable<glm::vec3> position;
     glm::quat orientation;
     glm::vec3 scale;
 
 public:
     TransformationProperty();
-    TransformationProperty(glm::vec3 position, glm::quat orientation, glm::vec3 scale);
+    TransformationProperty(Bindable<glm::vec3> position, glm::quat orientation, glm::vec3 scale);
     std::string getPropertyName() override { return "Transformation"; };
 
     glm::mat4 getTransformation();
@@ -28,7 +29,7 @@ public:
     void setOrientation(glm::vec3 eulerAngles);
     void setScale(glm::vec3 newScale);
 
-    glm::vec3& getPositionRef() { return position; };
+    glm::vec3& getPositionRef() { return position.get(); };
     glm::quat& getOrientationRef() { return orientation; };
     glm::vec3& getScaleRef() { return scale; };
 
