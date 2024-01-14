@@ -39,7 +39,7 @@ int main()
         auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"), IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
         auto shaderNode = std::make_unique<SceneTreeNode>(std::move(shader));
 
-        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0f));
+        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, -1.0f));
         auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
         auto pointLightNode = std::make_unique<SceneTreeNode>(std::move(pointLight));
 

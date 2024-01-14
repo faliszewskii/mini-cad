@@ -37,7 +37,7 @@ vec3 calculateLight(vec3 color, float strength, vec3 position, vec3 normal, vec3
     vec3 ambient  = color * vec3(0.2f);
     vec3 diffuse  = color * diff;
     vec3 specular = color * spec;
-    return (ambient + diffuse + specular) * strength * attenuation;//(ambient + diffuse + specular) * attenuation * strength;
+    return (ambient + diffuse + specular) * strength * attenuation;
 }
 
 void main()
