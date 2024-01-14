@@ -41,6 +41,7 @@ int main()
         appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(shader)));
 
         auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0f));
+        auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
         appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(pointLight)));
 
         auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
@@ -48,6 +49,8 @@ int main()
         appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(camera)));
 
         appState->rootSceneNode.addChild(ModelGenerator::generateAxis());
+        appState->rootSceneNode.addChild(std::move(pointLightModel));
+//        appState->rootSceneNode.addChild(ModelGenerator::generateSphere(20, 20));
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();

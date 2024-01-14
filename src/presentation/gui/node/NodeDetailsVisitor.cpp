@@ -22,6 +22,7 @@ int NodeDetailsVisitor::visitLight(Light &light) {
 int NodeDetailsVisitor::visitMaterial(Material &material) {
     if(!material.getHint().empty())
         ImGui::Text("AssImp hint: %s", material.getHint().c_str());
+    ImGui::DragFloat("shininess", &material.shininess, 0.01f); // TODO To Phong property.
     return 0;
 }
 

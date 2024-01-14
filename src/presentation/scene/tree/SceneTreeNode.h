@@ -17,6 +17,7 @@ public :
     explicit SceneTreeNode(std::unique_ptr<SceneNode> value);
 
     std::vector<std::unique_ptr<SceneTreeNode>>& getChildren() { return children; };
+    std::unique_ptr<SceneNode>& getValue() { return value; };
     void visitTree(SceneNodeVisitor &visitor) const;
 
     void addChild(std::unique_ptr<SceneNode> childValue);

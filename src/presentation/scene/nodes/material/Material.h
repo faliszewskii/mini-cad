@@ -17,7 +17,6 @@ struct Texture {
 };
 
 class Material : public SceneNode {
-    float shininess;
     glm::vec4 albedo;
     std::optional<Texture> diffuseTexture;
     std::string hint;
@@ -35,6 +34,7 @@ public:
     virtual int acceptLeave(SceneNodeVisitor& visitor) override;
 
 
+    float shininess;
 };
 
 

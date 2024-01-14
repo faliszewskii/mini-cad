@@ -2,15 +2,19 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec4 color;
 
-uniform sampler2D texture_diffuse;
-uniform bool useTexture;
+struct Material {
+    float shininess;
+    vec4 albedo;
+    bool useAlbedoTexture;
+    sampler2D textureAlbedo;
+};
+uniform Material material;
 
 void main()
 {
-    if(useTexture)
-        FragColor = texture(texture_diffuse, TexCoords);
+    if(material.useAlbedoTexture)
+        FragColor = texture(material.textureAlbedo, TexCoords);
     else
-        FragColor = color;
+        FragColor = material.albedo;
 }

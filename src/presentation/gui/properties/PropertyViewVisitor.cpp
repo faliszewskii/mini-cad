@@ -38,5 +38,4 @@ void PropertyViewVisitor::visitPointLightProperty(PointLightProperty &pointLight
     ImGui::DragFloat("x##position", static_cast<float*>(glm::value_ptr(pointLight.getPositionRef()))+0, 0.01f);
     ImGui::DragFloat("y##position", static_cast<float*>(glm::value_ptr(pointLight.getPositionRef()))+1, 0.01f);
     ImGui::DragFloat("z##position", static_cast<float*>(glm::value_ptr(pointLight.getPositionRef()))+2, 0.01f);
-
 }

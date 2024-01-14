@@ -18,6 +18,9 @@ public:
     Transformation(std::string name, glm::vec3 position, glm::quat orientation, glm::vec3 scale);
 
     glm::mat4 getTransformation() { return transformationProperty.getTransformation(); };
+    void setPosition(glm::vec3 position) { transformationProperty.setPosition(position); }
+    void setScale(glm::vec3 scale) { transformationProperty.setScale(scale); }
+
     std::string getTypeName() override { return "Transformation"; };
 
     std::vector<std::reference_wrapper<Property>> getProperties() override;
