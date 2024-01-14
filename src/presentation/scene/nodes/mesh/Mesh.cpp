@@ -13,8 +13,7 @@ Mesh::Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::ve
     setupMesh();
 }
 
-void Mesh::render(Shader &shader, glm::mat4 model) {
-    shader.setMat4("model", model);
+void Mesh::render() {
     // draw mesh
     glBindVertexArray(VAO);
     if(indices)

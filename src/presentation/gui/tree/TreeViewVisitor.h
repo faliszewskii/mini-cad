@@ -28,10 +28,15 @@ public:
     int visitShader(Shader &shader) override;
     int visitMaterial(Material& material) override;
 
-    int leaveTransformation(Transformation& transformation) override;
-    int leaveMaterial(Material& transformation) override;
+    int leaveTransformation(Transformation& transformation) override { return treePop(); };
+    int leaveLight(Light& light) override { return treePop(); };
+    int leaveCamera(Camera& camera) override { return treePop(); };
+    int leaveShader(Shader& shader) override { return treePop(); }
+    int leaveMaterial(Material& material) override { return treePop(); }
 
-    bool renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &sceneNode, const char *fmt);
+    bool renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &sceneNode, const char *fmt, bool leaf = false);
+
+    int treePop();
 };
 
 

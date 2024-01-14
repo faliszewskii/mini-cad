@@ -36,21 +36,23 @@ int main()
         GUI gui(openGlInstance.getWindow(), *appState);
 
         // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
-//        auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
         auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"), IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
-        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(shader)));
+        auto shaderNode = std::make_unique<SceneTreeNode>(std::move(shader));
 
         auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0f));
         auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
-        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(pointLight)));
+        auto pointLightNode = std::make_unique<SceneTreeNode>(std::move(pointLight));
 
         auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
         appState->currentCamera = *camera.get();
-        appState->rootSceneNode.addChild(std::make_unique<SceneTreeNode>(std::move(camera)));
+        auto cameraNode = std::make_unique<SceneTreeNode>(std::move(camera));
 
-        appState->rootSceneNode.addChild(ModelGenerator::generateAxis());
-        appState->rootSceneNode.addChild(std::move(pointLightModel));
-//        appState->rootSceneNode.addChild(ModelGenerator::generateSphere(20, 20));
+        pointLightNode->addChild(ModelGenerator::generateAxis());
+        pointLightNode->addChild(std::move(pointLightModel));
+        cameraNode->addChild(std::move(pointLightNode));
+        shaderNode->addChild(std::move(cameraNode));
+        appState->rootSceneNode.addChild(std::move(shaderNode));
+
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();

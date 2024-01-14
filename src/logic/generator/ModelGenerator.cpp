@@ -49,11 +49,8 @@ std::unique_ptr<SceneTreeNode> ModelGenerator::generatePointLightRepresentation(
     bulbMaterialNode->addChild(std::move(bulbMeshNode));
     bulbNode->addChild(std::move(bulbMaterialNode));
 
-    auto camera = std::make_unique<Camera>("camera", 1920-300, 1200, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
-
+    shaderNode->addChild(std::move(sourceNode));
     mainNode->addChild(std::move(shaderNode));
-    mainNode->addChild(std::move(camera));
-    mainNode->addChild(std::move(sourceNode));
     mainNode->addChild(std::move(bulbNode));
     return mainNode;
 }

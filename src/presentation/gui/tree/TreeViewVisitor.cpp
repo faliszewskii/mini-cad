@@ -14,67 +14,54 @@ nodeOpenStack(std::stack<bool>()), selectedNode(selectedNode), selectedProperty(
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth;
 }
 
-bool TreeViewVisitor::renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode& sceneNode, const char* fmt) {
+bool TreeViewVisitor::renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode& sceneNode, const char* fmt, bool leaf) {
     if (selectedNode && selectedNode.value().get() == sceneNode) localFlags |= ImGuiTreeNodeFlags_Selected;
     bool nodeOpen = ImGui::TreeNodeEx(uuids::to_string(sceneNode.getUuid()).c_str(), localFlags, fmt, sceneNode.getName().c_str());
     if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
         selectedNode = sceneNode;
         selectedProperty = 0;
     }
+    if(!leaf) {
+        nodeOpenStack.push(nodeOpen);
+        flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
+    }
     return nodeOpen;
 }
 
 int TreeViewVisitor::visitTransformation(Transformation &transformation) {
-    bool nodeOpen = renderTreeNode(flags, transformation, "[T] %s");
-    nodeOpenStack.push(nodeOpen);
-    flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
-    if(nodeOpen) return 0;
+    if(renderTreeNode(flags, transformation, "[T] %s")) return 0;
     return 1;
-}
-
-int TreeViewVisitor::leaveTransformation(Transformation &transformation) {
-    if(nodeOpenStack.top())
-        ImGui::TreePop();
-    nodeOpenStack.pop();
-    return 0;
 }
 
 int TreeViewVisitor::visitShader(Shader &shader) {
-    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, shader, "[S] %s");
-    return 0;
-}
-
-int TreeViewVisitor::visitMaterial(Material &material) {
-    bool nodeOpen = renderTreeNode(flags, material, "[Ma] %s");
-    nodeOpenStack.push(nodeOpen);
-    flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
-    if(nodeOpen) return 0;
+    if(renderTreeNode(flags, shader, "[S] %s")) return 0;
     return 1;
 }
 
-int TreeViewVisitor::leaveMaterial(Material &transformation) {
-    if(nodeOpenStack.top())
-        ImGui::TreePop();
-    nodeOpenStack.pop();
-    return 0;
-}
-
-
-int TreeViewVisitor::visitMesh(Mesh &mesh) {
-    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, mesh, "[Me] %s");
-    return 0;
+int TreeViewVisitor::visitMaterial(Material &material) {
+    if(renderTreeNode(flags, material, "[Ma] %s")) return 0;
+    return 1;
 }
 
 int TreeViewVisitor::visitLight(Light &light) {
-    ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, light, "[L] %s");
-    return 0;
+    if(renderTreeNode(flags, light, "[L] %s")) return 0;
+    return 1;
 }
 
 int TreeViewVisitor::visitCamera(Camera &camera) {
+    if(renderTreeNode(flags, camera, "[C] %s")) return 0;
+    return 1;
+}
+
+int TreeViewVisitor::visitMesh(Mesh &mesh) {
     ImGuiTreeNodeFlags localFlags = flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-    renderTreeNode(localFlags, camera, "[C] %s");
+    renderTreeNode(localFlags, mesh, "[Me] %s", true);
+    return 0;
+}
+
+int TreeViewVisitor::treePop() {
+    if(nodeOpenStack.top())
+        ImGui::TreePop();
+    nodeOpenStack.pop();
     return 0;
 }

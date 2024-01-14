@@ -9,51 +9,66 @@
 #include "../../scene/nodes/light/Light.h"
 #include "RenderSceneVisitor.h"
 
-RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {
-    std::stack<glm::mat4> stack{};
-    stack.emplace(1.0f);
-    transformationStack = stack;
-}
+RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {}
 
 int RenderSceneVisitor::visitShader(Shader &shader) {
-    activeShader = shader;
-    shader.use();
+    shaderStack.emplace(shader);
+    return 0;
+}
+
+int RenderSceneVisitor::leaveShader(Shader &shader) {
+    shaderStack.pop();
     return 0;
 }
 
 int RenderSceneVisitor::visitLight(Light &light) {
-    if(!activeShader) return 1;
     // TODO Here property visitor on chosen light type.
     // TODO pointLightCounter
-    activeShader->get().setFloat("pointLight.strength", light.strength); // TODO
-    activeShader->get().setVec3("pointLight.position", light.pointLightProperty->getPosition());
-    activeShader->get().setVec3("pointLight.color", glm::vec3(1.0f)); // TODO
+    uniformMap["pointLight.strength"].emplace(light.strength); // TODO Research light attenuation.
+    uniformMap["pointLight.position"].emplace(light.pointLightProperty->getPosition());
+    uniformMap["pointLight.color"].emplace(glm::vec3(1.0f));
+    return 0;
+}
+
+int RenderSceneVisitor::leaveLight(Light &light) {
+    uniformMap["pointLight.color"].pop();
+    uniformMap["pointLight.position"].pop();
+    uniformMap["pointLight.strength"].pop();
     return 0;
 }
 
 int RenderSceneVisitor::visitTransformation(Transformation &transformation) {
-    transformationStack.push(transformationStack.top() * transformation.getTransformation());
+    if(uniformMap.contains("model")) {
+        auto& globalTransform = std::get<glm::mat4>(uniformMap["model"].top());
+        uniformMap["model"].emplace(globalTransform * transformation.getTransformation());
+    } else
+        uniformMap["model"].emplace(transformation.getTransformation());
+    return 0;
+}
+
+int RenderSceneVisitor::leaveTransformation(Transformation &transformation) {
+    uniformMap["model"].pop();
     return 0;
 }
 
 int RenderSceneVisitor::visitMaterial(Material &material) {
-    if(!activeShader) return 1;
     if(material.getDiffuseTexture()) {
-        activeShader->get().setBool("material.useAlbedoTexture", true);
+        uniformMap["material.useAlbedoTexture"].emplace(true);
         glActiveTexture(GL_TEXTURE0);
-        activeShader->get().setInt("material.textureAlbedo", 0);
+        uniformMap["material.textureAlbedo"].emplace(0);
         glBindTexture(GL_TEXTURE_2D, material.getDiffuseTexture()->id);
     } else {
-        activeShader->get().setBool("material.useAlbedoTexture", false);
+        uniformMap["material.useAlbedoTexture"].emplace(false);
     }
-    activeShader->get().setVec4("material.albedo", material.getAlbedo());
-    activeShader->get().setFloat("material.shininess", material.getShininess());
+    uniformMap["material.albedo"].emplace(material.getAlbedo());
+    uniformMap["material.shininess"].emplace(material.getShininess());
     return 0;
 }
 
-int RenderSceneVisitor::visitMesh(Mesh &mesh) {
-    if(activeShader)
-        mesh.render(activeShader->get(), transformationStack.top());
+int RenderSceneVisitor::leaveMaterial(Material &material) {
+    uniformMap["material.useAlbedoTexture"].pop();
+    uniformMap["material.shininess"].pop();
+    uniformMap["material.albedo"].pop();
     return 0;
 }
 
@@ -62,17 +77,24 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 int RenderSceneVisitor::visitCamera(Camera &camera) {
-    if(!activeShader) return 1;
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)camera.screenWidth / (float)camera.screenHeight, 0.1f, 100.0f); // TODO configurable
-    activeShader.value().get().setMat4("projection", projection);
     glm::mat4 view = camera.getViewMatrix();
-    activeShader.value().get().setMat4("view", view);
-    activeShader.value().get().setVec3("viewPos", camera.getViewPosition());
-    // TODO Draw some representation of camera ?
+    uniformMap["projection"].emplace(projection);
+    uniformMap["view"].emplace(view);
+    uniformMap["viewPos"].emplace(camera.getViewPosition());
     return 0;
 }
 
-int RenderSceneVisitor::leaveTransformation(Transformation &transformation) {
-    transformationStack.pop();
+int RenderSceneVisitor::leaveCamera(Camera &camera) {
+    uniformMap["viewPos"].pop();
+    uniformMap["view"].pop();
+    uniformMap["projection"].pop();
+    return 0;
+}
+
+int RenderSceneVisitor::visitMesh(Mesh &mesh) {
+    if(shaderStack.empty()) return 1;
+    shaderStack.top().get().setUniforms(uniformMap);
+    mesh.render();
     return 0;
 }
