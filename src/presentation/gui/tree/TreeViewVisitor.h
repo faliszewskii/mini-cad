@@ -21,6 +21,7 @@ class TreeViewVisitor : public SceneNodeVisitor {
 public:
     explicit TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>>& selectedNode, int &selectedProperty);
 
+    int visitFrameBuffer(FrameBuffer& frameBuffer) override;
     int visitTransformation(Transformation& transformation) override;
     int visitMesh(Mesh& mesh) override;
     int visitLight(Light& light) override;
@@ -28,6 +29,7 @@ public:
     int visitShader(Shader &shader) override;
     int visitMaterial(Material& material) override;
 
+    int leaveFrameBuffer(FrameBuffer& frameBuffer) override { return treePop(); };
     int leaveTransformation(Transformation& transformation) override { return treePop(); };
     int leaveLight(Light& light) override { return treePop(); };
     int leaveCamera(Camera& camera) override { return treePop(); };

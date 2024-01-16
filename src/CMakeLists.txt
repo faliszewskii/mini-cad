@@ -85,6 +85,8 @@ add_executable(opengl-sandbox main.cpp
         presentation/scene/nodes/material/Material.cpp
         presentation/scene/nodes/material/Material.h
         presentation/scene/tree/Bindable.h
+        presentation/scene/nodes/frameBuffer/FrameBuffer.cpp
+        presentation/scene/nodes/frameBuffer/FrameBuffer.h
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)

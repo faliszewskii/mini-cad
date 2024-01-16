@@ -38,7 +38,7 @@ int RenderSceneVisitor::leaveLight(Light &light) {
 }
 
 int RenderSceneVisitor::visitTransformation(Transformation &transformation) {
-    if(uniformMap.contains("model")) {
+    if(!uniformMap["model"].empty()) {
         auto& globalTransform = std::get<glm::mat4>(uniformMap["model"].top());
         uniformMap["model"].emplace(globalTransform * transformation.getTransformation());
     } else

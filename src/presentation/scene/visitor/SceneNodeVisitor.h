@@ -6,6 +6,7 @@
 #define OPENGL_SANDBOX_SCENENODEVISITOR_H
 
 
+class FrameBuffer;
 class Transformation;
 class Mesh;
 class Light;
@@ -15,6 +16,7 @@ class Material;
 
 class SceneNodeVisitor {
 public:
+    virtual int visitFrameBuffer(FrameBuffer& frameBuffer) { return 0; };
     virtual int visitTransformation(Transformation& transformation) { return 0; };
     virtual int visitMesh(Mesh& mesh) { return 0; };
     virtual int visitLight(Light& light) { return 0; };
@@ -22,6 +24,7 @@ public:
     virtual int visitShader(Shader& shader) { return 0; }
     virtual int visitMaterial(Material& material) { return 0; }
 
+    virtual int leaveFrameBuffer(FrameBuffer& frameBuffer) { return 0; };
     virtual int leaveTransformation(Transformation& transformation) { return 0; };
     virtual int leaveMesh(Mesh& mesh) { return 0; };
     virtual int leaveLight(Light& light) { return 0; };

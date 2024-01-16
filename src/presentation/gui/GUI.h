@@ -18,14 +18,16 @@ struct ViewsMask {
 struct GUIApplicationState {
 
     explicit GUIApplicationState(ApplicationState& appState) : assetImporter(appState.assetImporter), currentCamera(appState.currentCamera),
-    rootSceneNode(appState.rootSceneNode), selectedNode(appState.selectedNode), selectedProperty(0), guiWidth(300) {
+    mainFrameBufferNode(appState.mainFrameBufferNode), selectedNode(appState.selectedNode), selectedProperty(0), guiWidth(300),
+    allNodes(appState.allNodes) {
         activeViewsMask = ViewsMask::MainView | ViewsMask::ShadersView; // TODO Get from last user settings.
     }
     // ApplicationState
     AssetImporter &assetImporter;
+    std::optional<std::reference_wrapper<SceneNode>>& mainFrameBufferNode;
+    std::vector<std::unique_ptr<SceneNode>>& allNodes;
     std::optional<std::reference_wrapper<SceneNode>>& selectedNode;
     std::optional<std::reference_wrapper<Camera>>& currentCamera;
-    SceneTreeNode &rootSceneNode;
     // this
     unsigned int activeViewsMask;
     int selectedProperty;

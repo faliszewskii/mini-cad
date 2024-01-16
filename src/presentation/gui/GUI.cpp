@@ -51,7 +51,7 @@ void GUI::renderMenuBar() {
     {
         if (ImGui::BeginMenu("File"))
         {
-            if(ImGui::MenuItem("Load Model")) {
+            if(ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
                 NFD_Init();
 
                 nfdchar_t *outPath;
@@ -59,11 +59,14 @@ void GUI::renderMenuBar() {
                 nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
                 if (result == NFD_OKAY)
                 {
-                    auto model = guiState.assetImporter.importModel(outPath);
-                    if(model)
-                        guiState.rootSceneNode.addChild(std::move(model.value()));
-                    else
-                        printf("Failed to load a file: %s", outPath); // TODO log message board
+                    try {
+                        auto model = guiState.assetImporter.importModel(outPath);
+                        guiState.selectedNode->get().addChild(*model[0]);
+                        guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()), std::make_move_iterator(model.end()));
+                    } catch(FailedToLoadModelException &ex) {
+                        // TODO Log error to log window.
+                        std::cerr<< ex.what() << std::endl;
+                    }
                     NFD_FreePath(outPath);
                 }
                 else if (result == NFD_CANCEL)
@@ -218,7 +221,7 @@ void GUI::renderModelTreeView() {
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
     TreeViewVisitor treeViewVisitor(guiState.selectedNode, guiState.selectedProperty);
-    guiState.rootSceneNode.visitTree(treeViewVisitor);
+    SceneNode::visitTree(*guiState.mainFrameBufferNode, treeViewVisitor);
 
 //    traverseModelNode(guiState.rootSceneNode, base_flags);
 
@@ -334,7 +337,7 @@ void GUI::renderGizmo() {
     ImGuizmo::Manipulate(
             static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getViewMatrix())),
             static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getProjectionMatrix())),
-            ImGuizmo::ROTATE, ImGuizmo::LOCAL, matrix, NULL,/* useSnap ? &snap.x :*/ NULL
+            ImGuizmo::ROTATE, ImGuizmo::WORLD, matrix, NULL,/* useSnap ? &snap.x :*/ NULL
     );
     transformation->setTransformation(mat);
 }

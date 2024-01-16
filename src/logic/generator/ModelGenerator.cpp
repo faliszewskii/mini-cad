@@ -10,55 +10,78 @@
 #include "../io/IOUtils.h"
 #include "../../presentation/scene/nodes/camera/Camera.h"
 
-std::unique_ptr<SceneTreeNode> ModelGenerator::generateAxis(glm::vec3 xAxis, glm::vec3 yAxis, bool isRightHanded) {
-    std::unique_ptr<SceneTreeNode> axisNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation("Axis")))));
-    axisNode->addChild(generateLine("xAxis", glm::vec3(), glm::normalize(xAxis), glm::vec4(1,0,0,1), "Red"));
-    axisNode->addChild(generateLine("yAxis", glm::vec3(), glm::normalize(yAxis), glm::vec4(0,1,0,1), "Green"));
-    axisNode->addChild(generateLine("zAxis", glm::vec3(), glm::normalize(glm::cross(xAxis, yAxis))*=(isRightHanded?1:-1), glm::vec4(0,0,1,1), "Blue"));
-    return axisNode;
+std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateAxis(glm::vec3 xAxis, glm::vec3 yAxis, bool isRightHanded) {
+    std::unique_ptr<SceneNode> axisNode(std::make_unique<Transformation>(Transformation("Axis")));
+    auto red = generateLine("xAxis", glm::vec3(), glm::normalize(xAxis), glm::vec4(1,0,0,1), "Red");
+    axisNode->addChild(*red[0]);
+    auto green = generateLine("yAxis", glm::vec3(), glm::normalize(yAxis), glm::vec4(0,1,0,1), "Green");
+    axisNode->addChild(*green[0]);
+    auto blue = generateLine("zAxis", glm::vec3(), glm::normalize(glm::cross(xAxis, yAxis))*=(isRightHanded?1:-1), glm::vec4(0,0,1,1), "Blue");
+    axisNode->addChild(*blue[0]);
+
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(axisNode));
+    nodes.insert(nodes.end(), std::make_move_iterator(red.begin()), std::make_move_iterator(red.end()));
+    nodes.insert(nodes.end(), std::make_move_iterator(green.begin()), std::make_move_iterator(green.end()));
+    nodes.insert(nodes.end(), std::make_move_iterator(blue.begin()), std::make_move_iterator(blue.end()));
+    return nodes;
 }
 
-std::unique_ptr<SceneTreeNode> ModelGenerator::generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string& materialName) {
-    std::unique_ptr<SceneTreeNode> materialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>(materialName, color))));
+std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string& materialName) {
+    std::unique_ptr<SceneNode> materialNode(std::make_unique<Material>(materialName, color));
     Vertex v1(start, glm::vec3(), glm::vec2()); // TODO Take care of different vertex structures.
     Vertex v2(end, glm::vec3(), glm::vec2());
     std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(Mesh(std::move(name), std::vector{v1, v2}, {}, GL_LINE_STRIP));
-    materialNode->addChild(std::move(meshNode));
-    return materialNode;
+    materialNode->addChild(*meshNode);
+
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(materialNode));
+    nodes.push_back(std::move(meshNode));
+    return nodes;
 }
 
-std::unique_ptr<SceneTreeNode> ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::unique_ptr<Light>> light) {
+std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::unique_ptr<Light>> light) {
     Bindable<glm::vec3> lightPosition([&lightVar= *light.get()](){return lightVar.getPosition();});
-    auto mainNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation("Point light representation", lightPosition)))));
+    auto mainNode(std::make_unique<Transformation>("Point light representation", lightPosition));
 
     auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"), IOUtils::getResource("shaders/basic/albedo.frag"));
-    auto shaderNode = std::make_unique<SceneTreeNode>(std::move(shader));
+    mainNode->addChild(*shader);
 
-    auto sourceTransformation = std::make_unique<Transformation>(Transformation("Light source"));
+    auto sourceTransformation = std::make_unique<Transformation>("Light source");
     sourceTransformation->setScale(glm::vec3(0.02));
-    auto sourceNode(std::make_unique<SceneTreeNode>(std::move(sourceTransformation)));
+    shader->addChild(*sourceTransformation);
+
     Bindable<glm::vec4> albedo([&lightVar= *light.get()](){return glm::vec4(lightVar.getColor(), 1.f);});
-    auto sourceMaterialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>("White", albedo)))); // TODO Bind material color to light color
+    auto sourceMaterialNode = std::make_unique<Material>("White", albedo); // TODO Bind material color to light color
+    sourceTransformation->addChild(*sourceMaterialNode);
+
     auto sourceMeshNode = generateSphere(10, 10);
-    sourceMaterialNode->addChild(std::move(sourceMeshNode));
-    sourceNode->addChild(std::move(sourceMaterialNode));
+    sourceMaterialNode->addChild(*sourceMeshNode);
 
     auto bulbTransformation = std::make_unique<Transformation>(Transformation("Bulb"));
     bulbTransformation->setScale(glm::vec3(0.1));
-    auto bulbNode(std::make_unique<SceneTreeNode>(std::move(bulbTransformation)));
-    auto bulbMaterialNode(std::make_unique<SceneTreeNode>((std::make_unique<Material>("Bulb material", glm::vec4(1,1,1,0.2f)))));
-    auto bulbMeshNode = generateSphere(10, 10);
-    bulbMaterialNode->addChild(std::move(bulbMeshNode));
-    bulbNode->addChild(std::move(bulbMaterialNode));
+    mainNode->addChild(*bulbTransformation);
 
-    shaderNode->addChild(std::move(sourceNode));
-    mainNode->addChild(std::move(shaderNode));
-    mainNode->addChild(std::move(bulbNode));
-    return mainNode;
+    auto bulbMaterialNode = std::make_unique<Material>("Bulb material", glm::vec4(1,1,1,0.2f));
+    bulbTransformation->addChild(*bulbMaterialNode);
+
+    auto bulbMeshNode = generateSphere(10, 10);
+    bulbMaterialNode->addChild(*bulbMeshNode);
+
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(mainNode));
+    nodes.push_back(std::move(shader));
+    nodes.push_back(std::move(sourceTransformation));
+    nodes.push_back(std::move(sourceMaterialNode));
+    nodes.push_back(std::move(sourceMeshNode));
+    nodes.push_back(std::move(bulbTransformation));
+    nodes.push_back(std::move(bulbMaterialNode));
+    nodes.push_back(std::move(bulbMeshNode));
+    return nodes;
 }
 
 
-std::unique_ptr<SceneTreeNode> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
+std::unique_ptr<SceneNode> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -118,5 +141,5 @@ std::unique_ptr<SceneTreeNode> ModelGenerator::generateSphere(int meridianCount,
         }
     }
 
-    return std::make_unique<SceneTreeNode>(std::make_unique<Mesh>(Mesh("UV Sphere mesh", vertices, indices, GL_TRIANGLES)));
+    return std::make_unique<Mesh>(Mesh("UV Sphere mesh", vertices, indices, GL_TRIANGLES));
 }

@@ -10,7 +10,7 @@
 #include "../io/stb_image.h"
 #include "../../presentation/scene/nodes/transformation/Transformation.h"
 
-std::optional<std::unique_ptr<SceneTreeNode>> AssetImporter::importModel(const std::string& resourcePath) {
+std::vector<std::unique_ptr<SceneNode>> AssetImporter::importModel(const std::string& resourcePath) {
     Assimp::Importer import;
     import.SetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, true);
 
@@ -18,14 +18,14 @@ std::optional<std::unique_ptr<SceneTreeNode>> AssetImporter::importModel(const s
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-        return {};
+        throw FailedToLoadModelException("Failed to load: " + resourcePath);
     }
     directory = resourcePath.substr(0, resourcePath.find_last_of('/'));
 
     return processNode(scene->mRootNode, scene);
 }
 
-std::unique_ptr<SceneTreeNode> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
+std::vector<std::unique_ptr<SceneNode>> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
     std::string name = node->mName.C_Str();
 
     aiMatrix4x4t<ai_real> t = node->mTransformation;
@@ -36,21 +36,30 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processNode(aiNode *node, const ai
             t.a4, t.b4, t.c4, t.d4
     );
 
-    std::unique_ptr<SceneTreeNode> transformationNode(std::make_unique<SceneTreeNode>((std::make_unique<Transformation>(Transformation(name, transformation)))));
+    std::unique_ptr<SceneNode> transformationNode(std::make_unique<Transformation>(name, transformation));
 
-    for(unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        transformationNode->addChild(processMesh(mesh, scene, i));
+    std::vector<std::unique_ptr<SceneNode>> children;
+    for(unsigned int i = 0; i < node->mNumChildren; i++) {
+        auto child = processNode(node->mChildren[i], scene);
+        transformationNode->addChild(*child[0]);
+        children.insert(children.end(), std::make_move_iterator(child.begin()), std::make_move_iterator(child.end()));
     }
 
-    for(unsigned int i = 0; i < node->mNumChildren; i++)
-        transformationNode->addChild(processNode(node->mChildren[i], scene));
+    std::vector<std::unique_ptr<SceneNode>> meshes;
+    for(unsigned int i = 0; i < node->mNumMeshes; i++){
+        auto mesh = processMesh(scene->mMeshes[node->mMeshes[i]], scene, i);
+        transformationNode->addChild(*mesh[0]);
+        meshes.insert(meshes.end(), std::make_move_iterator(mesh.begin()), std::make_move_iterator(mesh.end()));
+    }
 
-    return transformationNode;
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(transformationNode));
+    nodes.insert(nodes.end(), std::make_move_iterator(meshes.begin()), std::make_move_iterator(meshes.end()));
+    nodes.insert(nodes.end(), std::make_move_iterator(children.begin()), std::make_move_iterator(children.end()));
+    return nodes;
 }
 
-std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
+std::vector<std::unique_ptr<SceneNode>> AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -144,11 +153,13 @@ std::unique_ptr<SceneTreeNode> AssetImporter::processMesh(aiMesh *mesh, const ai
 
     // TODO Multiple textures
     std::unique_ptr<Material> materialNode(std::make_unique<Material>(materialName.C_Str(), diffuse, !textures.empty()? textures[0] : std::optional<Texture>(), shininess, shadingModelMap[shadingMode]));
-    std::unique_ptr<SceneTreeNode> materialSceneNode(std::make_unique<SceneTreeNode>((std::move(materialNode))));
-
     std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(Mesh(meshName.C_Str(), vertices, indices));
-    materialSceneNode->addChild(std::move(meshNode));
-    return materialSceneNode;
+    materialNode->addChild(*meshNode);
+
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(materialNode));
+    nodes.push_back(std::move(meshNode));
+    return nodes;
 }
 
 std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)

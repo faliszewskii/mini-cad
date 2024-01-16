@@ -14,6 +14,7 @@
 #include "presentation/scene/nodes/camera/Camera.h"
 #include "presentation/scene/nodes/light/Light.h"
 #include "logic/input/InputHandler.h"
+#include "presentation/scene/nodes/frameBuffer/FrameBuffer.h"
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -32,28 +33,36 @@ int main()
     {
         GUI gui(openGlInstance.getWindow(), *appState);
 
+        auto frameBuffer = std::make_unique<FrameBuffer>("Main");
         // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
         auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"), IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
-        auto shaderNode = std::make_unique<SceneTreeNode>(std::move(shader));
-
-        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, -1.0f));
-        auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
-        auto pointLightNode = std::make_unique<SceneTreeNode>(std::move(pointLight));
+        frameBuffer->addChild(*shader);
 
         auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
-        appState->currentCamera = *camera.get();
-        auto cameraNode = std::make_unique<SceneTreeNode>(std::move(camera));
+        appState->currentCamera = *camera;
+        shader->addChild(*camera);
+
+        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, -1.0f));
+        camera->addChild(*pointLight);
+
+        auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
+        camera->addChild(*pointLightModel[0]);
+
+        auto axis = ModelGenerator::generateAxis();
+        pointLight->addChild(*axis[0]);
 
         AssetImporter assetImporter;
-        auto result = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
-        if(result) pointLightNode->addChild(std::move(result.value()));
+        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
+        pointLight->addChild(*model[0]);
 
-        pointLightNode->addChild(ModelGenerator::generateAxis());
-        pointLightNode->addChild(std::move(pointLightModel));
-        cameraNode->addChild(std::move(pointLightNode));
-        shaderNode->addChild(std::move(cameraNode));
-        appState->rootSceneNode.addChild(std::move(shaderNode));
-
+        appState->mainFrameBufferNode = *frameBuffer;
+        appState->allNodes.push_back(std::move(frameBuffer));
+        appState->allNodes.push_back(std::move(shader));
+        appState->allNodes.push_back(std::move(camera));
+        appState->allNodes.push_back(std::move(pointLight));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(pointLightModel.begin()), std::make_move_iterator(pointLightModel.end()));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(axis.begin()), std::make_move_iterator(axis.end()));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()), std::make_move_iterator(model.end()));
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();
@@ -64,7 +73,7 @@ int main()
 
             glViewport(gui.getGuiWidth(), 0, SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT);
             RenderSceneVisitor renderSceneVisitor{};
-            appState->rootSceneNode.visitTree(renderSceneVisitor);
+            SceneNode::visitTree(*appState->mainFrameBufferNode, renderSceneVisitor);
 
             glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
             gui.render();
