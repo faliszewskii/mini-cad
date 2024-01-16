@@ -77,7 +77,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 int RenderSceneVisitor::visitCamera(Camera &camera) {
-    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)camera.screenWidth / (float)camera.screenHeight, 0.1f, 100.0f); // TODO configurable
+    glm::mat4 projection = camera.getProjectionMatrix();
     glm::mat4 view = camera.getViewMatrix();
     uniformMap["projection"].emplace(projection);
     uniformMap["view"].emplace(view);

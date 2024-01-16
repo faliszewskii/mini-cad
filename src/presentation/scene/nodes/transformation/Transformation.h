@@ -20,6 +20,7 @@ public:
     glm::mat4 getTransformation() { return transformationProperty.getTransformation(); };
     void setPosition(glm::vec3 position) { transformationProperty.setPosition(position); }
     void setScale(glm::vec3 scale) { transformationProperty.setScale(scale); }
+    void setTransformation(glm::mat4 transformation);
 
     std::string getTypeName() override { return "Transformation"; };
 

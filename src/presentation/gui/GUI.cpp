@@ -3,24 +3,30 @@
 //
 
 #include <nfd.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "GUI.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "tree/TreeViewVisitor.h"
 #include "properties/PropertyViewVisitor.h"
 #include "node/NodeDetailsVisitor.h"
+#include "../../../lib/imguizmo/ImGuizmo.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
-
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ax::NodeEditor::Config config;
+    config.SettingsFile = "Simple.json";
+    m_Context = ax::NodeEditor::CreateEditor(&config);
 }
 
 void GUI::newFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
+    ImGuizmo::Enable(true);
 }
 
 void GUI::render() {
@@ -31,6 +37,8 @@ void GUI::render() {
     renderLogOverlay();
 
     if(guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
+    renderEditorWindow();
+    renderGizmo();
 //    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
 
 
@@ -149,21 +157,60 @@ void GUI::renderMainWindow() {
     ImGui::End();
 }
 
-void GUI::renderShaderWindow() {
-    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+void GUI::renderEditorWindow() {
+    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGuiWindowFlags window_flags = 0;
-    if (!ImGui::Begin("Shaders View", nullptr, window_flags))
+    if (!ImGui::Begin("Editor View", nullptr, window_flags))
     {
         ImGui::End();
         return;
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
+    auto& io = ImGui::GetIO();
+
+    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+
+    ImGui::Separator();
+
+    ax::NodeEditor::SetCurrentEditor(m_Context);
+    ax::NodeEditor::Begin("My Editor", ImVec2(0.0, 0.0f));
+    int uniqueId = 1;
+    // Start drawing nodes.
+    ax::NodeEditor::BeginNode(uniqueId++);
+    ImGui::Text("Node A");
+    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Input);
+    ImGui::Text("-> In");
+    ax::NodeEditor::EndPin();
+    ImGui::SameLine();
+    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Output);
+    ImGui::Text("Out ->");
+    ax::NodeEditor::EndPin();
+    ax::NodeEditor::EndNode();
+    ax::NodeEditor::End();
+    ax::NodeEditor::SetCurrentEditor(nullptr);
+
+    //ImGui::ShowMetricsWindow();
+
     ImGui::PopItemWidth();
     ImGui::End();
 }
+
+//void GUI::renderShaderWindow() {
+//    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+//    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+//    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+//    ImGuiWindowFlags window_flags = 0;
+//    if (!ImGui::Begin("Shaders View", nullptr, window_flags))
+//    {
+//        ImGui::End();
+//        return;
+//    }
+//    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+//
+//    ImGui::PopItemWidth();
+//    ImGui::End();
+//}
 
 void GUI::renderModelTreeView() {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
@@ -270,6 +317,26 @@ GUI::~GUI() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+    ax::NodeEditor::DestroyEditor(m_Context);
+}
+
+void GUI::renderGizmo() {
+    if(!guiState.selectedNode || !guiState.currentCamera) return;
+    auto* transformation = dynamic_cast<Transformation*>(&guiState.selectedNode.value().get());
+    if(transformation == nullptr) return;
+
+    glm::mat4 mat = transformation->getTransformation();
+    auto* matrix = static_cast<float*>(glm::value_ptr(mat));
+    glm::mat4 deltaMatrix;
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(guiState.guiWidth, 0, io.DisplaySize.x - guiState.guiWidth, io.DisplaySize.y);
+    ImGuizmo::Manipulate(
+            static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getViewMatrix())),
+            static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getProjectionMatrix())),
+            ImGuizmo::ROTATE, ImGuizmo::LOCAL, matrix, NULL,/* useSnap ? &snap.x :*/ NULL
+    );
+    transformation->setTransformation(mat);
 }
 //
 //void GUI::renderShaderListView() {

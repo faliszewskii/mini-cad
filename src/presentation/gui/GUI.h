@@ -6,6 +6,7 @@
 #define OPENGL_SANDBOX_GUI_H
 
 #include "../../logic/ApplicationState.h"
+#include "../../../lib/imgui-node-editor/imgui_node_editor.h"
 #include "imgui.h"
 
 struct ViewsMask {
@@ -16,13 +17,14 @@ struct ViewsMask {
 
 struct GUIApplicationState {
 
-    explicit GUIApplicationState(ApplicationState& appState) : assetImporter(appState.assetImporter),
+    explicit GUIApplicationState(ApplicationState& appState) : assetImporter(appState.assetImporter), currentCamera(appState.currentCamera),
     rootSceneNode(appState.rootSceneNode), selectedNode(appState.selectedNode), selectedProperty(0), guiWidth(300) {
         activeViewsMask = ViewsMask::MainView | ViewsMask::ShadersView; // TODO Get from last user settings.
     }
     // ApplicationState
     AssetImporter &assetImporter;
     std::optional<std::reference_wrapper<SceneNode>>& selectedNode;
+    std::optional<std::reference_wrapper<Camera>>& currentCamera;
     SceneTreeNode &rootSceneNode;
     // this
     unsigned int activeViewsMask;
@@ -40,21 +42,20 @@ public:
     ~GUI();
 private:
     GUIApplicationState guiState;
-
+    ax::NodeEditor::EditorContext* m_Context = nullptr;
 
     void renderMenuBar();
 
     void renderDebugOverlay();
 
     void renderMainWindow();
+    void renderEditorWindow();
 
     void renderModelTreeView();
 
-    void renderShaderWindow();
-
-    void renderShaderListView();
-
     void renderLogOverlay();
+
+    void renderGizmo();
 };
 
 

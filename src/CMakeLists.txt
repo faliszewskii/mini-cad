@@ -22,6 +22,14 @@ set(IMGUI
         ../lib/imgui/misc/cpp/imgui_stdlib.h
         ../lib/imguizmo/ImGuizmo.cpp
         ../lib/imguizmo/ImGuizmo.h
+        ../lib/imgui-node-editor/imgui_node_editor.h
+        ../lib/imgui-node-editor/imgui_node_editor.cpp
+        ../lib/imgui-node-editor/crude_json.cpp
+        ../lib/imgui-node-editor/crude_json.h
+        ../lib/imgui-node-editor/imgui_bezier_math.h
+        ../lib/imgui-node-editor/imgui_canvas.h
+        ../lib/imgui-node-editor/imgui_canvas.cpp
+        ../lib/imgui-node-editor/imgui_node_editor_api.cpp
 )
 
 add_executable(opengl-sandbox main.cpp

@@ -32,3 +32,11 @@ std::vector<std::reference_wrapper<Property>> Transformation::getProperties() {
     std::vector<std::reference_wrapper<Property>> vec{transformationProperty};
     return vec;
 }
+
+void Transformation::setTransformation(glm::mat4 transformation) {
+    glm::vec3 scale; glm::quat rotation; glm::vec3 translation;
+    AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
+    transformationProperty.setPosition(translation);
+    transformationProperty.setOrientation(rotation);
+    transformationProperty.setScale(scale);
+}

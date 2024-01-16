@@ -7,9 +7,6 @@
 
 #include "logic/opengl/OpenGLInstance.h"
 #include "logic/io/IOUtils.h"
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
 #include "logic/generator/ModelGenerator.h"
 #include "presentation/gui/GUI.h"
 #include "logic/ApplicationState.h"
