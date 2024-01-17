@@ -14,16 +14,19 @@ class Bindable {
     std::optional<std::function<T()>> getter;
 public:
     Bindable() : value(T()) {};
+
     Bindable(T value) : value(value) {};
+
     explicit Bindable(std::function<T()> getter) : value(T()), getter(getter) {};
 
     void bind(std::function<T()> getterToBind) { getter = getterToBind; };
-    T& get() {
-        if(getter) value = getter.value()();
+
+    T &get() {
+        if (getter) value = getter.value()();
         return value;
     };
 
-    Bindable& operator=(T other) {
+    Bindable &operator=(T other) {
         value = other;
         return *this;
     };

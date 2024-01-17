@@ -19,9 +19,10 @@ struct InputHandlerState {
 class InputHandler {
     InputHandlerState inputHandlerState;
 public:
-    explicit InputHandler(std::unique_ptr<ApplicationState>& applicationState);
+    explicit InputHandler(std::unique_ptr<ApplicationState> &applicationState);
 
-    void setupCallbacks(GLFWwindow* window);
+    void setupCallbacks(GLFWwindow *window);
+
 private:
     void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) const;
     void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);

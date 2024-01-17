@@ -13,14 +13,15 @@
 class FrameBuffer : public SceneNode {
 public:
     explicit FrameBuffer(std::string name) : SceneNode(std::move(name)) {}
+
     std::string getTypeName() override { return "Frame buffer"; };
 
     int acceptVisit(SceneNodeVisitor &visitor) override {
-        visitor.visitFrameBuffer(*this);
+        return visitor.visitFrameBuffer(*this);
     };
 
     int acceptLeave(SceneNodeVisitor &visitor) override {
-        visitor.leaveFrameBuffer(*this);
+        return visitor.leaveFrameBuffer(*this);
     }
 
 };

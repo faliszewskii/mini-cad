@@ -52,7 +52,6 @@ add_executable(opengl-sandbox main.cpp
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
         presentation/scene/tree/SceneNode.h
-        presentation/scene/tree/SceneTreeNode.h
         presentation/scene/visitor/SceneNodeVisitor.h
         presentation/rendering/renderVisitor/RenderSceneVisitor.cpp
         presentation/rendering/renderVisitor/RenderSceneVisitor.h
@@ -66,7 +65,6 @@ add_executable(opengl-sandbox main.cpp
         presentation/scene/nodes/camera/Camera.h
         presentation/gui/tree/TreeViewVisitor.cpp
         presentation/gui/tree/TreeViewVisitor.h
-        presentation/scene/tree/SceneTreeNode.cpp
         presentation/gui/properties/PropertyViewVisitor.cpp
         presentation/gui/properties/PropertyViewVisitor.h
         logic/input/InputHandler.cpp

@@ -22,17 +22,20 @@ struct Vertex {
 
 class Mesh : public SceneNode {
 public:
-    std::vector<Vertex>                         vertices;
-    std::optional<std::vector<unsigned int>>    indices;
+    std::vector<Vertex> vertices;
+    std::optional<std::vector<unsigned int>> indices;
     int drawingMode;
 
-    Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {}, int drawingMode = GL_TRIANGLES);
+    Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {},
+         int drawingMode = GL_TRIANGLES);
+
     std::string getTypeName() override { return "Mesh"; };
 
     void render();
 
-    int acceptVisit(SceneNodeVisitor& visitor) override;
-    int acceptLeave(SceneNodeVisitor& visitor) override;
+    int acceptVisit(SceneNodeVisitor &visitor) override;
+    int acceptLeave(SceneNodeVisitor &visitor) override;
+
 private:
     //  render data
     unsigned int VAO, VBO, EBO;

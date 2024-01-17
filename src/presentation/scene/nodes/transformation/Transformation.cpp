@@ -12,8 +12,10 @@ Transformation::Transformation(std::string name) : SceneNode(std::move(name)), t
 Transformation::Transformation(std::string name, Bindable<glm::vec3> position, glm::quat orientation, glm::vec3 scale) :
         SceneNode(std::move(name)), transformationProperty(std::move(position), orientation, scale) {}
 
-Transformation::Transformation(std::string name, glm::mat4 transformation): SceneNode(std::move(name)) {
-    glm::vec3 scale; glm::quat rotation; glm::vec3 translation;
+Transformation::Transformation(std::string name, glm::mat4 transformation) : SceneNode(std::move(name)) {
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
     AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
     transformationProperty.setPosition(translation);
     transformationProperty.setOrientation(rotation);
@@ -34,7 +36,9 @@ std::vector<std::reference_wrapper<Property>> Transformation::getProperties() {
 }
 
 void Transformation::setTransformation(glm::mat4 transformation) {
-    glm::vec3 scale; glm::quat rotation; glm::vec3 translation;
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
     AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
     transformationProperty.setPosition(translation);
     transformationProperty.setOrientation(rotation);

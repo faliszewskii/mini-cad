@@ -1,10 +1,10 @@
 
 #include <memory>
 
-#include "../../lib/glad/glad_glfw.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "logic/io/stb_image.h"
 
+#include "logic/io/stb_image.h"
+#include "../../lib/glad/glad_glfw.h"
 #include "logic/opengl/OpenGLInstance.h"
 #include "logic/io/IOUtils.h"
 #include "logic/generator/ModelGenerator.h"
@@ -20,8 +20,7 @@
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-int main()
-{
+int main() {
     OpenGLInstance openGlInstance{};
     openGlInstance.init(SCR_WIDTH, SCR_HEIGHT);
 
@@ -35,10 +34,12 @@ int main()
 
         auto frameBuffer = std::make_unique<FrameBuffer>("Main");
         // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
-        auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"), IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
+        auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"),
+                                               IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
         frameBuffer->addChild(*shader);
 
-        auto camera = std::make_unique<Camera>("camera", SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
+        auto camera = std::make_unique<Camera>("camera", SCR_WIDTH - gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR,
+                                               glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
         appState->currentCamera = *camera;
         shader->addChild(*camera);
 
@@ -60,9 +61,12 @@ int main()
         appState->allNodes.push_back(std::move(shader));
         appState->allNodes.push_back(std::move(camera));
         appState->allNodes.push_back(std::move(pointLight));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(pointLightModel.begin()), std::make_move_iterator(pointLightModel.end()));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(axis.begin()), std::make_move_iterator(axis.end()));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()), std::make_move_iterator(model.end()));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(pointLightModel.begin()),
+                                  std::make_move_iterator(pointLightModel.end()));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(axis.begin()),
+                                  std::make_move_iterator(axis.end()));
+        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()),
+                                  std::make_move_iterator(model.end()));
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();
@@ -71,7 +75,7 @@ int main()
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glViewport(gui.getGuiWidth(), 0, SCR_WIDTH-gui.getGuiWidth(), SCR_HEIGHT);
+            glViewport(gui.getGuiWidth(), 0, SCR_WIDTH - gui.getGuiWidth(), SCR_HEIGHT);
             RenderSceneVisitor renderSceneVisitor{};
             SceneNode::visitTree(*appState->mainFrameBufferNode, renderSceneVisitor);
 

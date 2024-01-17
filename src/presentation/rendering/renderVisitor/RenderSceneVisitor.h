@@ -19,19 +19,18 @@ class RenderSceneVisitor : public SceneNodeVisitor {
 public:
     explicit RenderSceneVisitor();
 
-    int visitTransformation(Transformation& transformation) override;
+    int visitTransformation(Transformation &transformation) override;
     int visitLight(Light &light) override;
-    int visitMesh(Mesh& mesh) override;
-    int visitCamera(Camera& camera) override;
-    int visitShader(Shader& shader) override;
+    int visitMesh(Mesh &mesh) override;
+    int visitCamera(Camera &camera) override;
+    int visitShader(Shader &shader) override;
     int visitMaterial(Material &material) override;
 
-    int leaveTransformation(Transformation& transformation) override;
-    int leaveLight(Light& light) override;
-    int leaveCamera(Camera& camera) override;
-    int leaveShader(Shader& shader) override;
+    int leaveTransformation(Transformation &transformation) override;
+    int leaveLight(Light &light) override;
+    int leaveCamera(Camera &camera) override;
+    int leaveShader(Shader &shader) override;
     int leaveMaterial(Material &material) override;
-
 };
 
 

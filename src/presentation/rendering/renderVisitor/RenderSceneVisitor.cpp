@@ -38,8 +38,8 @@ int RenderSceneVisitor::leaveLight(Light &light) {
 }
 
 int RenderSceneVisitor::visitTransformation(Transformation &transformation) {
-    if(!uniformMap["model"].empty()) {
-        auto& globalTransform = std::get<glm::mat4>(uniformMap["model"].top());
+    if (!uniformMap["model"].empty()) {
+        auto &globalTransform = std::get<glm::mat4>(uniformMap["model"].top());
         uniformMap["model"].emplace(globalTransform * transformation.getTransformation());
     } else
         uniformMap["model"].emplace(transformation.getTransformation());
@@ -52,7 +52,7 @@ int RenderSceneVisitor::leaveTransformation(Transformation &transformation) {
 }
 
 int RenderSceneVisitor::visitMaterial(Material &material) {
-    if(material.getDiffuseTexture()) {
+    if (material.getDiffuseTexture()) {
         uniformMap["material.useAlbedoTexture"].emplace(true);
         glActiveTexture(GL_TEXTURE0);
         uniformMap["material.textureAlbedo"].emplace(0);
@@ -93,7 +93,7 @@ int RenderSceneVisitor::leaveCamera(Camera &camera) {
 }
 
 int RenderSceneVisitor::visitMesh(Mesh &mesh) {
-    if(shaderStack.empty()) return 1;
+    if (shaderStack.empty()) return 1;
     shaderStack.top().get().setUniforms(uniformMap);
     mesh.render();
     return 0;

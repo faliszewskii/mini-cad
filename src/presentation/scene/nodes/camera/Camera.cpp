@@ -12,8 +12,10 @@
 
 Camera::Camera(std::string name, int screenWidth, int screenHeight, CameraMode cameraMode, glm::vec3 position,
                glm::vec3 anchor, glm::quat orientation) : screenWidth(screenWidth), screenHeight(screenHeight),
-        SceneNode(std::move(name)), cameraType(cameraMode), position(position), anchor(anchor), orientation(orientation),
-        movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoomSensitivity(ZOOM_SENSITIVITY) {
+                                                          SceneNode(std::move(name)), cameraType(cameraMode),
+                                                          position(position), anchor(anchor), orientation(orientation),
+                                                          movementSpeed(SPEED), mouseSensitivity(SENSITIVITY),
+                                                          zoomSensitivity(ZOOM_SENSITIVITY) {
     // TODO Set orientation to anchor
     updateDirections();
 }
@@ -24,13 +26,13 @@ void Camera::updateDirections() {
     right = AlgebraUtils::getRight(orientation);
 }
 
-glm::mat4 Camera::getViewMatrix()
-{
+glm::mat4 Camera::getViewMatrix() {
     return glm::lookAt(position, position + front, up);
 }
 
 glm::mat4 Camera::getProjectionMatrix() {
-    return glm::perspective(glm::radians(45.f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f); // TODO configurable
+    return glm::perspective(glm::radians(45.f), (float) screenWidth / (float) screenHeight, 0.1f,
+                            100.0f); // TODO configurable
 }
 
 void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
@@ -41,8 +43,7 @@ void Camera::processMouseMovement(float xoffset, float yoffset) {
     (this->*mouseHandlerMapping[cameraType])(xoffset, yoffset);
 }
 
-void Camera::processMouseMovementAnchor(float xoffset, float yoffset)
-{
+void Camera::processMouseMovementAnchor(float xoffset, float yoffset) {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
 
@@ -54,8 +55,7 @@ void Camera::processMouseMovementAnchor(float xoffset, float yoffset)
     updateDirections();
 }
 
-void Camera::processMouseScroll(float yoffset)
-{
+void Camera::processMouseScroll(float yoffset) {
     yoffset *= zoomSensitivity;
     position += front * yoffset;
 }
@@ -108,7 +108,7 @@ void Camera::processKeyboardAnchor(CameraMovement direction, float deltaTime) {
     updateDirections();
 }
 
-int Camera::acceptVisit(SceneNodeVisitor& visitor) {
+int Camera::acceptVisit(SceneNodeVisitor &visitor) {
     return visitor.visitCamera(*this);
 }
 

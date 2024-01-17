@@ -10,8 +10,8 @@ class PointLightProperty;
 
 class PropertyVisitor {
 public:
-    virtual void visitTransformationProperty(TransformationProperty& transformation) {};
-    virtual void visitPointLightProperty(PointLightProperty& transformation) {};
+    virtual void visitTransformationProperty(TransformationProperty &transformation) {};
+    virtual void visitPointLightProperty(PointLightProperty &transformation) {};
 protected:
     PropertyVisitor() = default;
 };

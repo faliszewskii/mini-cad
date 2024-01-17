@@ -10,7 +10,7 @@
 #include "../ApplicationState.h"
 
 class OpenGLInstance {
-    GLFWwindow* window;
+    GLFWwindow *window;
 public:
     int init(int screenWidth, int screenHeight);
 

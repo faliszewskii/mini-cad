@@ -5,36 +5,35 @@
 #include "InputHandler.h"
 #include "imgui.h"
 
-InputHandler::InputHandler(std::unique_ptr<ApplicationState>& applicationState) :
+InputHandler::InputHandler(std::unique_ptr<ApplicationState> &applicationState) :
         inputHandlerState(applicationState->currentCamera, true) {}
 
-void InputHandler::setupCallbacks(GLFWwindow* window) {
+void InputHandler::setupCallbacks(GLFWwindow *window) {
     glfwSetWindowUserPointer(window, this);
 
-    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        auto* inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
+    glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+        auto *inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
         inputHandler->keyCallback(window, key, scancode, action, mods);
     });
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-        auto* inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
+    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xpos, double ypos) {
+        auto *inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
         inputHandler->mouseCallback(window, xpos, ypos);
     });
-    glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-        auto* inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
+        auto *inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
         inputHandler->scrollCallback(window, xoffset, yoffset);
     });
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-        auto* inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
+    glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
+        auto *inputHandler = static_cast<InputHandler *>(glfwGetWindowUserPointer(window));
         inputHandler->mouseButtonCallback(window, button, action, mods);
     });
 }
 
 
-void InputHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) const
-{
+void InputHandler::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) const {
     static auto deltaTime = static_cast<float>(glfwGetTime());
     deltaTime = static_cast<float>(glfwGetTime()) - deltaTime;
-    if(!inputHandlerState.currentCamera) return;
+    if (!inputHandlerState.currentCamera) return;
 
     if (ImGui::GetIO().WantCaptureKeyboard) return;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -49,7 +48,7 @@ void InputHandler::keyCallback(GLFWwindow* window, int key, int scancode, int ac
         inputHandlerState.currentCamera.value().get().processKeyboard(RIGHT, deltaTime);
 }
 
-void InputHandler::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+void InputHandler::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
         inputHandlerState.guiFocus = false;
     else
@@ -58,17 +57,15 @@ void InputHandler::mouseButtonCallback(GLFWwindow* window, int button, int actio
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void InputHandler::mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
-{
+void InputHandler::mouseCallback(GLFWwindow *window, double xposIn, double yposIn) {
     auto xpos = static_cast<float>(xposIn);
     auto ypos = static_cast<float>(yposIn);
 
     static float lastX = xpos;
     static float lastY = ypos;
-    static bool  firstMouse = true;
+    static bool firstMouse = true;
 
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
@@ -88,8 +85,7 @@ void InputHandler::mouseCallback(GLFWwindow* window, double xposIn, double yposI
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void InputHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    if(!inputHandlerState.currentCamera || ImGui::GetIO().WantCaptureMouse) return;
+void InputHandler::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+    if (!inputHandlerState.currentCamera || ImGui::GetIO().WantCaptureMouse) return;
     inputHandlerState.currentCamera.value().get().processMouseScroll(static_cast<float>(yoffset));
 }

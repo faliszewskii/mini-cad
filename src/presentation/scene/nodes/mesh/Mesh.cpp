@@ -8,15 +8,14 @@
 
 Mesh::Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices,
            int drawingMode) : SceneNode(std::move(name)),
-        vertices(std::move(vertices)), indices(std::move(indices)), drawingMode(drawingMode)
-{
+                              vertices(std::move(vertices)), indices(std::move(indices)), drawingMode(drawingMode) {
     setupMesh();
 }
 
 void Mesh::render() {
     // draw mesh
     glBindVertexArray(VAO);
-    if(indices)
+    if (indices)
         glDrawElements(drawingMode, indices.value().size(), GL_UNSIGNED_INT, 0);
     else
         glDrawArrays(drawingMode, 0, vertices.size());
@@ -32,21 +31,22 @@ void Mesh::setupMesh() {
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-    if(indices) {
+    if (indices) {
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.value().size() * sizeof(unsigned int), &indices.value()[0], GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.value().size() * sizeof(unsigned int), &indices.value()[0],
+                     GL_STATIC_DRAW);
     }
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) 0);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, normal));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, texCoords));
 
     glBindVertexArray(0);
 }

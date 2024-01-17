@@ -19,10 +19,11 @@ public:
     explicit PointLightProperty(Bindable<glm::vec3> position);
 
     std::string getPropertyName() override;
-    glm::vec3& getPositionRef() { return position.get(); };
+
+    glm::vec3 &getPositionRef() { return position.get(); };
     glm::vec3 getPosition() { return position.get(); };
 
-    void acceptVisit(PropertyVisitor& visitor) override;
+    void acceptVisit(PropertyVisitor &visitor) override;
 };
 
 

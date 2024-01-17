@@ -20,6 +20,7 @@ class TransformationProperty : public Property {
 public:
     TransformationProperty();
     TransformationProperty(Bindable<glm::vec3> position, Bindable<glm::quat> orientation, Bindable<glm::vec3> scale);
+
     std::string getPropertyName() override { return "Transformation"; };
 
     glm::mat4 getTransformation();
@@ -29,11 +30,11 @@ public:
     void setOrientation(glm::vec3 eulerAngles);
     void setScale(glm::vec3 newScale);
 
-    glm::vec3& getPositionRef() { return position.get(); };
-    glm::quat& getOrientationRef() { return orientation.get(); };
-    glm::vec3& getScaleRef() { return scale.get(); };
+    glm::vec3 &getPositionRef() { return position.get(); };
+    glm::quat &getOrientationRef() { return orientation.get(); };
+    glm::vec3 &getScaleRef() { return scale.get(); };
 
-    void acceptVisit(PropertyVisitor& visitor) override {
+    void acceptVisit(PropertyVisitor &visitor) override {
         visitor.visitTransformationProperty(*this);
     }
 

@@ -12,7 +12,7 @@
 #include "node/NodeDetailsVisitor.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
 
-GUI::GUI(GLFWwindow *window, ApplicationState& state) : guiState(state){
+GUI::GUI(GLFWwindow *window, ApplicationState &state) : guiState(state) {
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -36,7 +36,7 @@ void GUI::render() {
     renderDebugOverlay();
     renderLogOverlay();
 
-    if(guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
+    if (guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
     renderEditorWindow();
     renderGizmo();
 //    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
@@ -47,33 +47,27 @@ void GUI::render() {
 }
 
 void GUI::renderMenuBar() {
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if(ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
                 NFD_Init();
 
                 nfdchar_t *outPath;
-                nfdfilteritem_t filterItem[1] {{ "3D models", "gltf,fbx,FBX,obj" } };
+                nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
                 nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
-                if (result == NFD_OKAY)
-                {
+                if (result == NFD_OKAY) {
                     try {
                         auto model = guiState.assetImporter.importModel(outPath);
                         guiState.selectedNode->get().addChild(*model[0]);
-                        guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()), std::make_move_iterator(model.end()));
-                    } catch(FailedToLoadModelException &ex) {
+                        guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
+                                                 std::make_move_iterator(model.end()));
+                    } catch (FailedToLoadModelException &ex) {
                         // TODO Log error to log window.
-                        std::cerr<< ex.what() << std::endl;
+                        std::cerr << ex.what() << std::endl;
                     }
                     NFD_FreePath(outPath);
-                }
-                else if (result == NFD_CANCEL)
-                {
-                }
-                else
-                {
+                } else if (result == NFD_CANCEL) {
+                } else {
                     printf("Error: %s\n", NFD_GetError());
                 }
 
@@ -81,8 +75,7 @@ void GUI::renderMenuBar() {
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit"))
-        {
+        if (ImGui::BeginMenu("Edit")) {
             if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
@@ -96,10 +89,12 @@ void GUI::renderMenuBar() {
 }
 
 void GUI::renderDebugOverlay() {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+    ImGuiWindowFlags window_flags =
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
     const float PAD = 10.0f;
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
     ImVec2 work_size = viewport->WorkSize;
     ImVec2 window_pos, window_pos_pivot;
@@ -110,8 +105,7 @@ void GUI::renderDebugOverlay() {
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
     window_flags |= ImGuiWindowFlags_NoMove;
     ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-    if (ImGui::Begin("Debug Overlay", nullptr, window_flags))
-    {
+    if (ImGui::Begin("Debug Overlay", nullptr, window_flags)) {
         ImGui::Text("FPS: TODO");
         ImGui::Separator();
         ImGui::Text("mSPF: TODO");
@@ -120,10 +114,12 @@ void GUI::renderDebugOverlay() {
 }
 
 void GUI::renderLogOverlay() {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+    ImGuiWindowFlags window_flags =
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
     const float PAD = 10.0f;
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
     ImVec2 work_size = viewport->WorkSize;
     ImVec2 window_pos, window_pos_pivot;
@@ -135,20 +131,18 @@ void GUI::renderLogOverlay() {
     window_flags |= ImGuiWindowFlags_NoMove;
     ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
     ImGui::SetNextWindowSize(ImVec2(600, 50));
-    if (ImGui::Begin("Log Overlay", nullptr, window_flags))
-    {
+    if (ImGui::Begin("Log Overlay", nullptr, window_flags)) {
         ImGui::Text("Log messages will go here");
     }
     ImGui::End();
 }
 
 void GUI::renderMainWindow() {
-    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y));
     ImGui::SetNextWindowSize(ImVec2(guiState.guiWidth, main_viewport->WorkSize.y));
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize;
-    if (!ImGui::Begin("Main View", nullptr, window_flags))
-    {
+    if (!ImGui::Begin("Main View", nullptr, window_flags)) {
         ImGui::End();
         return;
     }
@@ -163,14 +157,13 @@ void GUI::renderMainWindow() {
 void GUI::renderEditorWindow() {
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGuiWindowFlags window_flags = 0;
-    if (!ImGui::Begin("Editor View", nullptr, window_flags))
-    {
+    if (!ImGui::Begin("Editor View", nullptr, window_flags)) {
         ImGui::End();
         return;
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
-    auto& io = ImGui::GetIO();
+    auto &io = ImGui::GetIO();
 
     ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
@@ -288,17 +281,16 @@ void GUI::renderModelTreeView() {
     ImGui::EndChild();
     ImGui::PopStyleVar();
 
-    if(guiState.selectedNode) {
-        ImGui::Text("%s \"%s\"", guiState.selectedNode->get().getTypeName().c_str(), guiState.selectedNode->get().getName().c_str());
+    if (guiState.selectedNode) {
+        ImGui::Text("%s \"%s\"", guiState.selectedNode->get().getTypeName().c_str(),
+                    guiState.selectedNode->get().getName().c_str());
         NodeDetailsVisitor nodeDetailsVisitor;
         guiState.selectedNode.value().get().acceptVisit(nodeDetailsVisitor);
 
         ImGui::SeparatorText("Properties##separatorText");
         auto properties = guiState.selectedNode->get().getProperties();
-        if (ImGui::BeginListBox("##PropertyListbox", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
-        {
-            for (int n = 0; n < properties.size(); n++)
-            {
+        if (ImGui::BeginListBox("##PropertyListbox", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
+            for (int n = 0; n < properties.size(); n++) {
                 const bool is_selected = (guiState.selectedProperty == n);
                 ImGui::PushID(n);
                 if (ImGui::Selectable(properties[n].get().getPropertyName().c_str(), is_selected))
@@ -324,19 +316,19 @@ GUI::~GUI() {
 }
 
 void GUI::renderGizmo() {
-    if(!guiState.selectedNode || !guiState.currentCamera) return;
-    auto* transformation = dynamic_cast<Transformation*>(&guiState.selectedNode.value().get());
-    if(transformation == nullptr) return;
+    if (!guiState.selectedNode || !guiState.currentCamera) return;
+    auto *transformation = dynamic_cast<Transformation *>(&guiState.selectedNode.value().get());
+    if (transformation == nullptr) return;
 
     glm::mat4 mat = transformation->getTransformation();
-    auto* matrix = static_cast<float*>(glm::value_ptr(mat));
+    auto *matrix = static_cast<float *>(glm::value_ptr(mat));
     glm::mat4 deltaMatrix;
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(guiState.guiWidth, 0, io.DisplaySize.x - guiState.guiWidth, io.DisplaySize.y);
     ImGuizmo::Manipulate(
-            static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getViewMatrix())),
-            static_cast<const float*>(glm::value_ptr(guiState.currentCamera.value().get().getProjectionMatrix())),
+            static_cast<const float *>(glm::value_ptr(guiState.currentCamera.value().get().getViewMatrix())),
+            static_cast<const float *>(glm::value_ptr(guiState.currentCamera.value().get().getProjectionMatrix())),
             ImGuizmo::ROTATE, ImGuizmo::WORLD, matrix, NULL,/* useSnap ? &snap.x :*/ NULL
     );
     transformation->setTransformation(mat);

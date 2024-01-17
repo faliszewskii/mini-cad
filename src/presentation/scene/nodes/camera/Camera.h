@@ -30,9 +30,9 @@ enum CameraMovement {
 };
 
 // Default camera values
-const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.01f;
-const float ZOOM_SENSITIVITY =  0.1f;
+const float SPEED = 2.5f;
+const float SENSITIVITY = 0.01f;
+const float ZOOM_SENSITIVITY = 0.1f;
 
 class Camera : public SceneNode {
 private:
@@ -50,11 +50,11 @@ private:
     glm::vec3 right;
 
 public:
-    std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping {
+    std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping{
             {CameraMode::FREE,   &Camera::processMouseMovementFree},
             {CameraMode::ANCHOR, &Camera::processMouseMovementAnchor}
     };
-    std::map<CameraMode, void (Camera::*)(CameraMovement direction, float)> keyboardHandlerMapping {
+    std::map<CameraMode, void (Camera::*)(CameraMovement direction, float)> keyboardHandlerMapping{
             {CameraMode::FREE,   &Camera::processKeyboardFree},
             {CameraMode::ANCHOR, &Camera::processKeyboardAnchor}
     };
@@ -66,8 +66,9 @@ public:
             CameraMode cameraMode = FREE,
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::quat orientation = glm::quat(1,0,0,0)
+            glm::quat orientation = glm::quat(1, 0, 0, 0)
     );
+
     std::string getTypeName() override { return "Camera"; };
 
 
@@ -79,8 +80,8 @@ public:
     void processMouseMovement(float xoffset, float yoffset);
     void processMouseScroll(float yoffset);
 
-    int acceptVisit(SceneNodeVisitor& visitor) override;
-    int acceptLeave(SceneNodeVisitor& visitor) override;
+    int acceptVisit(SceneNodeVisitor &visitor) override;
+    int acceptLeave(SceneNodeVisitor &visitor) override;
 
     int screenWidth;
     int screenHeight;
@@ -88,6 +89,7 @@ private:
 
     void processMouseMovementFree(float xoffset, float yoffset);
     void processMouseMovementAnchor(float xoffset, float yoffset);
+
     void processKeyboardFree(CameraMovement direction, float deltaTime);
     void processKeyboardAnchor(CameraMovement direction, float deltaTime);
 

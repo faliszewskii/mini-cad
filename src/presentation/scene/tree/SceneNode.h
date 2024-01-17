@@ -23,39 +23,41 @@ public:
     explicit SceneNode(std::string name) : name(std::move(name)) {
         uniqueObjectId = uuids::uuid_system_generator{}();
     }
+
     uuids::uuid getUuid() { return uniqueObjectId; };
     std::string getName() { return name; };
     virtual std::string getTypeName() = 0;
 
     virtual std::vector<std::reference_wrapper<Property>> getProperties() { return {}; }; // TODO sorted by some key.
 
-    void addChild(SceneNode& childValue) { children.emplace_back(childValue); }
+    void addChild(SceneNode &childValue) { children.emplace_back(childValue); }
 
-    virtual int acceptVisit(SceneNodeVisitor& visitor) = 0;
-    virtual int acceptLeave(SceneNodeVisitor& visitor) { return 0; };
+    virtual int acceptVisit(SceneNodeVisitor &visitor) = 0;
+    virtual int acceptLeave(SceneNodeVisitor &visitor) { return 0; };
 
-    static void visitTree(SceneNode& sceneNode, SceneNodeVisitor &visitor) {
+    static void visitTree(SceneNode &sceneNode, SceneNodeVisitor &visitor) {
         std::stack<std::pair<std::reference_wrapper<SceneNode>, int>> stack{};
         stack.emplace(sceneNode, 0);
-        while(!stack.empty()) {
-            SceneNode& node = stack.top().first;
+        while (!stack.empty()) {
+            SceneNode &node = stack.top().first;
             int state = stack.top().second;
             stack.pop();
             if (state == 0) {
                 stack.emplace(node, 1);
-                if(!node.acceptVisit(visitor))
-                    for(auto &child : std::ranges::views::reverse(node.children))
+                if (!node.acceptVisit(visitor))
+                    for (auto &child: std::ranges::views::reverse(node.children))
                         stack.emplace(child, 0);
             }
             if (state == 1) node.acceptLeave(visitor);
         }
     }
 
-    friend bool operator== (SceneNode & lhs, SceneNode & rhs ) {
+    friend bool operator==(SceneNode &lhs, SceneNode &rhs) {
         return std::addressof(lhs) == std::addressof(rhs);
     }
 
     virtual ~SceneNode() = default;
+
 protected:
     SceneNode() = default;
 };
