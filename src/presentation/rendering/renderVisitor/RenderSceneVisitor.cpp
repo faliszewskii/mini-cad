@@ -2,7 +2,6 @@
 // Created by faliszewskii on 07.01.24.
 //
 
-#include <glm/gtx/string_cast.hpp>
 #include "../../scene/nodes/transformation/Transformation.h"
 #include "../../scene/nodes/mesh/Mesh.h"
 #include "../../scene/nodes/camera/Camera.h"

@@ -11,6 +11,7 @@
 #include "properties/PropertyViewVisitor.h"
 #include "node/NodeDetailsVisitor.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
+#include "editor/EditorNodeVisitor.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState &state) : guiState(state) {
     ImGui::CreateContext();
@@ -161,29 +162,24 @@ void GUI::renderEditorWindow() {
         ImGui::End();
         return;
     }
-    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+    ImGui::PushItemWidth(ImGui::GetFontSize());
 
     auto &io = ImGui::GetIO();
 
-    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-    ImGui::Separator();
+
+    EditorNodeVisitor editorNodeVisitor;
 
     ax::NodeEditor::SetCurrentEditor(m_Context);
-    ax::NodeEditor::Begin("My Editor", ImVec2(0.0, 0.0f));
-    int uniqueId = 1;
-    // Start drawing nodes.
-    ax::NodeEditor::BeginNode(uniqueId++);
-    ImGui::Text("Node A");
-    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Input);
-    ImGui::Text("-> In");
-    ax::NodeEditor::EndPin();
+    ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
     ImGui::SameLine();
-    ax::NodeEditor::BeginPin(uniqueId++, ax::NodeEditor::PinKind::Output);
-    ImGui::Text("Out ->");
-    ax::NodeEditor::EndPin();
-    ax::NodeEditor::EndNode();
+    if(ImGui::Button("To content")) ax::NodeEditor::NavigateToContent();
+    ImGui::Separator();
+    ax::NodeEditor::Begin("My Editor", ImVec2(0.0, 0.0f));
+    for(auto& node : guiState.allNodes)
+        node->acceptVisit(editorNodeVisitor);
     ax::NodeEditor::End();
+    firstTime = false;
     ax::NodeEditor::SetCurrentEditor(nullptr);
 
     //ImGui::ShowMetricsWindow();

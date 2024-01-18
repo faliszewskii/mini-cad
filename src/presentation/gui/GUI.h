@@ -55,6 +55,7 @@ public:
 private:
     GUIApplicationState guiState;
     ax::NodeEditor::EditorContext *m_Context = nullptr;
+    bool firstTime = true;
 
     void renderMenuBar();
 

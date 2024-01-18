@@ -25,7 +25,6 @@ bool TreeViewVisitor::renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &s
     }
     if (!leaf) {
         nodeOpenStack.push(nodeOpen);
-        flags &= ~ImGuiTreeNodeFlags_DefaultOpen;
     }
     return nodeOpen;
 }
