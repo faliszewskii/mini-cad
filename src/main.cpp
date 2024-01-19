@@ -43,7 +43,7 @@ int main() {
         appState->currentCamera = *camera;
         shader->addChild(*camera);
 
-        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, -1.0f));
+        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, 1.0f));
         camera->addChild(*pointLight);
 
         auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);

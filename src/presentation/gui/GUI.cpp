@@ -8,10 +8,10 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "tree/TreeViewVisitor.h"
-#include "properties/PropertyViewVisitor.h"
 #include "node/NodeDetailsVisitor.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
 #include "editor/EditorNodeVisitor.h"
+#include "../../logic/generator/ModelGenerator.h"
 
 GUI::GUI(GLFWwindow *window, ApplicationState &state) : guiState(state) {
     ImGui::CreateContext();
@@ -50,30 +50,6 @@ void GUI::render() {
 void GUI::renderMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                NFD_Init();
-
-                nfdchar_t *outPath;
-                nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
-                nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
-                if (result == NFD_OKAY) {
-                    try {
-                        auto model = guiState.assetImporter.importModel(outPath);
-                        guiState.selectedNode->get().addChild(*model[0]);
-                        guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
-                                                 std::make_move_iterator(model.end()));
-                    } catch (FailedToLoadModelException &ex) {
-                        // TODO Log error to log window.
-                        std::cerr << ex.what() << std::endl;
-                    }
-                    NFD_FreePath(outPath);
-                } else if (result == NFD_CANCEL) {
-                } else {
-                    printf("Error: %s\n", NFD_GetError());
-                }
-
-                NFD_Quit();
-            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Edit")) {
@@ -83,9 +59,54 @@ void GUI::renderMenuBar() {
             if (ImGui::MenuItem("Cut", "CTRL+X")) {}
             if (ImGui::MenuItem("Copy", "CTRL+C")) {}
             if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::Separator();
+            renderMenuItemLoadModel();
+            if (ImGui::MenuItem("Add Axis") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+                addModel(ModelGenerator::generateAxis());
+            }
+            if (ImGui::MenuItem("Add Sphere") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+                addModel(ModelGenerator::generateSphere(10, 10));
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
+    }
+}
+void GUI::addModel(std::unique_ptr<SceneNode> &&model) {
+    guiState.selectedNode->get().addChild(*model);
+    guiState.allNodes.push_back(std::move(model));
+}
+
+void GUI::addModel(std::vector<std::unique_ptr<SceneNode>> &&model) {
+    guiState.selectedNode->get().addChild(*model[0]);
+    guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
+                             std::make_move_iterator(model.end()));
+}
+
+void GUI::renderMenuItemLoadModel() {
+    if (ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+        NFD_Init();
+
+        nfdchar_t *outPath;
+        nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
+        nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+        if (result == NFD_OKAY) {
+            try {
+                auto model = guiState.assetImporter.importModel(outPath);
+                guiState.selectedNode->get().addChild(*model[0]);
+                guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
+                                         std::make_move_iterator(model.end()));
+            } catch (FailedToLoadModelException &ex) {
+                // TODO Log error to log window.
+                std::cerr << ex.what() << std::endl;
+            }
+            NFD_FreePath(outPath);
+        } else if (result == NFD_CANCEL) {
+        } else {
+            printf("Error: %s\n", NFD_GetError());
+        }
+
+        NFD_Quit();
     }
 }
 
@@ -209,7 +230,7 @@ void GUI::renderModelTreeView() {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
-    TreeViewVisitor treeViewVisitor(guiState.selectedNode, guiState.selectedProperty);
+    TreeViewVisitor treeViewVisitor(guiState.selectedNode);
     SceneNode::visitTree(*guiState.mainFrameBufferNode, treeViewVisitor);
 
 //    traverseModelNode(guiState.rootSceneNode, base_flags);
@@ -282,25 +303,6 @@ void GUI::renderModelTreeView() {
                     guiState.selectedNode->get().getName().c_str());
         NodeDetailsVisitor nodeDetailsVisitor;
         guiState.selectedNode.value().get().acceptVisit(nodeDetailsVisitor);
-
-        ImGui::SeparatorText("Properties##separatorText");
-        auto properties = guiState.selectedNode->get().getProperties();
-        if (ImGui::BeginListBox("##PropertyListbox", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
-            for (int n = 0; n < properties.size(); n++) {
-                const bool is_selected = (guiState.selectedProperty == n);
-                ImGui::PushID(n);
-                if (ImGui::Selectable(properties[n].get().getPropertyName().c_str(), is_selected))
-                    guiState.selectedProperty = n;
-                ImGui::PopID();
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndListBox();
-        }
-
-        PropertyViewVisitor propertyViewVisitor;
-        for (const auto &property: guiState.selectedNode->get().getProperties())
-            property.get().acceptVisit(propertyViewVisitor);
     }
 }
 
@@ -325,9 +327,11 @@ void GUI::renderGizmo() {
     ImGuizmo::Manipulate(
             static_cast<const float *>(glm::value_ptr(guiState.currentCamera.value().get().getViewMatrix())),
             static_cast<const float *>(glm::value_ptr(guiState.currentCamera.value().get().getProjectionMatrix())),
-            ImGuizmo::ROTATE, ImGuizmo::WORLD, matrix, NULL,/* useSnap ? &snap.x :*/ NULL
+            ImGuizmo::ROTATE, ImGuizmo::LOCAL, matrix, static_cast<float *>(glm::value_ptr(deltaMatrix)),/* useSnap ? &snap.x :*/ NULL
     );
-    transformation->setTransformation(mat);
+    glm::quat q = glm::normalize(glm::quat_cast(deltaMatrix));
+    transformation->setOrientation(q * transformation->getOrientationRef());
+
 }
 //
 //void GUI::renderShaderListView() {

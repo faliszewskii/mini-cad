@@ -65,21 +65,10 @@ add_executable(opengl-sandbox main.cpp
         presentation/scene/nodes/camera/Camera.h
         presentation/gui/tree/TreeViewVisitor.cpp
         presentation/gui/tree/TreeViewVisitor.h
-        presentation/gui/properties/PropertyViewVisitor.cpp
-        presentation/gui/properties/PropertyViewVisitor.h
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
-        presentation/properties/transformation/TransformationProperty.cpp
-        presentation/properties/transformation/TransformationProperty.h
-        presentation/properties/Property.cpp
-        presentation/properties/Property.h
-        presentation/properties/visitor/PropertyVisitor.cpp
-        presentation/properties/visitor/PropertyVisitor.h
         presentation/gui/node/NodeDetailsVisitor.cpp
         presentation/gui/node/NodeDetailsVisitor.h
-        presentation/properties/light/LightTypeProperty.h
-        presentation/properties/light/PointLightProperty.cpp
-        presentation/properties/light/PointLightProperty.h
         presentation/scene/nodes/material/Material.cpp
         presentation/scene/nodes/material/Material.h
         presentation/scene/tree/Bindable.h

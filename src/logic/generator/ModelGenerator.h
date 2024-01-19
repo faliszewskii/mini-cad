@@ -20,7 +20,8 @@ public:
     static std::vector<std::unique_ptr<SceneNode>>
     generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string &materialName);
 
-    static std::unique_ptr<SceneNode> generateSphere(int meridianCount, int parallelCount);
+    static std::unique_ptr<SceneNode> generateSphereMesh(int meridianCount, int parallelCount);
+    static std::vector<std::unique_ptr<SceneNode>> generateSphere(int meridianCount, int parallelCount);
 
 };
 

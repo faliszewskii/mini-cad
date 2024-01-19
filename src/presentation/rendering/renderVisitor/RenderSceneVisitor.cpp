@@ -24,7 +24,7 @@ int RenderSceneVisitor::visitLight(Light &light) {
     // TODO Here property visitor on chosen light type.
     // TODO pointLightCounter
     uniformMap["pointLight.strength"].emplace(light.getStrength()); // TODO Research light attenuation.
-    uniformMap["pointLight.position"].emplace(light.getPointLightProperty().getPosition());
+    uniformMap["pointLight.position"].emplace(light.getPosition());
     uniformMap["pointLight.color"].emplace(light.getColor());
     return 0;
 }

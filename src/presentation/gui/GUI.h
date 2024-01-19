@@ -21,7 +21,7 @@ struct GUIApplicationState {
     explicit GUIApplicationState(ApplicationState &appState) : assetImporter(appState.assetImporter),
                                                                currentCamera(appState.currentCamera),
                                                                mainFrameBufferNode(appState.mainFrameBufferNode),
-                                                               selectedNode(appState.selectedNode), selectedProperty(0),
+                                                               selectedNode(appState.selectedNode),
                                                                guiWidth(300),
                                                                allNodes(appState.allNodes) {
         activeViewsMask = ViewsMask::MainView | ViewsMask::ShadersView; // TODO Get from last user settings.
@@ -35,7 +35,6 @@ struct GUIApplicationState {
     std::optional<std::reference_wrapper<Camera>> &currentCamera;
     // this
     unsigned int activeViewsMask;
-    int selectedProperty;
     int guiWidth;
 
 };
@@ -70,6 +69,11 @@ private:
     void renderLogOverlay();
 
     void renderGizmo();
+
+    void renderMenuItemLoadModel();
+
+    void addModel(std::unique_ptr<SceneNode> &&model);
+    void addModel(std::vector<std::unique_ptr<SceneNode>> &&model);
 };
 
 

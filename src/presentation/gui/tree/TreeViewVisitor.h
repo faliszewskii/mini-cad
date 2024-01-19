@@ -16,10 +16,9 @@ class TreeViewVisitor : public SceneNodeVisitor {
     std::stack<bool> nodeOpenStack;
     ImGuiTreeNodeFlags flags;
     std::optional<std::reference_wrapper<SceneNode>> &selectedNode;
-    int &selectedProperty;
     // TODO Add icons to gui to identify SceneNode type
 public:
-    explicit TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>> &selectedNode, int &selectedProperty);
+    explicit TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>> &selectedNode);
 
     int visitFrameBuffer(FrameBuffer &frameBuffer) override;
     int visitTransformation(Transformation &transformation) override;

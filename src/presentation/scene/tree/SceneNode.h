@@ -9,7 +9,6 @@
 #define UUID_SYSTEM_GENERATOR
 #include "../../../../lib/uuid/uuid.h"
 #include "../visitor/SceneNodeVisitor.h"
-#include "../../properties/Property.h"
 #include <string>
 #include <stack>
 #include <ranges>
@@ -27,8 +26,6 @@ public:
     uuids::uuid getUuid() { return uniqueObjectId; };
     std::string getName() { return name; };
     virtual std::string getTypeName() = 0;
-
-    virtual std::vector<std::reference_wrapper<Property>> getProperties() { return {}; }; // TODO sorted by some key.
 
     void addChild(SceneNode &childValue) { children.emplace_back(childValue); }
 

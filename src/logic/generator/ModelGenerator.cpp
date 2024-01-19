@@ -47,7 +47,7 @@ ModelGenerator::generateLine(std::string name, glm::vec3 start, glm::vec3 end, g
 
 std::vector<std::unique_ptr<SceneNode>>
 ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::unique_ptr<Light>> light) {
-    Bindable<glm::vec3> lightPosition([&lightVar = *light.get()]() { return lightVar.getPosition(); });
+    Bindable<glm::vec3> lightPosition([&lightVar = *light.get()]() { return lightVar.getPositionRef(); });
     auto mainNode(std::make_unique<Transformation>("Point light representation", lightPosition));
 
     auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"),
@@ -62,7 +62,7 @@ ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::uni
     auto sourceMaterialNode = std::make_unique<Material>("White", albedo); // TODO Bind material color to light color
     sourceTransformation->addChild(*sourceMaterialNode);
 
-    auto sourceMeshNode = generateSphere(10, 10);
+    auto sourceMeshNode = generateSphereMesh(10, 10);
     sourceMaterialNode->addChild(*sourceMeshNode);
 
     auto bulbTransformation = std::make_unique<Transformation>(Transformation("Bulb"));
@@ -72,7 +72,7 @@ ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::uni
     auto bulbMaterialNode = std::make_unique<Material>("Bulb material", glm::vec4(1, 1, 1, 0.2f));
     bulbTransformation->addChild(*bulbMaterialNode);
 
-    auto bulbMeshNode = generateSphere(10, 10);
+    auto bulbMeshNode = generateSphereMesh(10, 10);
     bulbMaterialNode->addChild(*bulbMeshNode);
 
     std::vector<std::unique_ptr<SceneNode>> nodes;
@@ -88,7 +88,7 @@ ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::uni
 }
 
 
-std::unique_ptr<SceneNode> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
+std::unique_ptr<SceneNode> ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -144,4 +144,18 @@ std::unique_ptr<SceneNode> ModelGenerator::generateSphere(int meridianCount, int
     }
 
     return std::make_unique<Mesh>(Mesh("UV Sphere mesh", vertices, indices, GL_TRIANGLES));
+}
+
+std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
+    auto transformation = std::make_unique<Transformation>("UV Sphere");
+    auto material = std::make_unique<Material>("White");
+    transformation->addChild(*material);
+    auto mesh = generateSphereMesh(meridianCount, parallelCount);
+    material->addChild(*mesh);
+
+    std::vector<std::unique_ptr<SceneNode>> nodes;
+    nodes.push_back(std::move(transformation));
+    nodes.push_back(std::move(material));
+    nodes.push_back(std::move(mesh));
+    return nodes;
 }

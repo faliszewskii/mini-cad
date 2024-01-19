@@ -9,8 +9,8 @@
 #include "../../scene/nodes/light/Light.h"
 #include "../../scene/nodes/camera/Camera.h"
 
-TreeViewVisitor::TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>> &selectedNode, int &selectedProperty)
-        : nodeOpenStack(std::stack<bool>()), selectedNode(selectedNode), selectedProperty(selectedProperty) {
+TreeViewVisitor::TreeViewVisitor(std::optional<std::reference_wrapper<SceneNode>> &selectedNode)
+        : nodeOpenStack(std::stack<bool>()), selectedNode(selectedNode) {
     flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
             ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth;
 }
@@ -19,13 +19,10 @@ bool TreeViewVisitor::renderTreeNode(ImGuiTreeNodeFlags localFlags, SceneNode &s
     if (selectedNode && selectedNode.value().get() == sceneNode) localFlags |= ImGuiTreeNodeFlags_Selected;
     bool nodeOpen = ImGui::TreeNodeEx(uuids::to_string(sceneNode.getUuid()).c_str(), localFlags, fmt,
                                       sceneNode.getName().c_str());
-    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
         selectedNode = sceneNode;
-        selectedProperty = 0;
-    }
-    if (!leaf) {
+    if (!leaf)
         nodeOpenStack.push(nodeOpen);
-    }
     return nodeOpen;
 }
 
