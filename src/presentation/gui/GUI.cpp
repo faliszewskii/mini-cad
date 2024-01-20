@@ -65,7 +65,10 @@ void GUI::renderMenuBar() {
                 addModel(ModelGenerator::generateAxis());
             }
             if (ImGui::MenuItem("Add Sphere") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                addModel(ModelGenerator::generateSphere(10, 10));
+                addModel(ModelGenerator::generateSphere(50, 50));
+            }
+            if (ImGui::MenuItem("Add Torus") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+                addModel(ModelGenerator::generateTorus(50, 50));
             }
             ImGui::EndMenu();
         }

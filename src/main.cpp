@@ -33,10 +33,28 @@ int main() {
         GUI gui(openGlInstance.getWindow(), *appState);
 
         auto frameBuffer = std::make_unique<FrameBuffer>("Main");
-        // TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
+
+//         TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
+        auto randomShader = std::make_unique<Shader>("random", IOUtils::getResource("shaders/basic/white.vert"),
+                                                     IOUtils::getResource("shaders/debug/random.frag"));
+        randomShader->setActive(false);
+        frameBuffer->addChild(*randomShader);
+
+        auto normalShader = std::make_unique<Shader>("normalDebug", IOUtils::getResource("shaders/debug/normalDebug.vert"),
+                                               IOUtils::getResource("shaders/debug/normalDebug.geom"),
+                                               IOUtils::getResource("shaders/debug/normalDebug.frag"));
+        normalShader->setActive(false);
+        randomShader->addChild(*normalShader);
+
+        auto wireframeShader = std::make_unique<Shader>("wireframe", IOUtils::getResource("shaders/debug/normalDebug.vert"),
+                                                     IOUtils::getResource("shaders/debug/wireframe.geom"),
+                                                     IOUtils::getResource("shaders/debug/normalDebug.frag"));
+        wireframeShader->setActive(false);
+        normalShader->addChild(*wireframeShader);
+
         auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"),
                                                IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
-        frameBuffer->addChild(*shader);
+        wireframeShader->addChild(*shader);
 
         auto camera = std::make_unique<Camera>("camera", SCR_WIDTH - gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR,
                                                glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
@@ -53,8 +71,8 @@ int main() {
         pointLight->addChild(*axis[0]);
 
         AssetImporter assetImporter;
-        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
-        pointLight->addChild(*model[0]);
+//        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
+//        pointLight->addChild(*model[0]);
 
         appState->mainFrameBufferNode = *frameBuffer;
         appState->allNodes.push_back(std::move(frameBuffer));
@@ -65,8 +83,8 @@ int main() {
                                   std::make_move_iterator(pointLightModel.end()));
         appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(axis.begin()),
                                   std::make_move_iterator(axis.end()));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()),
-                                  std::make_move_iterator(model.end()));
+//        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()),
+//                                  std::make_move_iterator(model.end()));
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();

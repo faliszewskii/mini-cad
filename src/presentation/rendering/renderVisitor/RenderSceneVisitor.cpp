@@ -11,12 +11,14 @@
 RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {}
 
 int RenderSceneVisitor::visitShader(Shader &shader) {
-    shaderStack.emplace(shader);
+    if(shader.active) activeShaders.emplace_back(shader);
     return 0;
 }
 
 int RenderSceneVisitor::leaveShader(Shader &shader) {
-    shaderStack.pop();
+    auto _ = std::remove_if(activeShaders.begin(), activeShaders.end(), [&](const auto &item) {
+        return item == shader;
+    });
     return 0;
 }
 
@@ -92,8 +94,9 @@ int RenderSceneVisitor::leaveCamera(Camera &camera) {
 }
 
 int RenderSceneVisitor::visitMesh(Mesh &mesh) {
-    if (shaderStack.empty()) return 1;
-    shaderStack.top().get().setUniforms(uniformMap);
-    mesh.render();
+    for(Shader& shader : activeShaders) {
+        shader.setUniforms(uniformMap);
+        mesh.render();
+    }
     return 0;
 }

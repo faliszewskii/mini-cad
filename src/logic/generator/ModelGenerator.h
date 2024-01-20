@@ -20,9 +20,15 @@ public:
     static std::vector<std::unique_ptr<SceneNode>>
     generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string &materialName);
 
-    static std::unique_ptr<SceneNode> generateSphereMesh(int meridianCount, int parallelCount);
+    static std::unique_ptr<Mesh> generateSphereMesh(int meridianCount, int parallelCount);
     static std::vector<std::unique_ptr<SceneNode>> generateSphere(int meridianCount, int parallelCount);
 
+    static std::unique_ptr<Mesh> generateTorusMesh(int radial_resolution, int tubular_resolution, float thickness = 0.25, float radius = 1);
+    static std::vector<std::unique_ptr<SceneNode>> generateTorus(int radial_resolution, int tubular_resolution, float thickness = 0.25, float radius = 1);
+
+    static std::vector<std::unique_ptr<SceneNode>> generateSolid(std::unique_ptr<Mesh> mesh, const std::string& name);
+
+    static void addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3);
 };
 
 

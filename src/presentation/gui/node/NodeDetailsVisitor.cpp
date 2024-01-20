@@ -33,6 +33,10 @@ int NodeDetailsVisitor::visitTransformation(Transformation &transformation) {
 int NodeDetailsVisitor::visitShader(Shader &shader) {
     if (ImGui::SmallButton("Hot reload"))
         shader.hotReload();
+    if (!shader.active && ImGui::SmallButton("Turn On"))
+        shader.setActive(true);
+    else if (shader.active && ImGui::SmallButton("Turn Off"))
+        shader.setActive(false);
     return 0;
 }
 

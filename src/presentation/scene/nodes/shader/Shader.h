@@ -22,77 +22,73 @@ class Shader : public SceneNode {
 public:
     unsigned int ID;
     std::string vertexPath;
+    std::string geometryPath;
     std::string fragmentPath;
     int maxUniformNameLength;
     int uniformCount;
     std::unique_ptr<char[]> uniformNameBuffer;
+    bool active;
 
-    // constructor generates the shader on the fly
-    // ------------------------------------------------------------------------
     Shader(std::string name, std::string vertexShaderPath, std::string fragmentShaderPath) : SceneNode(std::move(name)),
-                                                                                             vertexPath(std::move(
-                                                                                                     vertexShaderPath)),
-                                                                                             fragmentPath(std::move(
-                                                                                                     fragmentShaderPath)) {
-        initShader(vertexPath, fragmentPath);
+    vertexPath(std::move(vertexShaderPath)), geometryPath(), fragmentPath(std::move(fragmentShaderPath)) {
+        initShader(vertexPath, geometryPath, fragmentPath);
+    }
+    Shader(std::string name, std::string vertexShaderPath, std::string geometryShaderPath, std::string fragmentShaderPath) :
+    SceneNode(std::move(name)), vertexPath(std::move(vertexShaderPath)), geometryPath(std::move(geometryShaderPath)),
+    fragmentPath(std::move(fragmentShaderPath)) {
+        initShader(vertexPath, geometryPath, fragmentPath);
     }
 
     std::string getTypeName() override { return "Shader"; };
 
-    void initShader(std::string vertexShaderPath,
-                    std::string fragmentShaderPath) {// 1. retrieve the vertex/fragment source code from filePath
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        try {
-            // open files
-            vShaderFile.open(vertexShaderPath);
-            fShaderFile.open(fragmentShaderPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();
+    void setActive(bool toggle) { active = toggle; };
+
+    unsigned int loadShader(const std::string& path, int type, const std::string& name) {
+        unsigned int shader;
+        std::string code;
+        std::ifstream file;
+        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try{
+            file.open(path);
+            std::stringstream stream;
+            stream << file.rdbuf();
+            file.close();
+            code = stream.str();
         }
         catch (std::ifstream::failure &e) {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
         }
-        const char *vShaderCode = vertexCode.c_str();
-        const char *fShaderCode = fragmentCode.c_str();
-        // 2. compile shaders
-        unsigned int vertex, fragment;
-        // vertex shader
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-        // shader Program
+        const char *pCode = code.c_str();
+        shader = glCreateShader(type);
+        glShaderSource(shader, 1, &pCode, NULL);
+        glCompileShader(shader);
+        checkCompileErrors(shader, name);
+
+        return shader;
+    }
+
+    void initShader(const std::string& vertexShaderPath, const std::string& geometryShader, const std::string& fragmentShaderPath) {
+        unsigned int vertex, geometry, fragment;
+        vertex = loadShader(vertexShaderPath, GL_VERTEX_SHADER, "VERTEX");
+        if(!geometryShader.empty()) geometry = loadShader(geometryShader, GL_GEOMETRY_SHADER, "GEOMETRY");
+        fragment = loadShader(fragmentShaderPath, GL_FRAGMENT_SHADER, "FRAGMENT");
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
+        if(!geometryShader.empty()) glAttachShader(ID, geometry);
         glAttachShader(ID, fragment);
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertex);
+        if(!geometryShader.empty()) glDeleteShader(geometry);
         glDeleteShader(fragment);
+        initFields();
+    }
 
+    void initFields() {
         glGetProgramiv(ID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
         glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &uniformCount);
         uniformNameBuffer = std::unique_ptr<char[]>(new char[maxUniformNameLength]);
+        active = true;
     }
 
     // ------------------------------------------------------------------------
@@ -105,7 +101,7 @@ public:
     // Hot-reload the shader
     void hotReload() {
         glDeleteProgram(ID);
-        initShader(vertexPath, fragmentPath);
+        initShader(vertexPath, geometryPath, fragmentPath);
         // What about uniforms that have to be set on init (like color in flat).
     }
     // ------------------------------------------------------------------------

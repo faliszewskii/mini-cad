@@ -1,6 +1,8 @@
 //
 // Created by faliszewskii on 29.12.23.
 //
+// Based off https://danielsieger.com/blog/2021/05/03/generating-primitive-shapes.html
+// by Daniel Sieger.
 
 #include "ModelGenerator.h"
 
@@ -88,7 +90,7 @@ ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::uni
 }
 
 
-std::unique_ptr<SceneNode> ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
+std::unique_ptr<Mesh> ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -133,13 +135,7 @@ std::unique_ptr<SceneNode> ModelGenerator::generateSphereMesh(int meridianCount,
             auto i2 = j1 + (i + 1) % meridianCount;
             auto i3 = j1 + i;
 
-            indices.push_back(i0);
-            indices.push_back(i1);
-            indices.push_back(i2);
-
-            indices.push_back(i3);
-            indices.push_back(i0);
-            indices.push_back(i2);
+            addQuad(indices, i0, i1, i2, i3);
         }
     }
 
@@ -147,10 +143,63 @@ std::unique_ptr<SceneNode> ModelGenerator::generateSphereMesh(int meridianCount,
 }
 
 std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
-    auto transformation = std::make_unique<Transformation>("UV Sphere");
+    return generateSolid(generateSphereMesh(meridianCount, parallelCount), "UV Sphere");
+}
+
+std::unique_ptr<Mesh>
+ModelGenerator::generateTorusMesh(int radial_resolution, int tubular_resolution, float thickness, float radius) {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (int i = 0; i < radial_resolution; i++) {
+        for (int j = 0; j < tubular_resolution; j++) {
+            float u = (float)j / (float)tubular_resolution * M_PI * 2.0f;
+            float v = (float)i / (float)radial_resolution * M_PI * 2.0f;
+            float x = (radius + thickness * std::cos(v)) * std::cos(u);
+            float y = (radius + thickness * std::cos(v)) * std::sin(u);
+            float z = thickness * std::sin(v);
+            float xn = std::cos(v) * std::cos(u);
+            float yn = std::cos(v) * std::sin(u);
+            float zn = std::sin(v);
+            vertices.push_back(Vertex(glm::vec3(x, y, z), glm::normalize(glm::vec3(xn, yn, zn))));
+        }
+    }
+
+    // add quad faces
+    for (int i = 0; i < radial_resolution; i++) {
+        auto i_next = (i + 1) % radial_resolution;
+        for (int j = 0; j < tubular_resolution; j++) {
+            auto j_next = (j + 1) % tubular_resolution;
+            auto i0 = i * tubular_resolution + j;
+            auto i1 = i * tubular_resolution + j_next;
+            auto i2 = i_next * tubular_resolution + j_next;
+            auto i3 = i_next * tubular_resolution + j;
+
+            addQuad(indices, i0, i1, i2, i3);
+        }
+    }
+    return std::make_unique<Mesh>(Mesh("Torus mesh", vertices, indices, GL_TRIANGLES));
+}
+
+void ModelGenerator::addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3) {
+    indices.push_back(i0);
+    indices.push_back(i1);
+    indices.push_back(i2);
+
+    indices.push_back(i3);
+    indices.push_back(i0);
+    indices.push_back(i2);
+}
+
+std::vector<std::unique_ptr<SceneNode>>
+ModelGenerator::generateTorus(int radial_resolution, int tubular_resolution, float thickness, float radius) {
+    return generateSolid(generateTorusMesh(radial_resolution, tubular_resolution, thickness, radius), "Torus");
+}
+
+std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSolid(std::unique_ptr<Mesh> mesh, const std::string& name) {
+    auto transformation = std::make_unique<Transformation>(name);
     auto material = std::make_unique<Material>("White");
     transformation->addChild(*material);
-    auto mesh = generateSphereMesh(meridianCount, parallelCount);
     material->addChild(*mesh);
 
     std::vector<std::unique_ptr<SceneNode>> nodes;

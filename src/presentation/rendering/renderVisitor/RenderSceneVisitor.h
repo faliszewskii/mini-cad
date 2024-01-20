@@ -14,7 +14,7 @@
 
 class RenderSceneVisitor : public SceneNodeVisitor {
     UniformMap uniformMap;
-    std::stack<std::reference_wrapper<Shader>> shaderStack; // TODO Log error if tried to draw something without shader.
+    std::vector<std::reference_wrapper<Shader>> activeShaders; // TODO Log error if tried to draw something without shader.
     int pointLightCounter; // TODO Not bigger than the maxcap in shader
 public:
     explicit RenderSceneVisitor();
