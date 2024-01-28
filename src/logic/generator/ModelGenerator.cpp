@@ -208,3 +208,19 @@ std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSolid(std::uniqu
     nodes.push_back(std::move(mesh));
     return nodes;
 }
+
+std::unique_ptr<Mesh> ModelGenerator::generatePlaneMesh(glm::vec3 normal) {
+    // TODO create plane based on normal
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    if(normal != glm::vec3(0,1,0)) throw "not implemented";
+
+    vertices.push_back(Vertex(glm::vec3(1,0,-1), glm::vec3(0,1,0)));
+    vertices.push_back(Vertex(glm::vec3(1,0,1), glm::vec3(0,1,0)));
+    vertices.push_back(Vertex(glm::vec3(-1,0,1), glm::vec3(0,1,0)));
+    vertices.push_back(Vertex(glm::vec3(-1,0,-1), glm::vec3(0,1,0)));
+
+    addQuad(indices,0, 1, 2, 3);
+
+    return std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, GL_TRIANGLES));
+}

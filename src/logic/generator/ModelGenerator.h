@@ -29,6 +29,8 @@ public:
     static std::vector<std::unique_ptr<SceneNode>> generateSolid(std::unique_ptr<Mesh> mesh, const std::string& name);
 
     static void addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3);
+
+    static std::unique_ptr<Mesh> generatePlaneMesh(glm::vec3 normal);
 };
 
 
