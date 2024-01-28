@@ -9,16 +9,19 @@
 #include <utility>
 #include <stack>
 #include <variant>
+#include <set>
 
 #include "../../scene/nodes/shader/Shader.h"
 
 class RenderSceneVisitor : public SceneNodeVisitor {
     UniformMap uniformMap;
-    std::vector<std::reference_wrapper<Shader>> activeShaders; // TODO Log error if tried to draw something without shader.
+    constexpr static auto cmp = [](Shader& a, Shader& b) { return std::addressof(a) < std::addressof(b); };
+    std::set<std::reference_wrapper<Shader>, decltype(cmp)> activeShaders;
     int pointLightCounter; // TODO Not bigger than the maxcap in shader
 public:
     explicit RenderSceneVisitor();
 
+    int visitFrameBuffer(FrameBuffer &frameBuffer) override;
     int visitTransformation(Transformation &transformation) override;
     int visitLight(Light &light) override;
     int visitMesh(Mesh &mesh) override;
@@ -26,6 +29,7 @@ public:
     int visitShader(Shader &shader) override;
     int visitMaterial(Material &material) override;
 
+    int leaveFrameBuffer(FrameBuffer &frameBuffer) override;
     int leaveTransformation(Transformation &transformation) override;
     int leaveLight(Light &light) override;
     int leaveCamera(Camera &camera) override;

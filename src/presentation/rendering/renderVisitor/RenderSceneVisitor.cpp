@@ -10,15 +10,23 @@
 
 RenderSceneVisitor::RenderSceneVisitor() : pointLightCounter(0) {}
 
+int RenderSceneVisitor::visitFrameBuffer(FrameBuffer &frameBuffer) {
+    uniformMap["model"].emplace(glm::mat4(1.0f));
+    return 0;
+}
+
+int RenderSceneVisitor::leaveFrameBuffer(FrameBuffer &frameBuffer) {
+    uniformMap["model"].pop();
+    return 0;
+}
+
 int RenderSceneVisitor::visitShader(Shader &shader) {
-    if(shader.active) activeShaders.emplace_back(shader);
+    if (shader.active) activeShaders.emplace(shader);
     return 0;
 }
 
 int RenderSceneVisitor::leaveShader(Shader &shader) {
-    auto _ = std::remove_if(activeShaders.begin(), activeShaders.end(), [&](const auto &item) {
-        return item == shader;
-    });
+    if (shader.active) activeShaders.erase(shader);
     return 0;
 }
 
