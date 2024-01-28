@@ -31,6 +31,9 @@ public:
     static void addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3);
 
     static std::unique_ptr<Mesh> generatePlaneMesh(glm::vec3 normal);
+
+    static std::unique_ptr<Mesh> generateParametrisedMesh(const std::string& name, int uCount, int vCount, float uMin, float uMax, float vMin, float vMax,
+          std::function<float(float,float)> x, std::function<float(float,float)> y, std::function<float(float,float)> z);
 };
 
 

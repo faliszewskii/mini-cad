@@ -70,6 +70,41 @@ void GUI::renderMenuBar() {
             if (ImGui::MenuItem("Add Torus") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
                 addModel(ModelGenerator::generateTorus(50, 50));
             }
+            if (ImGui::MenuItem("Add XYZ") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+                float f = 1;
+                float a = 1, b = 1, c = 1, d=2, e =1;
+//                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 100, 100,
+//                                                                    [a](float u, float){return a * u;},
+//                                                                    [b](float, float v){return b * v;},
+//                                                                    [c](float u, float v){return c * u * v;});
+                auto w = [f](float v){return f * v * 0.5;};
+                auto cx = [&](float u) {return -c * cos(u);};
+                auto cy1 = [&](float u) {return e * sin(u*u*u / M_PI / M_PI);};
+                auto cy2 = [&](float u) {return e * sin(pow(2*M_PI-u, 3) / M_PI / M_PI);};
+                auto cy = [&](float u){return u < M_PI ? cy1(u) : cy2(u);};
+                auto rad = [&](float u) {return b*(d+sin(1.5*M_PI*(1-pow(cos((u+0.5)/2.85),3))));};
+
+//                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 200, 200, 0, M_PI, 0, 2*M_PI,
+//                         [&](float u, float v){
+//                    return -2.f/15 * cos(u) * (3*cos(v) - 30*sin(u) + 90*pow(cos(u),4)*sin(u) - 60*pow(cos(u),6)*sin(u)+5*cos(u)*cos(v)*sin(u));
+//                    },
+//                         [&](float u, float v){
+//                    return -1.f/15 * sin(u) * (3*cos(v) - 3*pow(cos(u),2)*cos(v) - 48*pow(cos(u),4)*cos(v) + 48*pow(cos(u),6)*cos(v)
+//                    - 60*sin(u) + 5*cos(u)*cos(v)*sin(u) - 5*pow(cos(u),3)*cos(v)*sin(u) - 80*pow(cos(u),5)*cos(v)*sin(u)
+//                    + 80*(pow(cos(u),7)*cos(v)*sin(u)));
+//                    },
+//                         [&](float u, float v){
+//                    return 2.f/15 * (3 + 5 * cos(u) * sin(u)) * sin(v);
+//                });
+
+
+                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 100, 100, 0, 2*M_PI, 0, 10,
+                         [&](float u, float v){return (a + cos(w(v)) * sin(u) - sin(w(v))*sin(2*u)) * cos(v);},
+                         [&](float u, float v){return (a + sin(u) - sin(w(v))*sin(2*u)) * sin(v);},
+                         [&](float u, float v){return sin(w(v)) * sin(u) - cos(w(v))*sin(2*u);});
+                auto model = ModelGenerator::generateSolid(std::move(mesh), "XYZ model");
+                addModel(std::move(model));
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

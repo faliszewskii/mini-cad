@@ -224,3 +224,36 @@ std::unique_ptr<Mesh> ModelGenerator::generatePlaneMesh(glm::vec3 normal) {
 
     return std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, GL_TRIANGLES));
 }
+
+/// Generates mesh based on 3D parametrised equations. It draws using u, v from min inclusive to max exclusive.
+std::unique_ptr<Mesh>
+ModelGenerator::generateParametrisedMesh(const std::string& name, int uCount, int vCount, float uMin, float uMax, float vMin, float vMax, std::function<float(float, float)> x,
+                                         std::function<float(float, float)> y, std::function<float(float, float)> z) {
+    // TODO Add rules for connecting edges (if closed) and in what direction to connect them.
+    // TODO Add indices.
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    float uStep = 1.f / (float)uCount * (uMax - uMin);
+    float vStep = 1.f / (float)vCount * (vMax - vMin);
+    for (int i = 0; i < uCount +1; i++) { // +1 or connection rules in indices
+        float u = (float)i * uStep + uMin;
+        for (int j = 0; j < vCount+1; j++) {
+            float v = (float)j * vStep + vMin;
+            vertices.push_back(Vertex(glm::vec3(x(u, v), y(u, v), z(u, v))));
+        }
+    }
+    for (int i = 0; i < uCount+1; i++) {
+        auto i_next = (i + 1) ;//% uCount;
+        for (int j = 0; j < vCount+1; j++) {
+            auto j_next = (j + 1);// % vCount;
+            auto i0 = i * vCount + j;
+            auto i1 = i * vCount + j_next;
+            auto i2 = i_next * vCount + j_next;
+            auto i3 = i_next * vCount + j;
+
+            addQuad(indices, i0, i1, i2, i3);
+        }
+    }
+    return std::make_unique<Mesh>(Mesh(name, vertices, indices, GL_TRIANGLES));
+}
