@@ -12,8 +12,10 @@
 #include "../../../lib/imguizmo/ImGuizmo.h"
 #include "editor/EditorNodeVisitor.h"
 #include "../../logic/generator/ModelGenerator.h"
+#include "tree/StepTreeViewVisitor.h"
+#include "node/StepParametersVisitor.h"
 
-GUI::GUI(GLFWwindow *window, ApplicationState &state) : guiState(state) {
+GUI::GUI(GLFWwindow *window, AppState &state) : guiState(state) {
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -61,68 +63,40 @@ void GUI::renderMenuBar() {
             if (ImGui::MenuItem("Paste", "CTRL+V")) {}
             ImGui::Separator();
             renderMenuItemLoadModel();
-            if (ImGui::MenuItem("Add Axis") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                addModel(ModelGenerator::generateAxis());
+            if (ImGui::MenuItem("Add Axis") && guiState.selectedStep) { // TODO Grey out on no select with tooltip.
+                guiState.scene.merge(ModelGenerator::generateAxis());
             }
-            if (ImGui::MenuItem("Add Sphere") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                addModel(ModelGenerator::generateSphere(50, 50));
+            if (ImGui::MenuItem("Add Sphere") && guiState.selectedStep) {
+                guiState.scene.merge(ModelGenerator::generateSphere(50, 50));
             }
-            if (ImGui::MenuItem("Add Torus") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                addModel(ModelGenerator::generateTorus(50, 50));
+            if (ImGui::MenuItem("Add Torus") && guiState.selectedStep) {
+                guiState.scene.merge(ModelGenerator::generateTorus(50, 50));
             }
-            if (ImGui::MenuItem("Add XYZ") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
-                float f = 1;
-                float a = 1, b = 1, c = 1, d=2, e =1;
-//                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 100, 100,
-//                                                                    [a](float u, float){return a * u;},
-//                                                                    [b](float, float v){return b * v;},
-//                                                                    [c](float u, float v){return c * u * v;});
-                auto w = [f](float v){return f * v * 0.5;};
-                auto cx = [&](float u) {return -c * cos(u);};
-                auto cy1 = [&](float u) {return e * sin(u*u*u / M_PI / M_PI);};
-                auto cy2 = [&](float u) {return e * sin(pow(2*M_PI-u, 3) / M_PI / M_PI);};
-                auto cy = [&](float u){return u < M_PI ? cy1(u) : cy2(u);};
-                auto rad = [&](float u) {return b*(d+sin(1.5*M_PI*(1-pow(cos((u+0.5)/2.85),3))));};
-
-//                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 200, 200, 0, M_PI, 0, 2*M_PI,
-//                         [&](float u, float v){
-//                    return -2.f/15 * cos(u) * (3*cos(v) - 30*sin(u) + 90*pow(cos(u),4)*sin(u) - 60*pow(cos(u),6)*sin(u)+5*cos(u)*cos(v)*sin(u));
-//                    },
-//                         [&](float u, float v){
-//                    return -1.f/15 * sin(u) * (3*cos(v) - 3*pow(cos(u),2)*cos(v) - 48*pow(cos(u),4)*cos(v) + 48*pow(cos(u),6)*cos(v)
-//                    - 60*sin(u) + 5*cos(u)*cos(v)*sin(u) - 5*pow(cos(u),3)*cos(v)*sin(u) - 80*pow(cos(u),5)*cos(v)*sin(u)
-//                    + 80*(pow(cos(u),7)*cos(v)*sin(u)));
-//                    },
-//                         [&](float u, float v){
-//                    return 2.f/15 * (3 + 5 * cos(u) * sin(u)) * sin(v);
-//                });
-
-
-                auto mesh = ModelGenerator::generateParametrisedMesh("XYZ Mesh", 100, 100, 0, 2*M_PI, 0, 10,
-                         [&](float u, float v){return (a + cos(w(v)) * sin(u) - sin(w(v))*sin(2*u)) * cos(v);},
-                         [&](float u, float v){return (a + sin(u) - sin(w(v))*sin(2*u)) * sin(v);},
-                         [&](float u, float v){return sin(w(v)) * sin(u) - cos(w(v))*sin(2*u);});
-                auto model = ModelGenerator::generateSolid(std::move(mesh), "XYZ model");
-                addModel(std::move(model));
+            if (ImGui::MenuItem("Add Hyperbolic Paraboloid") && guiState.selectedStep) {
+                float a = 1, b = 1, c = -0.5;
+                auto generator = ModelGenerator::HyperbolicParaboloidGenerator(a, b, c);
+                auto mesh = generator.generateParametrisedMesh("Hyperbolic Paraboloid Mesh", 10, 10);
+                auto model = ModelGenerator::generateSolid(std::move(mesh), "Hyperbolic Paraboloid model");
+                guiState.scene.merge(std::move(model));
             }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
     }
 }
-void GUI::addModel(std::unique_ptr<SceneNode> &&model) {
-    guiState.selectedNode->get().addChild(*model);
-    guiState.allNodes.push_back(std::move(model));
-}
+//void GUI::addModel(std::unique_ptr<SceneNode> &&model) {
+//    guiState.selectedNode->get().addChild(*model);
+//    guiState.allNodes.push_back(std::move(model));
+//}
 
-void GUI::addModel(std::vector<std::unique_ptr<SceneNode>> &&model) {
-    guiState.selectedNode->get().addChild(*model[0]);
-    guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
-                             std::make_move_iterator(model.end()));
-}
+//void GUI::addModel(std::vector<std::unique_ptr<SceneNode>> &&model) {
+//    guiState.selectedNode->get().addChild(*model[0]);
+//    guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
+//                             std::make_move_iterator(model.end()));
+//}
 
 void GUI::renderMenuItemLoadModel() {
-    if (ImGui::MenuItem("Load Model") && guiState.selectedNode) { // TODO Grey out on no select with tooltip.
+    if (ImGui::MenuItem("Load Model") && guiState.selectedStep && !guiState.selectedStep->get().isLeaf()) { // TODO Grey out on no select with tooltip.
         NFD_Init();
 
         nfdchar_t *outPath;
@@ -131,9 +105,7 @@ void GUI::renderMenuItemLoadModel() {
         if (result == NFD_OKAY) {
             try {
                 auto model = guiState.assetImporter.importModel(outPath);
-                guiState.selectedNode->get().addChild(*model[0]);
-                guiState.allNodes.insert(guiState.allNodes.begin(), std::make_move_iterator(model.begin()),
-                                         std::make_move_iterator(model.end()));
+                guiState.scene.merge(std::move(model), guiState.selectedStep->get());
             } catch (FailedToLoadModelException &ex) {
                 // TODO Log error to log window.
                 std::cerr << ex.what() << std::endl;
@@ -268,8 +240,8 @@ void GUI::renderModelTreeView() {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
     ImGui::BeginChild("Model View", ImVec2(0, 260), ImGuiChildFlags_Border, window_flags);
 
-    TreeViewVisitor treeViewVisitor(guiState.selectedNode);
-    SceneNode::visitTree(*guiState.mainFrameBufferNode, treeViewVisitor);
+    StepTreeViewVisitor treeViewVisitor(guiState.selectedStep);
+    RenderingStep::visitTree(guiState.scene.modelStepRoot->root, treeViewVisitor);
 
 //    traverseModelNode(guiState.rootSceneNode, base_flags);
 
@@ -336,11 +308,9 @@ void GUI::renderModelTreeView() {
     ImGui::EndChild();
     ImGui::PopStyleVar();
 
-    if (guiState.selectedNode) {
-        ImGui::Text("%s \"%s\"", guiState.selectedNode->get().getTypeName().c_str(),
-                    guiState.selectedNode->get().getName().c_str());
-        NodeDetailsVisitor nodeDetailsVisitor;
-        guiState.selectedNode.value().get().acceptVisit(nodeDetailsVisitor);
+    if (guiState.selectedStep) {
+        StepParametersVisitor stepParametersVisitor;
+        guiState.selectedStep->get().acceptVisit(stepParametersVisitor);
     }
 }
 

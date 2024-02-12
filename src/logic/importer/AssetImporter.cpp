@@ -10,7 +10,7 @@
 #include "../io/stb_image.h"
 #include "../../presentation/scene/nodes/transformation/Transformation.h"
 
-std::vector<std::unique_ptr<SceneNode>> AssetImporter::importModel(const std::string &resourcePath) {
+std::unique_ptr<Scene> AssetImporter::importModel(const std::string &resourcePath) {
     Assimp::Importer import;
     import.SetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, true);
 
@@ -25,7 +25,7 @@ std::vector<std::unique_ptr<SceneNode>> AssetImporter::importModel(const std::st
     return processNode(scene->mRootNode, scene);
 }
 
-std::vector<std::unique_ptr<SceneNode>> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
+std::unique_ptr<Scene> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
     std::string name = node->mName.C_Str();
 
     aiMatrix4x4t<ai_real> t = node->mTransformation;
@@ -36,31 +36,25 @@ std::vector<std::unique_ptr<SceneNode>> AssetImporter::processNode(aiNode *node,
             t.a4, t.b4, t.c4, t.d4
     );
 
-    std::unique_ptr<SceneNode> transformationNode(std::make_unique<Transformation>(name, transformation));
+    auto result = std::make_unique<Scene>();
+    auto &transformationNode = result->addStep(PushTransformation(result->addSceneNode(Transformation(name, transformation))));
 
     std::vector<std::unique_ptr<SceneNode>> children;
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         auto child = processNode(node->mChildren[i], scene);
-        transformationNode->addChild(*child[0]);
-        children.insert(children.end(), std::make_move_iterator(child.begin()), std::make_move_iterator(child.end()));
+        result->merge(std::move(child), transformationNode);
     }
 
     std::vector<std::unique_ptr<SceneNode>> meshes;
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         auto mesh = processMesh(scene->mMeshes[node->mMeshes[i]], scene, i);
-        transformationNode->addChild(*mesh[0]);
-        meshes.insert(meshes.end(), std::make_move_iterator(mesh.begin()), std::make_move_iterator(mesh.end()));
+        result->merge(std::move(mesh), transformationNode);
     }
 
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(transformationNode));
-    nodes.insert(nodes.end(), std::make_move_iterator(meshes.begin()), std::make_move_iterator(meshes.end()));
-    nodes.insert(nodes.end(), std::make_move_iterator(children.begin()), std::make_move_iterator(children.end()));
-    return nodes;
+    return result;
 }
 
-std::vector<std::unique_ptr<SceneNode>>
-AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
+std::unique_ptr<Scene> AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -148,18 +142,16 @@ AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int inde
     float shininess = 0;
     if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess)) {}
 
+    auto result = std::make_unique<Scene>();
     // TODO Multiple textures
-    std::unique_ptr<Material> materialNode(std::make_unique<Material>(materialName.C_Str(), diffuse,
-                                                                      !textures.empty() ? textures[0]
-                                                                                        : std::optional<Texture>(),
-                                                                      shininess, shadingModelMap[shadingMode]));
-    std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(Mesh(meshName.C_Str(), vertices, indices));
-    materialNode->addChild(*meshNode);
+    auto &materialSceneNode = result->addSceneNode(Material(materialName.C_Str(),diffuse,
+                                                       !textures.empty() ? textures[0] : std::optional<Texture>(),
+                                                       shininess, shadingModelMap[shadingMode]));
+    auto &materialNode = result->addStep(AddMaterial(materialSceneNode));
 
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(materialNode));
-    nodes.push_back(std::move(meshNode));
-    return nodes;
+    result->addStep(DrawMesh(result->addSceneNode(Mesh(meshName.C_Str(), vertices, indices))), materialNode);
+
+    return result;
 }
 
 std::vector<Texture>

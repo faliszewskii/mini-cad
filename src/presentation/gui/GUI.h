@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_GUI_H
 #define OPENGL_SANDBOX_GUI_H
 
-#include "../../logic/ApplicationState.h"
+#include "../../logic/AppState.h"
 #include "../../../lib/imgui-node-editor/imgui_node_editor.h"
 #include "imgui.h"
 
@@ -18,20 +18,24 @@ struct ViewsMask {
 
 struct GUIApplicationState {
 
-    explicit GUIApplicationState(ApplicationState &appState) : assetImporter(appState.assetImporter),
-                                                               currentCamera(appState.currentCamera),
-                                                               mainFrameBufferNode(appState.mainFrameBufferNode),
-                                                               selectedNode(appState.selectedNode),
-                                                               guiWidth(300),
-                                                               allNodes(appState.allNodes) {
+    explicit GUIApplicationState(AppState &appState) : assetImporter(appState.assetImporter),
+                                                       currentCamera(appState.currentCamera),
+                                                       scene(appState.scene),
+                                                       mainFrameBufferNode(appState.mainFrameBufferNode),
+                                                       selectedNode(appState.selectedNode),
+                                                       selectedStep(appState.selectedStep),
+                                                       guiWidth(300),
+                                                       allNodes(appState.allNodes) {
         activeViewsMask = ViewsMask::MainView | ViewsMask::ShadersView; // TODO Get from last user settings.
     }
 
-    // ApplicationState
+    // AppState
     AssetImporter &assetImporter;
+    Scene& scene;
     std::optional<std::reference_wrapper<SceneNode>> &mainFrameBufferNode;
     std::vector<std::unique_ptr<SceneNode>> &allNodes;
     std::optional<std::reference_wrapper<SceneNode>> &selectedNode;
+    std::optional<std::reference_wrapper<RenderingStep>> &selectedStep;
     std::optional<std::reference_wrapper<Camera>> &currentCamera;
     // this
     unsigned int activeViewsMask;
@@ -41,7 +45,7 @@ struct GUIApplicationState {
 
 class GUI {
 public:
-    explicit GUI(GLFWwindow *window, ApplicationState &state);
+    explicit GUI(GLFWwindow *window, AppState &state);
 
     void render();
 

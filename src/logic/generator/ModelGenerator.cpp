@@ -1,96 +1,46 @@
 //
 // Created by faliszewskii on 29.12.23.
 //
-// Based off https://danielsieger.com/blog/2021/05/03/generating-primitive-shapes.html
+// Sphere and torus based off https://danielsieger.com/blog/2021/05/03/generating-primitive-shapes.html
 // by Daniel Sieger.
 
 #include "ModelGenerator.h"
 
 #include <utility>
-#include "../../presentation/scene/nodes/transformation/Transformation.h"
-#include "../../presentation/scene/nodes/light/Light.h"
-#include "../io/IOUtils.h"
-#include "../../presentation/scene/nodes/camera/Camera.h"
 
-std::vector<std::unique_ptr<SceneNode>>
-ModelGenerator::generateAxis(glm::vec3 xAxis, glm::vec3 yAxis, bool isRightHanded) {
-    std::unique_ptr<SceneNode> axisNode(std::make_unique<Transformation>(Transformation("Axis")));
+std::unique_ptr<Scene> ModelGenerator::generateAxis(glm::vec3 xAxis, glm::vec3 yAxis, bool isRightHanded) {
+    auto result = std::make_unique<Scene>();
+
+    auto &axisTransformation = result->addSceneNode(Transformation("Axis"));
+    auto &axisNode = result->addStep(PushTransformation(axisTransformation));
+
     auto red = generateLine("xAxis", glm::vec3(), glm::normalize(xAxis), glm::vec4(1, 0, 0, 1), "Red");
-    axisNode->addChild(*red[0]);
+    result->merge(std::move(red), axisNode);
     auto green = generateLine("yAxis", glm::vec3(), glm::normalize(yAxis), glm::vec4(0, 1, 0, 1), "Green");
-    axisNode->addChild(*green[0]);
+    result->merge(std::move(green), axisNode);
     auto blue = generateLine("zAxis", glm::vec3(), glm::normalize(glm::cross(xAxis, yAxis)) *= (isRightHanded ? 1 : -1),
                              glm::vec4(0, 0, 1, 1), "Blue");
-    axisNode->addChild(*blue[0]);
+    result->merge(std::move(blue), axisNode);
 
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(axisNode));
-    nodes.insert(nodes.end(), std::make_move_iterator(red.begin()), std::make_move_iterator(red.end()));
-    nodes.insert(nodes.end(), std::make_move_iterator(green.begin()), std::make_move_iterator(green.end()));
-    nodes.insert(nodes.end(), std::make_move_iterator(blue.begin()), std::make_move_iterator(blue.end()));
-    return nodes;
+    return result;
 }
 
-std::vector<std::unique_ptr<SceneNode>>
-ModelGenerator::generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color,
-                             const std::string &materialName) {
-    std::unique_ptr<SceneNode> materialNode(std::make_unique<Material>(materialName, color));
+std::unique_ptr<Scene> ModelGenerator::generateLine(std::string name, glm::vec3 start, glm::vec3 end, glm::vec4 color, const std::string &materialName) {
+    auto result = std::make_unique<Scene>();
+
+    auto& material = result->addSceneNode(Material(materialName, color));
+    auto& materialNode = result->addStep(AddMaterial(material));
+
     Vertex v1(start, glm::vec3(), glm::vec2()); // TODO Take care of different vertex structures.
     Vertex v2(end, glm::vec3(), glm::vec2());
-    std::unique_ptr<Mesh> meshNode = std::make_unique<Mesh>(
-            Mesh(std::move(name), std::vector{v1, v2}, {}, GL_LINE_STRIP));
-    materialNode->addChild(*meshNode);
 
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(materialNode));
-    nodes.push_back(std::move(meshNode));
-    return nodes;
+    auto &mesh = result->addSceneNode(Mesh(std::move(name), std::vector{v1, v2}, {}, GL_LINE_STRIP));
+    result->addStep(DrawMesh(mesh), materialNode);
+
+    return result;
 }
 
-std::vector<std::unique_ptr<SceneNode>>
-ModelGenerator::generatePointLightRepresentation(std::reference_wrapper<std::unique_ptr<Light>> light) {
-    Bindable<glm::vec3> lightPosition([&lightVar = *light.get()]() { return lightVar.getPositionRef(); });
-    auto mainNode(std::make_unique<Transformation>("Point light representation", lightPosition));
-
-    auto shader = std::make_unique<Shader>("albedo", IOUtils::getResource("shaders/basic/albedo.vert"),
-                                           IOUtils::getResource("shaders/basic/albedo.frag"));
-    mainNode->addChild(*shader);
-
-    auto sourceTransformation = std::make_unique<Transformation>("Light source");
-    sourceTransformation->setScale(glm::vec3(0.02));
-    shader->addChild(*sourceTransformation);
-
-    Bindable<glm::vec4> albedo([&lightVar = *light.get()]() { return glm::vec4(lightVar.getColor(), 1.f); });
-    auto sourceMaterialNode = std::make_unique<Material>("White", albedo); // TODO Bind material color to light color
-    sourceTransformation->addChild(*sourceMaterialNode);
-
-    auto sourceMeshNode = generateSphereMesh(10, 10);
-    sourceMaterialNode->addChild(*sourceMeshNode);
-
-    auto bulbTransformation = std::make_unique<Transformation>(Transformation("Bulb"));
-    bulbTransformation->setScale(glm::vec3(0.1));
-    mainNode->addChild(*bulbTransformation);
-
-    auto bulbMaterialNode = std::make_unique<Material>("Bulb material", glm::vec4(1, 1, 1, 0.2f));
-    bulbTransformation->addChild(*bulbMaterialNode);
-
-    auto bulbMeshNode = generateSphereMesh(10, 10);
-    bulbMaterialNode->addChild(*bulbMeshNode);
-
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(mainNode));
-    nodes.push_back(std::move(shader));
-    nodes.push_back(std::move(sourceTransformation));
-    nodes.push_back(std::move(sourceMaterialNode));
-    nodes.push_back(std::move(sourceMeshNode));
-    nodes.push_back(std::move(bulbTransformation));
-    nodes.push_back(std::move(bulbMaterialNode));
-    nodes.push_back(std::move(bulbMeshNode));
-    return nodes;
-}
-
-
-std::unique_ptr<Mesh> ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
+Mesh ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -139,15 +89,14 @@ std::unique_ptr<Mesh> ModelGenerator::generateSphereMesh(int meridianCount, int 
         }
     }
 
-    return std::make_unique<Mesh>(Mesh("UV Sphere mesh", vertices, indices, GL_TRIANGLES));
+    return {"UV Sphere mesh", vertices, indices, GL_TRIANGLES};
 }
 
-std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
+std::unique_ptr<Scene> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
     return generateSolid(generateSphereMesh(meridianCount, parallelCount), "UV Sphere");
 }
 
-std::unique_ptr<Mesh>
-ModelGenerator::generateTorusMesh(int radial_resolution, int tubular_resolution, float thickness, float radius) {
+Mesh ModelGenerator::generateTorusMesh(int radial_resolution, int tubular_resolution, float thickness, float radius) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -178,7 +127,7 @@ ModelGenerator::generateTorusMesh(int radial_resolution, int tubular_resolution,
             addQuad(indices, i0, i1, i2, i3);
         }
     }
-    return std::make_unique<Mesh>(Mesh("Torus mesh", vertices, indices, GL_TRIANGLES));
+    return {"Torus mesh", vertices, indices, GL_TRIANGLES};
 }
 
 void ModelGenerator::addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3) {
@@ -191,22 +140,16 @@ void ModelGenerator::addQuad(std::vector<unsigned int> &indices, int i0, int i1,
     indices.push_back(i2);
 }
 
-std::vector<std::unique_ptr<SceneNode>>
-ModelGenerator::generateTorus(int radial_resolution, int tubular_resolution, float thickness, float radius) {
+std::unique_ptr<Scene> ModelGenerator::generateTorus(int radial_resolution, int tubular_resolution, float thickness, float radius) {
     return generateSolid(generateTorusMesh(radial_resolution, tubular_resolution, thickness, radius), "Torus");
 }
 
-std::vector<std::unique_ptr<SceneNode>> ModelGenerator::generateSolid(std::unique_ptr<Mesh> mesh, const std::string& name) {
-    auto transformation = std::make_unique<Transformation>(name);
-    auto material = std::make_unique<Material>("White");
-    transformation->addChild(*material);
-    material->addChild(*mesh);
-
-    std::vector<std::unique_ptr<SceneNode>> nodes;
-    nodes.push_back(std::move(transformation));
-    nodes.push_back(std::move(material));
-    nodes.push_back(std::move(mesh));
-    return nodes;
+std::unique_ptr<Scene> ModelGenerator::generateSolid(Mesh &&mesh, const std::string& name) {
+    auto result = std::make_unique<Scene>();
+    auto &transformationNode = result->addStep(PushTransformation(result->addSceneNode(Transformation(name))));
+    auto &materialNode = result->addStep(AddMaterial(result->addSceneNode(Material("White"))), transformationNode);
+    result->addStep(DrawMesh(result->addSceneNode(std::move(mesh))), materialNode);
+    return result;
 }
 
 std::unique_ptr<Mesh> ModelGenerator::generatePlaneMesh(glm::vec3 normal) {
@@ -225,28 +168,29 @@ std::unique_ptr<Mesh> ModelGenerator::generatePlaneMesh(glm::vec3 normal) {
     return std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, GL_TRIANGLES));
 }
 
-/// Generates mesh based on 3D parametrised equations. It draws using u, v from min inclusive to max exclusive.
-std::unique_ptr<Mesh>
-ModelGenerator::generateParametrisedMesh(const std::string& name, int uCount, int vCount, float uMin, float uMax, float vMin, float vMax, std::function<float(float, float)> x,
-                                         std::function<float(float, float)> y, std::function<float(float, float)> z) {
+/// Generates mesh based on 3D parametrised equations. It draws using u, v from min inclusive to max exclusive if repeating, max inclusive if not.
+Mesh ModelGenerator::ParametrisedModelGenerator::generateParametrisedMesh(const std::string& name, int uCount, int vCount) {
     // TODO Add rules for connecting edges (if closed) and in what direction to connect them.
     // TODO Add indices.
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    float uStep = 1.f / (float)uCount * (uMax - uMin);
-    float vStep = 1.f / (float)vCount * (vMax - vMin);
-    for (int i = 0; i < uCount +1; i++) { // +1 or connection rules in indices
+    float uStep = 1.f / (float)(uCount-1) * (uMax - uMin);
+    float vStep = 1.f / (float)(vCount-1) * (vMax - vMin);
+    for (int i = 0; i < uCount; i++) { // +1 or connection rules in indices
         float u = (float)i * uStep + uMin;
-        for (int j = 0; j < vCount+1; j++) {
+        for (int j = 0; j < vCount; j++) {
             float v = (float)j * vStep + vMin;
-            vertices.push_back(Vertex(glm::vec3(x(u, v), y(u, v), z(u, v))));
+            auto pos = glm::vec3(x(u, v), y(u, v), z(u, v));
+            auto U = glm::vec3(xdu(u, v), ydu(u, v), zdu(u, v));
+            auto V = glm::vec3(xdv(u, v), ydv(u, v), zdv(u, v));
+            vertices.emplace_back(pos, glm::normalize(glm::cross(U,V)));
         }
     }
-    for (int i = 0; i < uCount+1; i++) {
-        auto i_next = (i + 1) ;//% uCount;
-        for (int j = 0; j < vCount+1; j++) {
-            auto j_next = (j + 1);// % vCount;
+    for (int i = 0; i < uCount-1; i++) {
+        auto i_next = (i + 1);
+        for (int j = 0; j < vCount-1; j++) {
+            auto j_next = (j + 1);
             auto i0 = i * vCount + j;
             auto i1 = i * vCount + j_next;
             auto i2 = i_next * vCount + j_next;
@@ -255,5 +199,5 @@ ModelGenerator::generateParametrisedMesh(const std::string& name, int uCount, in
             addQuad(indices, i0, i1, i2, i3);
         }
     }
-    return std::make_unique<Mesh>(Mesh(name, vertices, indices, GL_TRIANGLES));
+    return {name, vertices, indices, GL_TRIANGLES};
 }

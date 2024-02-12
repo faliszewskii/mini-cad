@@ -36,6 +36,9 @@ int RenderSceneVisitor::visitLight(Light &light) {
     uniformMap["pointLight.strength"].emplace(light.getStrength()); // TODO Research light attenuation.
     uniformMap["pointLight.position"].emplace(light.getPosition());
     uniformMap["pointLight.color"].emplace(light.getColor());
+    uniformMap["pointLight.linearAttenuation"].emplace(light.getLinearAttenuation());
+    uniformMap["pointLight.constantAttenuation"].emplace(light.getConstantAttenuation());
+    uniformMap["pointLight.quadraticAttenuation"].emplace(light.getQuadraticAttenuation());
     return 0;
 }
 
@@ -43,6 +46,9 @@ int RenderSceneVisitor::leaveLight(Light &light) {
     uniformMap["pointLight.color"].pop();
     uniformMap["pointLight.position"].pop();
     uniformMap["pointLight.strength"].pop();
+    uniformMap["pointLight.linearAttenuation"].pop();
+    uniformMap["pointLight.constantAttenuation"].pop();
+    uniformMap["pointLight.quadraticAttenuation"].pop();
     return 0;
 }
 

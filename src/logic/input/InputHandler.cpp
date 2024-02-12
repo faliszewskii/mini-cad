@@ -5,7 +5,7 @@
 #include "InputHandler.h"
 #include "imgui.h"
 
-InputHandler::InputHandler(std::unique_ptr<ApplicationState> &applicationState) :
+InputHandler::InputHandler(std::unique_ptr<AppState> &applicationState) :
         inputHandlerState(applicationState->currentCamera, true) {}
 
 void InputHandler::setupCallbacks(GLFWwindow *window) {

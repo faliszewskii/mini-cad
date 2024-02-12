@@ -12,7 +12,10 @@
 
 class Light : public SceneNode {
     Bindable<glm::vec3> position;
-    std::optional<float> attenuation; // TODO
+//    std::optional<float> attenuation; // TODO optional attenuation for dirlight
+    Bindable<float> constantAttenuation = 1;
+    Bindable<float> linearAttenuation = 0.045;
+    Bindable<float> quadraticAttenuation = 0.075;
     Bindable<float> strength = 1;
     Bindable<glm::vec3> color = glm::vec3(1.f);
     // TODO rest of light types
@@ -29,6 +32,13 @@ public:
 
     float &getStrengthRef() { return strength.get(); };
     float getStrength() { return strength.get(); };
+
+    float &getConstantAttenuationRef() { return constantAttenuation.get(); };
+    float getConstantAttenuation() { return constantAttenuation.get(); };
+    float &getLinearAttenuationRef() { return linearAttenuation.get(); };
+    float getLinearAttenuation() { return linearAttenuation.get(); };
+    float &getQuadraticAttenuationRef() { return quadraticAttenuation.get(); };
+    float getQuadraticAttenuation() { return quadraticAttenuation.get(); };
 
     int acceptVisit(SceneNodeVisitor &visitor) override;
     int acceptLeave(SceneNodeVisitor &visitor) override;

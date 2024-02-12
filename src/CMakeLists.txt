@@ -32,8 +32,7 @@ set(IMGUI
         ../lib/imgui-node-editor/imgui_node_editor_api.cpp
 )
 
-add_executable(opengl-sandbox main.cpp
-        ${IMGUI}
+set(INCL
         ../lib/glad/glad.c
         presentation/scene/nodes/shader/Shader.h
         logic/opengl/OpenGLInstance.cpp
@@ -48,7 +47,7 @@ add_executable(opengl-sandbox main.cpp
         logic/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
         presentation/gui/GUI.h
-        logic/ApplicationState.h
+        logic/AppState.h
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
         presentation/scene/tree/SceneNode.h
@@ -76,6 +75,23 @@ add_executable(opengl-sandbox main.cpp
         presentation/scene/nodes/frameBuffer/FrameBuffer.h
         presentation/gui/editor/EditorNodeVisitor.cpp
         presentation/gui/editor/EditorNodeVisitor.h
+        presentation/scene/steps/RenderingStep.cpp
+        presentation/scene/steps/RenderingStep.h
+        presentation/scene/visitor/StepVisitor.h
+        presentation/rendering/renderVisitor/ExecuteStepVisitor.cpp
+        presentation/rendering/renderVisitor/ExecuteStepVisitor.h
+        presentation/gui/tree/StepTreeViewVisitor.cpp
+        presentation/gui/tree/StepTreeViewVisitor.h
+        presentation/gui/node/StepParametersVisitor.cpp
+        presentation/gui/node/StepParametersVisitor.h
+        logic/Scene.h
+        presentation/modules/Module.cpp
+        presentation/modules/Module.h
+)
+
+add_executable(opengl-sandbox main.cpp
+        ${IMGUI}
+        ${INCL}
 )
 
 set(CFLAGS -std=c++23 -fmodules-ts)

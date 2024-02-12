@@ -9,22 +9,22 @@
 #include "logic/io/IOUtils.h"
 #include "logic/generator/ModelGenerator.h"
 #include "presentation/gui/GUI.h"
-#include "logic/ApplicationState.h"
-#include "presentation/rendering/renderVisitor/RenderSceneVisitor.h"
+#include "logic/AppState.h"
 #include "presentation/scene/nodes/camera/Camera.h"
 #include "presentation/scene/nodes/light/Light.h"
 #include "logic/input/InputHandler.h"
 #include "presentation/scene/nodes/frameBuffer/FrameBuffer.h"
+#include "presentation/rendering/renderVisitor/ExecuteStepVisitor.h"
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const int SCR_WIDTH = 1920;
+const int SCR_HEIGHT = 1080;
 
 int main() {
     OpenGLInstance openGlInstance{};
     openGlInstance.init(SCR_WIDTH, SCR_HEIGHT);
 
-    auto appState = std::make_unique<ApplicationState>();
+    auto appState = std::make_unique<AppState>();
 
     InputHandler inputHandler(appState);
     inputHandler.setupCallbacks(openGlInstance.getWindow());
@@ -32,59 +32,55 @@ int main() {
     {
         GUI gui(openGlInstance.getWindow(), *appState);
 
-        auto frameBuffer = std::make_unique<FrameBuffer>("Main");
+        auto &frameBuffer = appState->scene.addSceneNode(FrameBuffer("Main"));
+        appState->scene.addStep(AddFrameBuffer(frameBuffer));
 
 //         TODO Do research on paths in C++. Try to be as OS agnostic as possible. Cerberus model had the 'windows slash' problem
-        auto randomShader = std::make_unique<Shader>("random", IOUtils::getResource("shaders/basic/white.vert"),
-                                                     IOUtils::getResource("shaders/debug/random.frag"));
-        randomShader->setActive(false);
-        frameBuffer->addChild(*randomShader);
+        auto &randomShader = appState->scene.addSceneNode(Shader("random",
+                                     IOUtils::getResource("shaders/basic/white.vert"),
+                                     IOUtils::getResource("shaders/debug/random.frag")));
+        randomShader.setActive(false);
+        appState->scene.addStep(ActivateShader(randomShader));
 
-        auto normalShader = std::make_unique<Shader>("normalDebug", IOUtils::getResource("shaders/debug/normalDebug.vert"),
-                                               IOUtils::getResource("shaders/debug/normalDebug.geom"),
-                                               IOUtils::getResource("shaders/debug/normalDebug.frag"));
-        normalShader->setActive(false);
-        randomShader->addChild(*normalShader);
+        auto &normalShader = appState->scene.addSceneNode(Shader("normalDebug",
+                                     IOUtils::getResource("shaders/debug/normalDebug.vert"),
+                                     IOUtils::getResource("shaders/debug/normalDebug.geom"),
+                                     IOUtils::getResource("shaders/debug/normalDebug.frag")));
+        normalShader.setActive(false);
+//        randomShader->addChild(*normalShader); TODO Delete after full refactor.
+        appState->scene.addStep(ActivateShader(normalShader));
 
-        auto wireframeShader = std::make_unique<Shader>("wireframe", IOUtils::getResource("shaders/debug/normalDebug.vert"),
-                                                     IOUtils::getResource("shaders/debug/wireframe.geom"),
-                                                     IOUtils::getResource("shaders/debug/normalDebug.frag"));
-        wireframeShader->setActive(false);
-        normalShader->addChild(*wireframeShader);
+        auto &wireframeShader = appState->scene.addSceneNode(Shader("wireframe",
+                                        IOUtils::getResource("shaders/debug/normalDebug.vert"),
+                                        IOUtils::getResource("shaders/debug/wireframe.geom"),
+                                        IOUtils::getResource("shaders/debug/normalDebug.frag")));
+        wireframeShader.setActive(false);
+        appState->scene.addStep(ActivateShader(wireframeShader));
 
-        auto shader = std::make_unique<Shader>("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"),
-                                               IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"));
-        wireframeShader->addChild(*shader);
+        auto &shader = appState->scene.addSceneNode(Shader("blinnPhong",
+                              IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"),
+                              IOUtils::getResource("shaders/phong/basicBlinnPhong.frag")));
+        appState->scene.addStep(ActivateShader(shader));
 
-        auto camera = std::make_unique<Camera>("camera", SCR_WIDTH - gui.getGuiWidth(), SCR_HEIGHT, CameraMode::ANCHOR,
-                                               glm::vec3(0.0f, 0.0f, 3.0f)); // TODO Set orientation to anchor
-        appState->currentCamera = *camera;
-        shader->addChild(*camera);
+        auto &camera = appState->scene.addSceneNode(Camera("camera", SCR_WIDTH - gui.getGuiWidth(),
+                                SCR_HEIGHT, CameraMode::ANCHOR,glm::vec3(0.0f, 0.0f, 3.0f)));
+        appState->scene.addStep(AddCamera(camera));
+        appState->currentCamera = camera;
 
-        auto pointLight = std::make_unique<Light>("pointLight", glm::vec3(1.0, 1.0f, 1.0f));
-        camera->addChild(*pointLight);
+//        auto gridShader = std::make_unique<Shader>("grid", IOUtils::getResource("shaders/debug/grid.vert"),
+//                                                   IOUtils::getResource("shaders/debug/grid.frag"));
+//        auto grid = ModelGenerator::generatePlaneMesh(glm::vec3(0,1,0));
+//        gridShader->addChild(*grid);
 
-        auto pointLightModel = ModelGenerator::generatePointLightRepresentation(pointLight);
-        camera->addChild(*pointLightModel[0]);
+        auto &pointLight = appState->scene.addSceneNode(Light("pointLight", glm::vec3(1.0, 1.0f, 1.0f)));
+        appState->scene.addStep(AddLight(pointLight));
 
         auto axis = ModelGenerator::generateAxis();
-        pointLight->addChild(*axis[0]);
+        appState->scene.merge(std::move(axis));
 
         AssetImporter assetImporter;
-//        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
-//        pointLight->addChild(*model[0]);
+        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
 
-        appState->mainFrameBufferNode = *frameBuffer;
-        appState->allNodes.push_back(std::move(frameBuffer));
-        appState->allNodes.push_back(std::move(shader));
-        appState->allNodes.push_back(std::move(camera));
-        appState->allNodes.push_back(std::move(pointLight));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(pointLightModel.begin()),
-                                  std::make_move_iterator(pointLightModel.end()));
-        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(axis.begin()),
-                                  std::make_move_iterator(axis.end()));
-//        appState->allNodes.insert(appState->allNodes.end(), std::make_move_iterator(model.begin()),
-//                                  std::make_move_iterator(model.end()));
 
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();
@@ -94,8 +90,8 @@ int main() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glViewport(gui.getGuiWidth(), 0, SCR_WIDTH - gui.getGuiWidth(), SCR_HEIGHT);
-            RenderSceneVisitor renderSceneVisitor{};
-            SceneNode::visitTree(*appState->mainFrameBufferNode, renderSceneVisitor);
+            ExecuteStepVisitor executeStepVisitor;
+            RenderingStep::visitTree(appState->scene.modelStepRoot->root, executeStepVisitor);
 
             glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
             gui.render();

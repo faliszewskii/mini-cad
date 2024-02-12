@@ -11,6 +11,7 @@
 #include <assimp/postprocess.h>
 #include <map>
 #include "../../presentation/scene/nodes/mesh/Mesh.h"
+#include "../Scene.h"
 
 class FailedToLoadModelException : public std::runtime_error {
 public:
@@ -19,15 +20,15 @@ public:
 
 class AssetImporter {
 public:
-    std::vector<std::unique_ptr<SceneNode>> importModel(const std::string &resourcePath);
+    std::unique_ptr<Scene> importModel(const std::string &resourcePath);
 
 private:
     std::vector<Texture> textures_loaded;
     std::string directory;
 
-    std::vector<std::unique_ptr<SceneNode>> processNode(aiNode *node, const aiScene *scene);
+    std::unique_ptr<Scene> processNode(aiNode *node, const aiScene *scene);
 
-    std::vector<std::unique_ptr<SceneNode>> processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
+    std::unique_ptr<Scene> processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
 
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName);
 

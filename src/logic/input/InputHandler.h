@@ -9,7 +9,7 @@
 #include "../../../lib/glad/glad_glfw.h"
 #include <functional>
 #include "../../presentation/scene/nodes/camera/Camera.h"
-#include "../ApplicationState.h"
+#include "../AppState.h"
 
 struct InputHandlerState {
     std::optional<std::reference_wrapper<Camera>> &currentCamera;
@@ -19,7 +19,7 @@ struct InputHandlerState {
 class InputHandler {
     InputHandlerState inputHandlerState;
 public:
-    explicit InputHandler(std::unique_ptr<ApplicationState> &applicationState);
+    explicit InputHandler(std::unique_ptr<AppState> &applicationState);
 
     void setupCallbacks(GLFWwindow *window);
 

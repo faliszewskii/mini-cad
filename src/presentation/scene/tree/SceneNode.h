@@ -54,6 +54,10 @@ public:
     }
 
     virtual ~SceneNode() = default;
+    SceneNode (const SceneNode&) = delete;
+    SceneNode& operator= (const SceneNode&) = delete;
+    SceneNode(SceneNode &&other) noexcept = default;
+    SceneNode& operator=(SceneNode &&other) = default;
 
 protected:
     SceneNode() = default;

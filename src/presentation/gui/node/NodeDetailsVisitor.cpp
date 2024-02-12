@@ -28,6 +28,7 @@ int NodeDetailsVisitor::visitTransformation(Transformation &transformation) {
     ImGui::DragFloat("x##scale", static_cast<float *>(glm::value_ptr(transformation.getScaleRef())) + 0, 0.001f);
     ImGui::DragFloat("y##scale", static_cast<float *>(glm::value_ptr(transformation.getScaleRef())) + 1, 0.001f);
     ImGui::DragFloat("z##scale", static_cast<float *>(glm::value_ptr(transformation.getScaleRef())) + 2, 0.001f);
+    return 0;
 }
 
 int NodeDetailsVisitor::visitShader(Shader &shader) {
@@ -52,6 +53,11 @@ int NodeDetailsVisitor::visitLight(Light &light) {
     ImGui::DragFloat("r##light", static_cast<float *>(glm::value_ptr(light.getColorRef())) + 0, 0.01f, 0, 1);
     ImGui::DragFloat("g##light", static_cast<float *>(glm::value_ptr(light.getColorRef())) + 1, 0.01f, 0, 1);
     ImGui::DragFloat("b##light", static_cast<float *>(glm::value_ptr(light.getColorRef())) + 2, 0.01f, 0, 1);
+
+    ImGui::Text("Attenuation:");
+    ImGui::DragFloat("1##Attenuation", &light.getConstantAttenuationRef(), 0.01f, 0, 1);
+    ImGui::DragFloat("d##Attenuation", &light.getLinearAttenuationRef(), 0.01f, 0, 1);
+    ImGui::DragFloat("dd##Attenuation", &light.getQuadraticAttenuationRef(), 0.01f, 0, 1);
 
     return 0;
 }

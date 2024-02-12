@@ -32,6 +32,7 @@ public:
     std::optional<Texture> getDiffuseTexture();
 
     glm::vec4 getAlbedo();
+    glm::vec4& getAlbedoRef();
 
     float getShininess();
     float &getShininessRef();

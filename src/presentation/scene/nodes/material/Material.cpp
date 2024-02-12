@@ -20,6 +20,10 @@ glm::vec4 Material::getAlbedo() {
     return albedo.get();
 }
 
+glm::vec4& Material::getAlbedoRef() {
+    return albedo.get();
+}
+
 float Material::getShininess() {
     return shininess;
 }
