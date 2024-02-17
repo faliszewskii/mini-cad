@@ -14,7 +14,7 @@
 #include "../../scene/nodes/shader/Shader.h"
 
 class RenderSceneVisitor : public SceneNodeVisitor {
-    UniformMap uniformMap;
+    UniformMapOld uniformMap;
     constexpr static auto cmp = [](Shader& a, Shader& b) { return std::addressof(a) < std::addressof(b); };
     std::set<std::reference_wrapper<Shader>, decltype(cmp)> activeShaders;
     int pointLightCounter; // TODO Not bigger than the maxcap in shader

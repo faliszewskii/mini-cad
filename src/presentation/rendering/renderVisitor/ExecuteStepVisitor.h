@@ -11,7 +11,7 @@
 #include "../../scene/nodes/shader/Shader.h"
 
 class ExecuteStepVisitor : public StepVisitor {
-    UniformMap uniformMap;
+    UniformMapOld uniformMap;
     constexpr static auto cmp = [](Shader& a, Shader& b) { return std::addressof(a) < std::addressof(b); };
     std::set<std::reference_wrapper<Shader>, decltype(cmp)> activeShaders;
 public:

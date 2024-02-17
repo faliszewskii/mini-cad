@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "../../lib/glad/glad_glfw.h"
-#include "../AppState.h"
+#include "../state/AppState.h"
 
 class OpenGLInstance {
     GLFWwindow *window;

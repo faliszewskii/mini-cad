@@ -14,9 +14,11 @@
 #include <stack>
 #include <map>
 #include "../../tree/SceneNode.h"
+#include "../../../../logic/utils/VariantUtil.h"
 
 using ShaderType = std::variant<bool, int, float, glm::vec3, glm::vec4, glm::mat4>;
-using UniformMap = std::map<std::string, std::stack<ShaderType>>;
+using UniformMapOld = std::map<std::string, std::stack<ShaderType>>;
+using UniformMap = std::map<std::string, ShaderType>;
 
 class Shader : public SceneNode {
 public:
@@ -107,7 +109,7 @@ public:
     // ------------------------------------------------------------------------
     // uniform setter
 
-    void setUniforms(UniformMap &uniforms) const {
+    /*void setUniforms(UniformMapOld &uniforms) const {
         int length, size;
         unsigned int type;
 
@@ -119,12 +121,9 @@ public:
             if (stack.empty()) continue;
             setUniform(uniformNameBuffer.get(), stack.top());
         }
-    }
+    }*/
 
-    template<class... Ts>
-    struct overloaded : Ts... { using Ts::operator()...; };
-
-    void setUniform(const std::string &name, ShaderType &value) const {
+    void setUniform(const std::string &name, ShaderType &&value) const {
         std::visit(overloaded{
                 [&](bool &v) { glUniform1i(glGetUniformLocation(ID, name.c_str()), (int) v); },
                 [&](int &v) { glUniform1i(glGetUniformLocation(ID, name.c_str()), v); },

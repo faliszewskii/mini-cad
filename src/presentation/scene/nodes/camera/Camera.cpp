@@ -26,13 +26,17 @@ void Camera::updateDirections() {
     right = AlgebraUtils::getRight(orientation);
 }
 
-glm::mat4 Camera::getViewMatrix() {
+glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(position, position + front, up);
 }
 
-glm::mat4 Camera::getProjectionMatrix() {
+glm::mat4 Camera::getProjectionMatrix() const {
     return glm::perspective(glm::radians(45.f), (float) screenWidth / (float) screenHeight, 0.1f,
                             100.0f); // TODO configurable
+}
+
+glm::vec3 Camera::getViewPosition() const {
+    return position;
 }
 
 void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
@@ -114,8 +118,4 @@ int Camera::acceptVisit(SceneNodeVisitor &visitor) {
 
 int Camera::acceptLeave(SceneNodeVisitor &visitor) {
     return visitor.leaveCamera(*this);
-}
-
-glm::vec3 Camera::getViewPosition() {
-    return position;
 }

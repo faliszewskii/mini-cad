@@ -72,9 +72,9 @@ public:
     std::string getTypeName() override { return "Camera"; };
 
 
-    glm::mat4 getViewMatrix();
-    glm::mat4 getProjectionMatrix();
-    glm::vec3 getViewPosition();
+    [[nodiscard]] glm::mat4 getViewMatrix() const;
+    [[nodiscard]] glm::mat4 getProjectionMatrix() const;
+    [[nodiscard]] glm::vec3 getViewPosition() const;
 
     void processKeyboard(CameraMovement direction, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);

@@ -72,7 +72,7 @@ int ExecuteStepVisitor::visitActivateShader(ActivateShader &step) {
 
 int ExecuteStepVisitor::visitDrawMesh(DrawMesh &step) {
     for(Shader& shader : activeShaders) {
-        shader.setUniforms(uniformMap);
+//        shader.setUniforms(uniformMap);
         step.mesh.render();
     }
     return 0;

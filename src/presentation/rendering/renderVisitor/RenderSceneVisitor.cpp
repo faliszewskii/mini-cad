@@ -109,7 +109,7 @@ int RenderSceneVisitor::leaveCamera(Camera &camera) {
 
 int RenderSceneVisitor::visitMesh(Mesh &mesh) {
     for(Shader& shader : activeShaders) {
-        shader.setUniforms(uniformMap);
+//        shader.setUniforms(uniformMap);
         mesh.render();
     }
     return 0;

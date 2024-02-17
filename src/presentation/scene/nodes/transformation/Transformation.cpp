@@ -10,8 +10,8 @@
 Transformation::Transformation(std::string name) : SceneNode(std::move(name)), translation(),
 orientation(glm::quat(1, 0, 0, 0)), scale(glm::vec3(1.0f)) {}
 
-Transformation::Transformation(std::string name, Bindable<glm::vec3> translation, Bindable<glm::quat> orientation, Bindable<glm::vec3> scale) :
-        SceneNode(std::move(name)), translation(std::move(translation)), orientation(std::move(orientation)), scale(std::move(scale))  {}
+Transformation::Transformation(std::string name, glm::vec3 translation, glm::quat orientation, glm::vec3 scale) :
+        SceneNode(std::move(name)), translation(translation), orientation(orientation), scale(scale)  {}
 
 Transformation::Transformation(std::string name, glm::mat4 transformation) : SceneNode(std::move(name)) {
     glm::vec3 scaleFactor;
@@ -23,9 +23,8 @@ Transformation::Transformation(std::string name, glm::mat4 transformation) : Sce
     setScale(scaleFactor);
 }
 
-glm::mat4 Transformation::getTransformation() {
-    return glm::translate(glm::mat4(1.0f), translation.get()) * glm::mat4_cast(orientation.get()) *
-           glm::scale(glm::mat4(1.0f), scale.get());
+glm::mat4 Transformation::getTransformation() const {
+    return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(orientation) * glm::scale(glm::mat4(1.0f), scale);
 }
 
 void Transformation::setTransformation(glm::mat4 transformation) {

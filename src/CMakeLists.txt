@@ -47,7 +47,7 @@ set(INCL
         logic/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
         presentation/gui/GUI.h
-        logic/AppState.h
+        logic/state/AppState.h
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
         presentation/scene/tree/SceneNode.h
@@ -87,6 +87,32 @@ set(INCL
         logic/Scene.h
         presentation/modules/Module.cpp
         presentation/modules/Module.h
+        presentation/modules/renderers/PhongRenderModule.h
+        logic/algebra/Rect.h
+        presentation/modules/renderers/RenderHelpers.h
+        presentation/modules/renderers/RandomRenderModule.h
+        presentation/modules/renderers/NormalRenderModule.h
+        presentation/modules/gui/WorkspaceModule.h
+        presentation/modules/gui/MenuBarModule.h
+        presentation/modules/gui/LogPanelModule.h
+        presentation/modules/gui/DebugOverlayModule.h
+        presentation/modules/gui/GizmoModule.h
+        logic/utils/VariantUtil.h
+        logic/state/TransformTree.h
+        logic/state/SelectionGroup.h
+        presentation/modules/gui/workspaces/TransformTreeWorkspace.h
+        presentation/modules/gui/workspaces/MaterialsWorkspace.h
+        presentation/modules/gui/workspaces/LightsWorkspace.h
+        presentation/modules/gui/workspaces/CamerasWorkspace.h
+        presentation/modules/gui/workspaces/DebugOverlayModuleWorkspace.h
+        presentation/modules/gui/workspaces/GizmoModuleWorkspace.h
+        presentation/modules/gui/workspaces/LogPanelModuleWorkspace.h
+        presentation/modules/gui/workspaces/MenuBarModuleWorkspace.h
+        presentation/modules/gui/workspaces/PhongRendererModuleWorkspace.h
+        presentation/modules/gui/workspaces/NormalRendererModuleWorkspace.h
+        presentation/modules/gui/workspaces/RandomRendererModule.h
+        presentation/modules/gui/workspaces/ModulesWorkspaceHelpers.h
+        logic/state/AppState.cpp
 )
 
 add_executable(opengl-sandbox main.cpp

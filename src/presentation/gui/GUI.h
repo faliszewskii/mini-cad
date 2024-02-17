@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_GUI_H
 #define OPENGL_SANDBOX_GUI_H
 
-#include "../../logic/AppState.h"
+#include "../../logic/state/AppState.h"
 #include "../../../lib/imgui-node-editor/imgui_node_editor.h"
 #include "imgui.h"
 

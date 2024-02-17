@@ -23,8 +23,8 @@ public:
         uniqueObjectId = uuids::uuid_system_generator{}();
     }
 
-    uuids::uuid getUuid() { return uniqueObjectId; };
-    std::string getName() { return name; };
+    [[nodiscard]] uuids::uuid getUuid() const { return uniqueObjectId; };
+    [[nodiscard]] std::string getName() const { return name; };
     virtual std::string getTypeName() = 0;
 
     void addChild(SceneNode &childValue) { children.emplace_back(childValue); }

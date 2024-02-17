@@ -26,6 +26,11 @@ public:
         return value;
     };
 
+    T get() const {
+        if (getter) value = getter.value()();
+        return value;
+    };
+
     Bindable &operator=(T other) {
         value = other;
         return *this;

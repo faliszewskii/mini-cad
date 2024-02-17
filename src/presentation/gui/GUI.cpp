@@ -33,18 +33,6 @@ void GUI::newFrame() {
 }
 
 void GUI::render() {
-    ImGui::ShowDemoWindow();
-
-    renderMenuBar();
-    renderDebugOverlay();
-    renderLogOverlay();
-
-    if (guiState.activeViewsMask & ViewsMask::MainView) renderMainWindow();
-    renderEditorWindow();
-    renderGizmo();
-//    if(guiState.activeViewsMask & ViewsMask::ShadersView) renderShaderWindow();
-
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

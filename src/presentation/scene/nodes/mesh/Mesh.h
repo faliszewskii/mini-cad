@@ -25,6 +25,7 @@ public:
     std::vector<Vertex> vertices;
     std::optional<std::vector<unsigned int>> indices;
     int drawingMode;
+    std::optional<std::reference_wrapper<Material>> material;
 
     Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {},
          int drawingMode = GL_TRIANGLES);

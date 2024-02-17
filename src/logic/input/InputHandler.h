@@ -9,7 +9,7 @@
 #include "../../../lib/glad/glad_glfw.h"
 #include <functional>
 #include "../../presentation/scene/nodes/camera/Camera.h"
-#include "../AppState.h"
+#include "../state/AppState.h"
 
 struct InputHandlerState {
     std::optional<std::reference_wrapper<Camera>> &currentCamera;
