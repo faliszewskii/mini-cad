@@ -8,6 +8,7 @@
 #include "../../presentation/modules/gui/WorkspaceModule.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
+        guiFocus(true),
         transformTree("root"),
         menuBarModule(std::make_unique<MenuBarModule>()),
         logPanelModule(std::make_unique<LogPanelModule>()),

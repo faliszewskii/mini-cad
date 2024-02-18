@@ -21,14 +21,14 @@ struct Vertex {
 };
 
 class Mesh : public SceneNode {
-public:
     std::vector<Vertex> vertices;
     std::optional<std::vector<unsigned int>> indices;
+public:
     int drawingMode;
     std::optional<std::reference_wrapper<Material>> material;
 
-    Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices = {},
-         int drawingMode = GL_TRIANGLES);
+    Mesh(std::string name, std::vector<Vertex> vertices = std::vector<Vertex>(), std::optional<std::vector<unsigned int>> indices = {},
+         std::optional<std::reference_wrapper<Material>> = {}, int drawingMode = GL_TRIANGLES);
 
     std::string getTypeName() override { return "Mesh"; };
 
@@ -36,6 +36,11 @@ public:
 
     int acceptVisit(SceneNodeVisitor &visitor) override;
     int acceptLeave(SceneNodeVisitor &visitor) override;
+
+    void setVertices(std::vector<Vertex> &&vertices);
+    void setIndices(std::optional<std::vector<unsigned int>> &&indices);
+
+    void update(std::vector<Vertex> &&vertices, std::optional<std::vector<unsigned int>> &&indices);
 
 private:
     //  render data

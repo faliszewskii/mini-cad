@@ -113,6 +113,16 @@ set(INCL
         presentation/modules/gui/workspaces/RandomRendererModule.h
         presentation/modules/gui/workspaces/ModulesWorkspaceHelpers.h
         logic/state/AppState.cpp
+        logic/importer/ImportResult.h
+        logic/importer/ImportResult.cpp
+        presentation/modules/MeshGenerationModule.h
+        logic/generator/MeshGenerator.h
+        logic/generator/ParametrisedMeshGenerator.h
+        logic/generator/MeshGeneratorHelpers.h
+        logic/generator/ParametrisedMeshGenerator.cpp
+        logic/generator/HyperbolicParaboloidGenerator.h
+        presentation/modules/gui/workspaces/MeshGeneratorsWorkspace.h
+        logic/generator/TorusGenerator.h
 )
 
 add_executable(opengl-sandbox main.cpp

@@ -10,7 +10,7 @@
 #include "../io/stb_image.h"
 #include "../../presentation/scene/nodes/transformation/Transformation.h"
 
-std::unique_ptr<Scene> AssetImporter::importModel(const std::string &resourcePath) {
+ImportResult AssetImporter::importModel(const std::string &resourcePath) {
     Assimp::Importer import;
     import.SetPropertyBool(AI_CONFIG_FBX_CONVERT_TO_M, true);
 
@@ -22,10 +22,12 @@ std::unique_ptr<Scene> AssetImporter::importModel(const std::string &resourcePat
     }
     directory = resourcePath.substr(0, resourcePath.find_last_of('/'));
 
-    return processNode(scene->mRootNode, scene);
+    auto materials = processMaterials(scene);
+    auto transformTree = processNode(scene->mRootNode, scene, materials);
+    return ImportResult(std::move(transformTree), std::move(materials));
 }
 
-std::unique_ptr<Scene> AssetImporter::processNode(aiNode *node, const aiScene *scene) {
+std::unique_ptr<TransformTree> AssetImporter::processNode(aiNode *node, const aiScene *scene, std::vector<std::unique_ptr<Material>> &materials) {
     std::string name = node->mName.C_Str();
 
     aiMatrix4x4t<ai_real> t = node->mTransformation;
@@ -36,25 +38,23 @@ std::unique_ptr<Scene> AssetImporter::processNode(aiNode *node, const aiScene *s
             t.a4, t.b4, t.c4, t.d4
     );
 
-    auto result = std::make_unique<Scene>();
-    auto &transformationNode = result->addStep(PushTransformation(result->addSceneNode(Transformation(name, transformation))));
 
-    std::vector<std::unique_ptr<SceneNode>> children;
+    auto transformTree = std::make_unique<TransformTree>(TransformTree(name, transformation));
+
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        auto child = processNode(node->mChildren[i], scene);
-        result->merge(std::move(child), transformationNode);
+        auto child = processNode(node->mChildren[i], scene, materials);
+        transformTree->addChlid(std::move(child));
     }
 
-    std::vector<std::unique_ptr<SceneNode>> meshes;
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        auto mesh = processMesh(scene->mMeshes[node->mMeshes[i]], scene, i);
-        result->merge(std::move(mesh), transformationNode);
+        auto mesh = std::make_unique<Mesh>(processMesh(scene->mMeshes[node->mMeshes[i]], materials, i));
+        transformTree->addChlid(std::move(mesh));
     }
 
-    return result;
+    return transformTree;
 }
 
-std::unique_ptr<Scene> AssetImporter::processMesh(aiMesh *mesh, const aiScene *scene, unsigned int index) {
+Mesh AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -108,18 +108,20 @@ std::unique_ptr<Scene> AssetImporter::processMesh(aiMesh *mesh, const aiScene *s
             indices.push_back(face.mIndices[j]);
     }
     // TODO global table of materials and SceneTreeNode only has reference to SceneNodes.
-    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-    // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-    // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-    // Same applies to other texture as the following list summarizes:
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
 
-    // 1. diffuse maps
-    std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    // TODO Multiple textures
+
+    return {meshName.C_Str(), vertices, indices, *materials[mesh->mMaterialIndex]};
+}
+
+std::vector<std::unique_ptr<Material>> AssetImporter::processMaterials(const aiScene *scene) {
+    std::vector<std::unique_ptr<Material>> materials;
+    std::vector<Texture> loadedTextures;
+    for(int i = 0; i < scene->mNumMaterials; i++) {
+        aiMaterial *material = scene->mMaterials[i];
+
+        // 1. diffuse maps
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, loadedTextures, aiTextureType_DIFFUSE, "texture_diffuse");
+        // TODO Multiple textures
 //    // 2. specular maps
 //    vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 //    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -130,41 +132,35 @@ std::unique_ptr<Scene> AssetImporter::processMesh(aiMesh *mesh, const aiScene *s
 //    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 //    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-    glm::vec4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
-    C_STRUCT aiColor4D _diffuse;
-    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &_diffuse))
-        color4_to_vec4(&_diffuse, diffuse);
-    aiString materialName;
-    if (AI_SUCCESS != material->Get(AI_MATKEY_NAME, materialName))
-        materialName = std::string("material.") + std::to_string(index);
-    aiShadingMode shadingMode = aiShadingMode_Gouraud;
-    if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {}
-    float shininess = 0;
-    if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess)) {}
+        glm::vec4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
+        C_STRUCT aiColor4D _diffuse;
+        if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &_diffuse))
+            color4_to_vec4(&_diffuse, diffuse);
+        aiString materialName;
+        if (AI_SUCCESS != material->Get(AI_MATKEY_NAME, materialName))
+            materialName = std::string("material.") + std::to_string(i);
+        aiShadingMode shadingMode = aiShadingMode_Gouraud;
+        if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {}
+        float shininess = 0;
+        if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess)) {}
 
-    auto result = std::make_unique<Scene>();
-    // TODO Multiple textures
-    auto &materialSceneNode = result->addSceneNode(Material(materialName.C_Str(),diffuse,
-                                                       !textures.empty() ? textures[0] : std::optional<Texture>(),
-                                                       shininess, shadingModelMap[shadingMode]));
-    auto &materialNode = result->addStep(AddMaterial(materialSceneNode));
-
-    result->addStep(DrawMesh(result->addSceneNode(Mesh(meshName.C_Str(), vertices, indices))), materialNode);
-
-    return result;
+        // TODO Multiple textures
+        materials.push_back(std::make_unique<Material>(materialName.C_Str(), diffuse,
+                                                       !diffuseMaps.empty() ? diffuseMaps[0] : std::optional<Texture>(), shininess, shadingModelMap[shadingMode]));
+    }
+    return materials;
 }
 
-std::vector<Texture>
-AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName) {
+std::vector<Texture> AssetImporter::loadMaterialTextures(aiMaterial *mat, std::vector<Texture> &loadedTextures, aiTextureType type, const std::string &typeName) {
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
         // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
         bool skip = false;
-        for (unsigned int j = 0; j < textures_loaded.size(); j++) {
-            if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {
-                textures.push_back(textures_loaded[j]);
+        for (unsigned int j = 0; j < loadedTextures.size(); j++) {
+            if (std::strcmp(loadedTextures[j].path.data(), str.C_Str()) == 0) {
+                textures.push_back(loadedTextures[j]);
                 skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
                 break;
             }
@@ -175,8 +171,7 @@ AssetImporter::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const s
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
-            textures_loaded.push_back(
-                    texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+            loadedTextures.push_back(texture);
         }
     }
     return textures;

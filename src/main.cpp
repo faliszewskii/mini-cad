@@ -22,6 +22,8 @@
 #include "presentation/modules/gui/LogPanelModule.h"
 #include "presentation/modules/gui/DebugOverlayModule.h"
 #include "presentation/modules/gui/GizmoModule.h"
+#include "logic/generator/HyperbolicParaboloidGenerator.h"
+#include "logic/generator/TorusGenerator.h"
 
 // settings
 const int SCR_WIDTH = 1920;
@@ -36,9 +38,11 @@ std::unique_ptr<AppState> initializeAppState() {
     Camera& camera = appState->cameras.emplace_back("Camera", SCR_WIDTH - GUI_PANEL_LEFT_WIDTH, SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
     appState->currentCamera = camera;
     appState->lights.emplace_back("Point Light", glm::vec3(1.0, 1.0f, 1.0f));
-    auto &material = appState->materials.emplace_back(Material("Default Material", glm::vec4(1,0.5,0.5, 1), {}, 128));
-    auto &mesh = appState->transformTree.meshes.emplace_back(std::make_unique<Mesh>(ModelGenerator::generateTorusMesh(50, 50)));
-    mesh->material = material;
+    auto &material = *appState->materials.emplace_back(std::make_unique<Material>(Material("Default Material", glm::vec4(1,0.5,0.5, 1), {}, 128)));
+
+    auto &generated = appState->transformTree.addChlid(std::make_unique<Mesh>("Generated"));
+    generated.material = material;
+    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
 
     return appState;
 }

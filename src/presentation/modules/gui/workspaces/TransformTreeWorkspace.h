@@ -5,6 +5,7 @@
 #ifndef OPENGL_SANDBOX_TRANSFORMTREEWORKSPACE_H
 #define OPENGL_SANDBOX_TRANSFORMTREEWORKSPACE_H
 
+#include <nfd.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "../../../../logic/state/AppState.h"
 #include "imgui.h"
@@ -49,10 +50,10 @@ namespace TransformTreeWorkspace {
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
                 appState.selectionGroup.setFocus(node);
 
-            for(auto &child : node.children)
-                lambda(*child);
             if(nodeOpen) {
-                for (auto &mesh: node.meshes) {
+                for(auto &child : node.getChildren())
+                    lambda(*child);
+                for (auto &mesh: node.getMeshes()) {
                     auto localFlagsMesh = flags;
                     if (appState.selectionGroup.getSelectedMesh() && &appState.selectionGroup.getSelectedMesh().value().get() == &*mesh) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
                     ImGui::TreeNodeEx(uuids::to_string(mesh->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
@@ -69,6 +70,30 @@ namespace TransformTreeWorkspace {
 
         ImGui::EndChild();
         ImGui::PopStyleVar();
+
+        ImGui::BeginDisabled(!appState.selectionGroup.getSelectedTransformTree().has_value());
+        if(ImGui::Button("Import Model")) {
+            NFD_Init();
+
+            nfdchar_t *outPath;
+            nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
+            nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+            if (result == NFD_OKAY) {
+                try {
+                    appState.assetImporter.importModel(outPath).addToState(appState, appState.selectionGroup.getSelectedTransformTree().value());
+                } catch (FailedToLoadModelException &ex) {
+                    // TODO Log error to log window.
+                    std::cerr << ex.what() << std::endl;
+                }
+                NFD_FreePath(outPath);
+            } else if (result == NFD_CANCEL) {
+            } else {
+                printf("Error: %s\n", NFD_GetError());
+            }
+
+            NFD_Quit();
+        }
+        ImGui::EndDisabled();
 
         auto &selectedTransform = appState.selectionGroup.getSelectedTransformTree();
         if(selectedTransform) renderWorkspaceTransform(selectedTransform->get().transform);

@@ -26,9 +26,9 @@ namespace MaterialsWorkspace {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         if(ImGui::BeginChild("Materials#Workspace", ImVec2(-FLT_MIN, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY)) {
             for (auto &material : appState.materials) {
-                bool isSelected = appState.selectionGroup.getSelectedMaterial() && &appState.selectionGroup.getSelectedMaterial()->get() == &material;
-                if (ImGui::Selectable(material.getName().c_str(), isSelected)) {
-                    appState.selectionGroup.setFocus(material);
+                bool isSelected = appState.selectionGroup.getSelectedMaterial() && &appState.selectionGroup.getSelectedMaterial()->get() == &*material;
+                if (ImGui::Selectable(material->getName().c_str(), isSelected)) {
+                    appState.selectionGroup.setFocus(*material);
                 }
             }
             ImGui::EndChild();

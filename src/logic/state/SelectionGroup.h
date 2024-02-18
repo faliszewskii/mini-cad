@@ -10,6 +10,7 @@
 #include "../../presentation/scene/nodes/material/Material.h"
 #include "../../presentation/scene/nodes/light/Light.h"
 #include "../../presentation/scene/nodes/mesh/Mesh.h"
+#include "../generator/MeshGenerator.h"
 #include "TransformTree.h"
 
 
@@ -19,7 +20,8 @@ class SelectionGroup {
     GROUP(Material, MATERIAL)               \
     GROUP(TransformTree, TRANSFORM_TREE)    \
     GROUP(Light, LIGHT)                     \
-    GROUP(Mesh, MESH)
+    GROUP(Mesh, MESH)                       \
+    GROUP(MeshGenerator, MESH_GENERATOR)
 
     enum Focus {
         #define GROUP(T, ENUM) \

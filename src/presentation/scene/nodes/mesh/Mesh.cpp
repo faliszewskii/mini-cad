@@ -7,8 +7,9 @@
 #include "../material/Material.h"
 
 Mesh::Mesh(std::string name, std::vector<Vertex> vertices, std::optional<std::vector<unsigned int>> indices,
-           int drawingMode) : SceneNode(std::move(name)),
-                              vertices(std::move(vertices)), indices(std::move(indices)), drawingMode(drawingMode) {
+           std::optional<std::reference_wrapper<Material>> material, int drawingMode) : SceneNode(std::move(name)),
+                              vertices(std::move(vertices)), indices(std::move(indices)),
+                              material(material), drawingMode(drawingMode) {
     setupMesh();
 }
 
@@ -28,7 +29,6 @@ void Mesh::setupMesh() {
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
     if (indices) {
@@ -57,4 +57,9 @@ int Mesh::acceptVisit(SceneNodeVisitor &visitor) {
 
 int Mesh::acceptLeave(SceneNodeVisitor &visitor) {
     return visitor.leaveMesh(*this);
+}
+void Mesh::update(std::vector<Vertex> &&newVertices, std::optional<std::vector<unsigned int>> &&newIndices) {
+    vertices = std::move(newVertices);
+    indices = std::move(newIndices);
+    setupMesh();
 }

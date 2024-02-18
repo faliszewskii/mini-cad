@@ -11,13 +11,8 @@
 #include "../../presentation/scene/nodes/camera/Camera.h"
 #include "../state/AppState.h"
 
-struct InputHandlerState {
-    std::optional<std::reference_wrapper<Camera>> &currentCamera;
-    bool guiFocus;
-};
-
 class InputHandler {
-    InputHandlerState inputHandlerState;
+    AppState &appState;
 public:
     explicit InputHandler(std::unique_ptr<AppState> &applicationState);
 

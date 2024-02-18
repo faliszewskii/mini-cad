@@ -9,9 +9,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "tree/TreeViewVisitor.h"
 #include "node/NodeDetailsVisitor.h"
-#include "../../../lib/imguizmo/ImGuizmo.h"
 #include "editor/EditorNodeVisitor.h"
-#include "../../logic/generator/ModelGenerator.h"
 #include "tree/StepTreeViewVisitor.h"
 #include "node/StepParametersVisitor.h"
 
@@ -29,7 +27,6 @@ void GUI::newFrame() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
-    ImGuizmo::Enable(true);
 }
 
 void GUI::render() {
@@ -50,7 +47,7 @@ void GUI::renderMenuBar() {
             if (ImGui::MenuItem("Copy", "CTRL+C")) {}
             if (ImGui::MenuItem("Paste", "CTRL+V")) {}
             ImGui::Separator();
-            renderMenuItemLoadModel();
+//            renderMenuItemLoadModel();
             if (ImGui::MenuItem("Add Axis") && guiState.selectedStep) { // TODO Grey out on no select with tooltip.
                 guiState.scene.merge(ModelGenerator::generateAxis());
             }
@@ -83,30 +80,29 @@ void GUI::renderMenuBar() {
 //                             std::make_move_iterator(model.end()));
 //}
 
-void GUI::renderMenuItemLoadModel() {
-    if (ImGui::MenuItem("Load Model") && guiState.selectedStep && !guiState.selectedStep->get().isLeaf()) { // TODO Grey out on no select with tooltip.
-        NFD_Init();
-
-        nfdchar_t *outPath;
-        nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
-        nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
-        if (result == NFD_OKAY) {
-            try {
-                auto model = guiState.assetImporter.importModel(outPath);
-                guiState.scene.merge(std::move(model), guiState.selectedStep->get());
-            } catch (FailedToLoadModelException &ex) {
-                // TODO Log error to log window.
-                std::cerr << ex.what() << std::endl;
-            }
-            NFD_FreePath(outPath);
-        } else if (result == NFD_CANCEL) {
-        } else {
-            printf("Error: %s\n", NFD_GetError());
-        }
-
-        NFD_Quit();
-    }
-}
+//void GUI::renderMenuItemLoadModel() {
+//    if (ImGui::MenuItem("Load Model") && guiState.selectedStep && !guiState.selectedStep->get().isLeaf()) { // TODO Grey out on no select with tooltip.
+//        NFD_Init();
+//
+//        nfdchar_t *outPath;
+//        nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
+//        nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+//        if (result == NFD_OKAY) {
+//            try {
+//                auto model = guiState.assetImporter.importModel(outPath);
+//            } catch (FailedToLoadModelException &ex) {
+//                // TODO Log error to log window.
+//                std::cerr << ex.what() << std::endl;
+//            }
+//            NFD_FreePath(outPath);
+//        } else if (result == NFD_CANCEL) {
+//        } else {
+//            printf("Error: %s\n", NFD_GetError());
+//        }
+//
+//        NFD_Quit();
+//    }
+//}
 
 void GUI::renderDebugOverlay() {
     ImGuiWindowFlags window_flags =

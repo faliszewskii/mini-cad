@@ -19,6 +19,7 @@
 #include "../algebra/Rect.h"
 #include "imgui.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
+#include "../generator/MeshGenerator.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -41,8 +42,9 @@ struct AppState {
 
     std::vector<Light> lights;
     std::vector<Camera> cameras;
-    std::vector<Material> materials; // TODO Maybe map with name string as a key? Think about unique names instead of uuids.
+    std::vector<std::unique_ptr<Material>> materials; // TODO Maybe map with name string as a key? Think about unique names instead of uuids.
     TransformTree transformTree;
+    std::vector<std::unique_ptr<MeshGenerator>> meshGenerators;
     // TODO framebuffers
     // TODO textures
 
@@ -57,6 +59,7 @@ struct AppState {
 
     SelectionGroup selectionGroup;
     std::optional<std::reference_wrapper<Camera>> currentCamera;
+    bool guiFocus;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 
@@ -65,6 +68,7 @@ struct AppState {
     std::optional<std::reference_wrapper<RenderingStep>> selectedStep;
     std::optional<std::reference_wrapper<SceneNode>> mainFrameBufferNode;
     std::vector<std::unique_ptr<SceneNode>> allNodes;
+
 };
 
 

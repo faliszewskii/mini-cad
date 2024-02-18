@@ -12,6 +12,7 @@
 #include <map>
 #include "../../presentation/scene/nodes/mesh/Mesh.h"
 #include "../Scene.h"
+#include "ImportResult.h"
 
 class FailedToLoadModelException : public std::runtime_error {
 public:
@@ -20,17 +21,17 @@ public:
 
 class AssetImporter {
 public:
-    std::unique_ptr<Scene> importModel(const std::string &resourcePath);
+    ImportResult importModel(const std::string &resourcePath);
 
 private:
-    std::vector<Texture> textures_loaded;
     std::string directory;
 
-    std::unique_ptr<Scene> processNode(aiNode *node, const aiScene *scene);
+    std::unique_ptr<TransformTree> processNode(aiNode *node, const aiScene *scene, std::vector<std::unique_ptr<Material>> &materials);
 
-    std::unique_ptr<Scene> processMesh(aiMesh *mesh, const aiScene *scene, unsigned int i);
+    Mesh processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int i);
+    std::vector<std::unique_ptr<Material>> processMaterials(const aiScene *scene);
 
-    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName);
+    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, std::vector<Texture> &loadedTextures, aiTextureType type, const std::string &typeName);
 
     unsigned int textureFromFile(const char *path);
 

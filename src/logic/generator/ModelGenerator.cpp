@@ -34,7 +34,7 @@ std::unique_ptr<Scene> ModelGenerator::generateLine(std::string name, glm::vec3 
     Vertex v1(start, glm::vec3(), glm::vec2()); // TODO Take care of different vertex structures.
     Vertex v2(end, glm::vec3(), glm::vec2());
 
-    auto &mesh = result->addSceneNode(Mesh(std::move(name), std::vector{v1, v2}, {}, GL_LINE_STRIP));
+    auto &mesh = result->addSceneNode(Mesh(std::move(name), std::vector{v1, v2}, {}, {}, GL_LINE_STRIP));
     result->addStep(DrawMesh(mesh), materialNode);
 
     return result;
@@ -89,7 +89,7 @@ Mesh ModelGenerator::generateSphereMesh(int meridianCount, int parallelCount) {
         }
     }
 
-    return {"UV Sphere mesh", vertices, indices, GL_TRIANGLES};
+    return {"UV Sphere mesh", vertices, indices, {}, GL_TRIANGLES};
 }
 
 std::unique_ptr<Scene> ModelGenerator::generateSphere(int meridianCount, int parallelCount) {
@@ -127,7 +127,7 @@ Mesh ModelGenerator::generateTorusMesh(int radial_resolution, int tubular_resolu
             addQuad(indices, i0, i1, i2, i3);
         }
     }
-    return {"Torus mesh", vertices, indices, GL_TRIANGLES};
+    return {"Torus mesh", vertices, indices, {}, GL_TRIANGLES};
 }
 
 void ModelGenerator::addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3) {
@@ -165,7 +165,7 @@ std::unique_ptr<Mesh> ModelGenerator::generatePlaneMesh(glm::vec3 normal) {
 
     addQuad(indices,0, 1, 2, 3);
 
-    return std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, GL_TRIANGLES));
+    return std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
 }
 
 /// Generates mesh based on 3D parametrised equations. It draws using u, v from min inclusive to max exclusive if repeating, max inclusive if not.
@@ -199,5 +199,5 @@ Mesh ModelGenerator::ParametrisedModelGenerator::generateParametrisedMesh(const 
             addQuad(indices, i0, i1, i2, i3);
         }
     }
-    return {name, vertices, indices, GL_TRIANGLES};
+    return {name, vertices, indices, {}, GL_TRIANGLES};
 }

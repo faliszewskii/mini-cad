@@ -33,7 +33,7 @@ void Transformation::setTransformation(glm::mat4 transformation) {
     glm::vec3 translation;
     AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
     setTranslation(translation);
-    setOrientation(rotation);
+    setOrientation(glm::normalize(rotation));
     setScale(scale);
 }
 

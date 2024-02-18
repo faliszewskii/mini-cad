@@ -28,7 +28,7 @@ namespace LightsWorkspace {
         ImGui::DragFloat("dd##Attenuation", &light.getQuadraticAttenuationRef(), 0.01f, 0, 1);
     }
 
-        inline void render(AppState &appState) {
+    inline void render(AppState &appState) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         if(ImGui::BeginChild("Lights#Workspace", ImVec2(-FLT_MIN, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY)) {
             for (auto &light : appState.lights) {

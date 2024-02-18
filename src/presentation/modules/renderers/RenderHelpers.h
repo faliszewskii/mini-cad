@@ -50,14 +50,15 @@ namespace RenderHelpers {
 
         std::function<void(const TransformTree &)> lambda;
         lambda = [&](const TransformTree &node){
-            auto &globalTransform = modelStack.top();
-            shader.setUniform("model", globalTransform * node.transform.getTransformation());
-            for(auto &child : node.children)
-                lambda(*child);
-            for(auto &mesh : node.meshes) {
+            modelStack.push(modelStack.top() * node.transform.getTransformation());
+            shader.setUniform("model", modelStack.top());
+            for(auto &mesh : node.getMeshes()) {
                 setUpMesh(shader, *mesh);
                 mesh->render();
             }
+            for(auto &child : node.getChildren())
+                lambda(*child);
+            modelStack.pop();
         };
 
         lambda(transformTree);
@@ -69,13 +70,13 @@ namespace RenderHelpers {
 
         std::function<void(const TransformTree &)> lambda;
         lambda = [&](const TransformTree &node){
-            auto &globalTransform = modelStack.top();
-            shader.setUniform("model", globalTransform * node.transform.getTransformation());
-            for(auto &child : node.children)
-                lambda(*child);
-            for(auto &mesh : node.meshes) {
+            modelStack.push(modelStack.top() * node.transform.getTransformation());
+            shader.setUniform("model", modelStack.top());
+            for(auto &mesh : node.getMeshes())
                 mesh->render();
-            }
+            for(auto &child : node.getChildren())
+                lambda(*child);
+            modelStack.pop();
         };
 
         lambda(transformTree);
