@@ -21,6 +21,9 @@ public:
     virtual ParameterMap getParameters() = 0;
 
     virtual std::string getName() = 0;
+
+    virtual ~MeshGenerator() = default;
+    // TODO Rule of Five
 };
 
 #endif //OPENGL_SANDBOX_MESHGENERATOR_H

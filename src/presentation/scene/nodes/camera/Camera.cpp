@@ -15,7 +15,8 @@ Camera::Camera(std::string name, int screenWidth, int screenHeight, CameraMode c
                                                           SceneNode(std::move(name)), cameraType(cameraMode),
                                                           position(position), anchor(anchor), orientation(orientation),
                                                           movementSpeed(SPEED), mouseSensitivity(SENSITIVITY),
-                                                          zoomSensitivity(ZOOM_SENSITIVITY) {
+                                                          zoomSensitivity(ZOOM_SENSITIVITY), nearPlane(0.01),
+                                                          farPlane(100), fov(45.f) {
     // TODO Set orientation to anchor
     updateDirections();
 }
@@ -31,8 +32,8 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 glm::mat4 Camera::getProjectionMatrix() const {
-    return glm::perspective(glm::radians(45.f), (float) screenWidth / (float) screenHeight, 0.1f,
-                            100.0f); // TODO configurable
+    return glm::perspective(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane,
+                            farPlane); // TODO configurable
 }
 
 glm::vec3 Camera::getViewPosition() const {

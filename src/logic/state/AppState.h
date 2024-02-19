@@ -20,6 +20,7 @@
 #include "imgui.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
 #include "../generator/MeshGenerator.h"
+#include "../logger/Logger.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -29,6 +30,7 @@ class GizmoModule;
 class NormalRenderModule;
 class PhongRenderModule;
 class RandomRenderModule;
+class GridModule;
 
 struct AppState {
     explicit AppState(Rect<int> viewport, int guiPanelLeftWidth);
@@ -56,11 +58,14 @@ struct AppState {
     std::unique_ptr<NormalRenderModule> normalRendererModule;
     std::unique_ptr<PhongRenderModule> phongRendererModule;
     std::unique_ptr<RandomRenderModule> randomRendererModule;
+    std::unique_ptr<GridModule> gridModule;
 
+    Logger logger;
     SelectionGroup selectionGroup;
     std::optional<std::reference_wrapper<Camera>> currentCamera;
     bool guiFocus;
     std::pair<int, std::array<float, 100>> rollingFps;
+    bool vSync;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 
@@ -71,7 +76,5 @@ struct AppState {
     std::vector<std::unique_ptr<SceneNode>> allNodes;
 
 };
-
-
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

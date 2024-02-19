@@ -7,13 +7,10 @@
 #include "../../lib/glad/glad_glfw.h"
 #include "logic/opengl/OpenGLInstance.h"
 #include "logic/io/IOUtils.h"
-#include "logic/generator/ModelGenerator.h"
 #include "presentation/gui/GUI.h"
 #include "logic/state/AppState.h"
 #include "presentation/scene/nodes/camera/Camera.h"
-#include "presentation/scene/nodes/light/Light.h"
 #include "logic/input/InputHandler.h"
-#include "presentation/scene/nodes/frameBuffer/FrameBuffer.h"
 #include "presentation/modules/renderers/PhongRenderModule.h"
 #include "presentation/modules/renderers/RandomRenderModule.h"
 #include "presentation/modules/renderers/NormalRenderModule.h"
@@ -22,8 +19,9 @@
 #include "presentation/modules/gui/LogPanelModule.h"
 #include "presentation/modules/gui/DebugOverlayModule.h"
 #include "presentation/modules/gui/GizmoModule.h"
-#include "logic/generator/HyperbolicParaboloidGenerator.h"
+#include "presentation/modules/renderers/GridModule.h"
 #include "logic/generator/TorusGenerator.h"
+#include "logic/generator/NormOneGenerator.h"
 
 // settings
 const int SCR_WIDTH = 1920;
@@ -42,7 +40,11 @@ std::unique_ptr<AppState> initializeAppState() {
 
     auto &generated = appState->transformTree.addChlid(std::make_unique<Mesh>("Generated"));
     generated.material = material;
-    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
+    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
+
+    appState->logger.logInfo("Test Info");
+    appState->logger.logDebug("Test Debug");
+    appState->logger.logError("Test Error");
 
     return appState;
 }

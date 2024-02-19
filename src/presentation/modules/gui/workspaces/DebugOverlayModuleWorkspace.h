@@ -12,6 +12,9 @@
 namespace DebugOverlayModuleWorkspace {
     inline void render(AppState &appState) {
         ModulesWorkspaceHelpers::renderModuleToggle(appState.debugOverlayModule->active);
+        if(ImGui::Checkbox("VSync (Lock FPS)", &appState.vSync)) {
+            glfwSwapInterval(appState.vSync);
+        }
     }
 };
 

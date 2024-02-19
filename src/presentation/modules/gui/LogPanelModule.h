@@ -30,7 +30,13 @@ public:
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::SetNextWindowSize(ImVec2(600, 50));
         if (ImGui::Begin("Log Overlay", nullptr, window_flags)) {
-            ImGui::Text("Log messages will go here");
+            auto &logs = appState.logger.getLogs();
+            for(auto &log : std::views::reverse(logs)) {
+                auto color = Logger::getColor(log.logType);
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r*255, color.g*255, color.b*255, 255));
+                ImGui::Text("[%s](%.2g) %s", Logger::getName(log.logType).c_str(), log.time, log.message.c_str());
+                ImGui::PopStyleColor();
+            }
         }
         ImGui::End();
     }

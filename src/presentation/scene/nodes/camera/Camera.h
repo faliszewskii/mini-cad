@@ -50,6 +50,10 @@ private:
     glm::vec3 right;
 
 public:
+    float nearPlane;
+    float farPlane;
+    float fov;
+
     std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping{
             {CameraMode::FREE,   &Camera::processMouseMovementFree},
             {CameraMode::ANCHOR, &Camera::processMouseMovementAnchor}

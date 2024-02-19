@@ -21,6 +21,7 @@
 #include "workspaces/DebugOverlayModuleWorkspace.h"
 #include "workspaces/GizmoModuleWorkspace.h"
 #include "workspaces/MeshGeneratorsWorkspace.h"
+#include "workspaces/GridModuleWorkspace.h"
 
 class WorkspaceModule : public Module {
     const int workspaceWidth;
@@ -42,6 +43,7 @@ public:
                 {"Debug Overlay Module",    DebugOverlayModuleWorkspace::render},
                 {"Gizmo Module",            GizmoModuleWorkspace::render},
                 {"Mesh Generators",         MeshGeneratorsWorkspace::render},
+                {"Grid Module",             GridModuleWorkspace::render}
         };
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         if(ImGui::BeginChild("Categories#Workspace", ImVec2(-FLT_MIN, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY)) {

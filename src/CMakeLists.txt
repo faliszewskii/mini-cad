@@ -123,6 +123,11 @@ set(INCL
         logic/generator/HyperbolicParaboloidGenerator.h
         presentation/modules/gui/workspaces/MeshGeneratorsWorkspace.h
         logic/generator/TorusGenerator.h
+        logic/generator/SphereGenerator.h
+        presentation/modules/renderers/GridModule.h
+        logic/logger/Logger.h
+        presentation/modules/gui/workspaces/GridModuleWorkspace.h
+        logic/generator/NormOneGenerator.h
 )
 
 add_executable(opengl-sandbox main.cpp

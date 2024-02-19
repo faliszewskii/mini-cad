@@ -9,6 +9,14 @@
 #include "imgui.h"
 
 namespace CamerasWorkspace {
+    inline void renderWorkspaceCamera(Camera &camera) {
+        ImGui::SeparatorText(camera.getName().c_str());
+
+        ImGui::DragFloat("fov", &camera.fov);
+        ImGui::DragFloat("Near Plane", &camera.nearPlane, 0.01);
+        ImGui::DragFloat("Far Plane", &camera.farPlane);
+    }
+
     inline void render(AppState &appState) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         if(ImGui::BeginChild("Cameras#Workspace", ImVec2(-FLT_MIN, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY)) {
@@ -21,7 +29,8 @@ namespace CamerasWorkspace {
         }
         ImGui::PopStyleVar();
 
-        // TODO Camera UI
+        auto &selected = appState.selectionGroup.getSelectedCamera();
+        if(selected) renderWorkspaceCamera(selected->get());
     }
 };
 
