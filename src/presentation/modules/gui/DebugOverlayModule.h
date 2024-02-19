@@ -7,6 +7,7 @@
 
 #include "../Module.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 class DebugOverlayModule : public Module {
     const int workspaceWidth;
@@ -31,9 +32,18 @@ public:
         window_flags |= ImGuiWindowFlags_NoMove;
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         if (ImGui::Begin("Debug Overlay", nullptr, window_flags)) {
-            ImGui::Text("FPS: TODO");
-            ImGui::Separator();
-            ImGui::Text("mSPF: TODO");
+            auto &io = ImGui::GetIO();
+            const static auto getter = [](void* data, int i){return static_cast<float*>(data)[i];};
+            static float delta = 0;
+            delta += io.DeltaTime;
+            if(delta > 0.2) {
+                delta = 0;
+                appState.rollingFps.first = (appState.rollingFps.first + 1) % appState.rollingFps.second.size();
+                appState.rollingFps.second[appState.rollingFps.first] = io.Framerate;
+            }
+            ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+            // TODO Ironically after implementing this I noticed a crash-like slowdown of the app.
+            ImGui::PlotEx(ImGuiPlotType_Lines, "", getter, appState.rollingFps.second.data(), appState.rollingFps.second.size(), appState.rollingFps.first+1, NULL, 0.0f, 1000, ImVec2(0, 40));
         }
         ImGui::End();
     }

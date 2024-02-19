@@ -60,6 +60,7 @@ struct AppState {
     SelectionGroup selectionGroup;
     std::optional<std::reference_wrapper<Camera>> currentCamera;
     bool guiFocus;
+    std::pair<int, std::array<float, 100>> rollingFps;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 
