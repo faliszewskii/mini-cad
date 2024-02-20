@@ -21,6 +21,7 @@
 #include "presentation/modules/gui/GizmoModule.h"
 #include "presentation/modules/renderers/GridModule.h"
 #include "logic/generator/TorusGenerator.h"
+#include "presentation/modules/renderers/WireframeRenderModule.h"
 #include "logic/generator/NormOneGenerator.h"
 
 // settings
@@ -40,7 +41,8 @@ std::unique_ptr<AppState> initializeAppState() {
 
     auto &generated = appState->transformTree.addChlid(std::make_unique<Mesh>("Generated"));
     generated.material = material;
-    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
+//    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
+    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
 
     appState->logger.logInfo("Test Info");
     appState->logger.logDebug("Test Debug");

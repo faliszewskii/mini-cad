@@ -51,8 +51,22 @@ void InputHandler::keyCallback(GLFWwindow *window, int key, int scancode, int ac
 void InputHandler::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
         appState.guiFocus = false;
-    else
+    else {
         appState.guiFocus = true;
+        if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            GLbyte color[4];
+            GLfloat depth;
+            GLuint index;
+            glReadPixels(xpos, /*window_height - y - 1*/ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+            glReadPixels(xpos, ypos, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+            glReadPixels(xpos, ypos, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+//            printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+//                   xpos, ypos, color[0], color[1], color[2], color[3], depth, index);
+            // TODO Finish object selection (look through notes for hints).
+        }
+    }
 }
 
 // glfw: whenever the mouse moves, this callback is called

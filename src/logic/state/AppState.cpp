@@ -7,6 +7,7 @@
 #include "../../presentation/modules/gui/DebugOverlayModule.h"
 #include "../../presentation/modules/gui/MenuBarModule.h"
 #include "../../presentation/modules/gui/WorkspaceModule.h"
+#include "../../presentation/modules/renderers/WireframeRenderModule.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         guiFocus(true),
@@ -20,6 +21,7 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         normalRendererModule(std::make_unique<NormalRenderModule>(guiPanelLeftWidth)),
         phongRendererModule(std::make_unique<PhongRenderModule>(guiPanelLeftWidth)),
         randomRendererModule(std::make_unique<RandomRenderModule>(guiPanelLeftWidth)),
+        wireframeRendererModule(std::make_unique<WireframeRenderModule>(guiPanelLeftWidth)),
         gridModule(new GridModule(guiPanelLeftWidth))
         {}
 
@@ -32,5 +34,6 @@ void AppState::runModules() {
     if(normalRendererModule->active) normalRendererModule->run(*this);
     if(phongRendererModule->active) phongRendererModule->run(*this);
     if(randomRendererModule->active) randomRendererModule->run(*this);
+    if(wireframeRendererModule->active) wireframeRendererModule->run(*this);
     if(gridModule->active) gridModule->run(*this);
 }

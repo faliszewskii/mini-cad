@@ -30,6 +30,7 @@ class GizmoModule;
 class NormalRenderModule;
 class PhongRenderModule;
 class RandomRenderModule;
+class WireframeRenderModule;
 class GridModule;
 
 struct AppState {
@@ -58,6 +59,7 @@ struct AppState {
     std::unique_ptr<NormalRenderModule> normalRendererModule;
     std::unique_ptr<PhongRenderModule> phongRendererModule;
     std::unique_ptr<RandomRenderModule> randomRendererModule;
+    std::unique_ptr<WireframeRenderModule> wireframeRendererModule;
     std::unique_ptr<GridModule> gridModule;
 
     Logger logger;

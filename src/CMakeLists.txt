@@ -128,6 +128,8 @@ set(INCL
         logic/logger/Logger.h
         presentation/modules/gui/workspaces/GridModuleWorkspace.h
         logic/generator/NormOneGenerator.h
+        presentation/modules/renderers/WireframeRenderModule.h
+        presentation/modules/gui/workspaces/WireframeRenderModuleWorkspace.h
 )
 
 add_executable(opengl-sandbox main.cpp

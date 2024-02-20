@@ -22,6 +22,7 @@
 #include "workspaces/GizmoModuleWorkspace.h"
 #include "workspaces/MeshGeneratorsWorkspace.h"
 #include "workspaces/GridModuleWorkspace.h"
+#include "workspaces/WireframeRenderModuleWorkspace.h"
 
 class WorkspaceModule : public Module {
     const int workspaceWidth;
@@ -38,6 +39,7 @@ public:
                 {"Phong Render Module",     PhongRenderModuleWorkspace::render},
                 {"Random Render Module",    RandomRenderModuleWorkspace::render},
                 {"Normal Render Module",    NormalRenderModuleWorkspace::render},
+                {"Wireframe Render Module", WireframeRenderModuleWorkspace::render},
                 {"Workspace Module",        render},
                 {"Log Panel Module",        LogPanelModuleWorkspace::render},
                 {"Debug Overlay Module",    DebugOverlayModuleWorkspace::render},
