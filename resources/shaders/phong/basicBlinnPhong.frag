@@ -40,7 +40,7 @@ vec3 calculateLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 ambient  = light.color * vec3(0.2f);
     vec3 diffuse  = light.color * diff;
     vec3 specular = light.color * spec;
-    return (ambient + diffuse + specular) * light.strength * attenuation;
+    return ambient + (diffuse + specular) * light.strength * attenuation;
 }
 
 void main()
