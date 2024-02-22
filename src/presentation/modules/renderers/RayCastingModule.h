@@ -28,6 +28,7 @@ class RayCastingModule : public Module {
 
     int startingPixelSize;
     int pixelSize;
+    int shaderPixelSize;
     bool shouldUpdate;
 
     int pixelsPerLoop;
@@ -44,9 +45,24 @@ class RayCastingModule : public Module {
     glm::mat4 proj;
 
 public:
+
+    float& getSemiAxisA() { return semiAxisA; };
+    float& getSemiAxisB() { return semiAxisB; };
+    float& getSemiAxisC() { return semiAxisC; };
+    int& getPixelsPerLoop() { return pixelsPerLoop; };
+    int& getStartingPixelSize() { return startingPixelSize; };
+    float& getSpecularFactor() { return specularFactor; };
+
+    void triggerUpdate() {
+        if(shouldUpdate) return;
+        shouldUpdate = true;
+        currentX = 0;
+        currentY = 0;
+    };
+
     explicit RayCastingModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth), specularFactor(128),
-        semiAxisA(0.75), semiAxisB(0.5), semiAxisC(1), shouldUpdate(true), startingPixelSize(1 << 5), pixelSize(startingPixelSize),
-        pixelsPerLoop(100), currentX(0), currentY(0),
+        semiAxisA(0.5), semiAxisB(0.25), semiAxisC(1), shouldUpdate(true), startingPixelSize(1 << 4), pixelSize(startingPixelSize),
+        shaderPixelSize(pixelSize), pixelsPerLoop(4000), currentX(0), currentY(0),
         shader(Shader("RayCasting", IOUtils::getResource("shaders/rayCasting/rayCasting.vert"), IOUtils::getResource("shaders/rayCasting/rayCasting.frag"))){
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -78,7 +94,7 @@ public:
         shader.setUniform("coordinatesTexture", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId);
-        shader.setUniform("pixelSize", pixelSize);
+        shader.setUniform("pixelSize", shaderPixelSize);
         shader.setUniform("viewportOffsetX", workspaceWidth);
         shader.setUniform("viewportOffsetY", 0);
         shader.setUniform("semiAxisA", semiAxisA);
@@ -123,31 +139,60 @@ public:
         Camera& camera = appState.currentCamera->get();
         viewInv = glm::inverse(camera.getViewMatrix());
         projInv = glm::inverse(camera.getProjectionMatrix());
-        view = camera.getViewMatrix();
+        view = camera.getViewMatrix(); // TODO Manually view and proj matrices
         proj = camera.getProjectionMatrix();
         if(shouldUpdate) {
             pixelSize = startingPixelSize;
-            for(int currentY = 0;currentY < textureHeight; currentY+=pixelSize) {
-                for(int currentX = 0;currentX < textureWidth; currentX+=pixelSize) {
-                    glm::vec3 vPixel = findElipsoidCoords( (float)currentX/textureWidth, (float)currentY/textureHeight);
+            shaderPixelSize = pixelSize;
+            for(int i = 0; currentY < textureHeight && i < pixelsPerLoop; ) {
+                for(;currentX < textureWidth && i < pixelsPerLoop; currentX+=pixelSize, i++) {
+                    glm::vec3 vPixel = findEllipsoidCoords((float) currentX / textureWidth,
+                                                           (float) currentY / textureHeight);
                     glTexSubImage2D (GL_TEXTURE_2D, 0, currentX, currentY, 1, 1, GL_RGB, GL_FLOAT, glm::value_ptr(vPixel));
+                }
+                if(currentX >= textureWidth) {
+                    currentX = 0;
+                    currentY+=pixelSize;
                 }
             }
-            shouldUpdate = false;
-        } else if (pixelSize > 1) {
-            pixelSize /= 2;
-            for(int currentY = 0;currentY < textureHeight; currentY+=pixelSize) {
-                for(int currentX = 0;currentX < textureWidth; currentX+=pixelSize) {
+            if(currentY >= textureHeight) {
+                shouldUpdate = false;
+                currentY = 0;
+                pixelSize /= 2;
+            }
+        } else if (pixelSize >= 1) {
+            for(int i = 0; currentY < textureHeight && i < pixelsPerLoop;) {
+                for(;currentX < textureWidth && i < pixelsPerLoop; currentX+=pixelSize, i++) {
                     if(currentX/pixelSize%2 == 0 && currentY/pixelSize%2 == 0) continue;
-                    glm::vec3 vPixel = findElipsoidCoords((float)currentX/textureWidth, (float)currentY/textureHeight);
+                    glm::vec3 vPixel = findEllipsoidCoords((float) currentX / textureWidth,
+                                                           (float) currentY / textureHeight);
                     glTexSubImage2D (GL_TEXTURE_2D, 0, currentX, currentY, 1, 1, GL_RGB, GL_FLOAT, glm::value_ptr(vPixel));
                 }
+                if(currentX >= textureWidth) {
+                    currentY+=pixelSize;
+                    currentX = 0;
+                }
+            }
+            if(currentY >= textureHeight) {
+                currentY = 0;
+                shaderPixelSize /= 2;
+                pixelSize /= 2;
+            }
+            if(!appState.guiFocus) { // Update trigger
+                shouldUpdate = true;
+                currentX = 0;
+                currentY = 0;
+            }
+        } else {
+            if(!appState.guiFocus) { // Update trigger
+                shouldUpdate = true;
+                currentX = 0;
+                currentY = 0;
             }
         }
-        shouldUpdate = !appState.guiFocus;
     }
 
-    glm::vec3 findElipsoidCoords(float x, float y) {
+    glm::vec3 findEllipsoidCoords(float x, float y) {
         x = x*2-1;
         y = y*2-1;
         float a2 = 1/(semiAxisA*semiAxisA);

@@ -17,8 +17,9 @@ namespace MeshGeneratorsWorkspace {
                 [&parameter](int& value) { ImGui::DragInt(parameter.first.c_str(), &value); },
                 [&parameter](float& value) { ImGui::DragFloat(parameter.first.c_str(), &value, 0.01); }
             }, parameter.second);
+            if(ImGui::IsItemActive()) generator.generate();
         }
-        generator.generate(); // TODO Check if changed !!!!!
+
     }
 
     inline void render(AppState &appState) {

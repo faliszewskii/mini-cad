@@ -110,7 +110,7 @@ set(INCL
         presentation/modules/gui/workspaces/MenuBarModuleWorkspace.h
         presentation/modules/gui/workspaces/PhongRendererModuleWorkspace.h
         presentation/modules/gui/workspaces/NormalRendererModuleWorkspace.h
-        presentation/modules/gui/workspaces/RandomRendererModule.h
+        presentation/modules/gui/workspaces/RandomRendererModuleWorkspace.h
         presentation/modules/gui/workspaces/ModulesWorkspaceHelpers.h
         logic/state/AppState.cpp
         logic/importer/ImportResult.h
@@ -131,6 +131,7 @@ set(INCL
         presentation/modules/renderers/WireframeRenderModule.h
         presentation/modules/gui/workspaces/WireframeRenderModuleWorkspace.h
         presentation/modules/renderers/RayCastingModule.h
+        presentation/modules/gui/workspaces/RayCastingModuleWorkspace.h
 )
 
 add_executable(opengl-sandbox main.cpp

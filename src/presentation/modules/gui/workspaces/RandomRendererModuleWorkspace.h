@@ -2,8 +2,8 @@
 // Created by faliszewskii on 17.02.24.
 //
 
-#ifndef OPENGL_SANDBOX_RANDOMRENDERERMODULE_H
-#define OPENGL_SANDBOX_RANDOMRENDERERMODULE_H
+#ifndef OPENGL_SANDBOX_RANDOMRENDERERMODULEWORKSPACE_H
+#define OPENGL_SANDBOX_RANDOMRENDERERMODULEWORKSPACE_H
 
 #include "../../../../logic/state/AppState.h"
 #include "../../renderers/RandomRenderModule.h"
@@ -15,4 +15,4 @@ namespace RandomRenderModuleWorkspace {
     }
 };
 
-#endif //OPENGL_SANDBOX_RANDOMRENDERERMODULE_H
+#endif //OPENGL_SANDBOX_RANDOMRENDERERMODULEWORKSPACE_H

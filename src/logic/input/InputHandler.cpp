@@ -2,6 +2,7 @@
 // Created by faliszewskii on 10.01.24.
 //
 
+#include "../../presentation/modules/renderers/RayCastingModule.h"
 #include "InputHandler.h"
 #include "imgui.h"
 
@@ -102,4 +103,5 @@ void InputHandler::mouseCallback(GLFWwindow *window, double xposIn, double yposI
 void InputHandler::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
     if (!appState.currentCamera || ImGui::GetIO().WantCaptureMouse) return;
     appState.currentCamera.value().get().processMouseScroll(static_cast<float>(yoffset));
+    appState.rayCastingModule->triggerUpdate();
 }

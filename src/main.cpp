@@ -43,7 +43,7 @@ std::unique_ptr<AppState> initializeAppState() {
     auto &generated = appState->transformTree.addChlid(std::make_unique<Mesh>("Generated"));
     generated.material = material;
 //    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
-//    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
+    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
     // TODO UI for adding objects.
 
     appState->logger.logInfo("Test Info");
