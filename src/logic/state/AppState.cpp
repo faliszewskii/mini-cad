@@ -2,12 +2,12 @@
 // Created by faliszewskii on 17.02.24.
 //
 
+#include "../../presentation/modules/renderers/RayCastingModule.h"
 #include "../../presentation/modules/renderers/GridModule.h"
 #include "AppState.h"
 #include "../../presentation/modules/gui/DebugOverlayModule.h"
 #include "../../presentation/modules/gui/MenuBarModule.h"
 #include "../../presentation/modules/gui/WorkspaceModule.h"
-#include "../../presentation/modules/renderers/WireframeRenderModule.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         guiFocus(true),
@@ -22,7 +22,8 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         phongRendererModule(std::make_unique<PhongRenderModule>(guiPanelLeftWidth)),
         randomRendererModule(std::make_unique<RandomRenderModule>(guiPanelLeftWidth)),
         wireframeRendererModule(std::make_unique<WireframeRenderModule>(guiPanelLeftWidth)),
-        gridModule(new GridModule(guiPanelLeftWidth))
+        gridModule(new GridModule(guiPanelLeftWidth)),
+        rayCastingModule(std::make_unique<RayCastingModule>(guiPanelLeftWidth))
         {}
 
 void AppState::runModules() {
@@ -35,5 +36,6 @@ void AppState::runModules() {
     if(phongRendererModule->active) phongRendererModule->run(*this);
     if(randomRendererModule->active) randomRendererModule->run(*this);
     if(wireframeRendererModule->active) wireframeRendererModule->run(*this);
+    if(rayCastingModule->active) rayCastingModule->run(*this);
     if(gridModule->active) gridModule->run(*this);
 }

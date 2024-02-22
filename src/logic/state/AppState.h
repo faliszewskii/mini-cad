@@ -32,6 +32,7 @@ class PhongRenderModule;
 class RandomRenderModule;
 class WireframeRenderModule;
 class GridModule;
+class RayCastingModule;
 
 struct AppState {
     explicit AppState(Rect<int> viewport, int guiPanelLeftWidth);
@@ -61,12 +62,13 @@ struct AppState {
     std::unique_ptr<RandomRenderModule> randomRendererModule;
     std::unique_ptr<WireframeRenderModule> wireframeRendererModule;
     std::unique_ptr<GridModule> gridModule;
+    std::unique_ptr<RayCastingModule> rayCastingModule;
 
     Logger logger;
     SelectionGroup selectionGroup;
     std::optional<std::reference_wrapper<Camera>> currentCamera;
     bool guiFocus;
-    std::pair<int, std::array<float, 100>> rollingFps;
+    std::pair<int, std::array<float, 100>> rollingMspf;
     bool vSync;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;

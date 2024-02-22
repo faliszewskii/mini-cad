@@ -130,6 +130,7 @@ set(INCL
         logic/generator/NormOneGenerator.h
         presentation/modules/renderers/WireframeRenderModule.h
         presentation/modules/gui/workspaces/WireframeRenderModuleWorkspace.h
+        presentation/modules/renderers/RayCastingModule.h
 )
 
 add_executable(opengl-sandbox main.cpp
