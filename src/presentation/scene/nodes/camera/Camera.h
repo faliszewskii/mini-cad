@@ -39,8 +39,6 @@ private:
     CameraMode cameraType;
 
     glm::quat orientation;
-    glm::vec3 position;
-    glm::vec3 anchor;
 
     float movementSpeed;
     float mouseSensitivity;
@@ -50,6 +48,8 @@ private:
     glm::vec3 right;
 
 public:
+    glm::vec3 position;
+    glm::vec3 anchor;
     float nearPlane;
     float farPlane;
     float fov;

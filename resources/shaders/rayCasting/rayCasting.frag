@@ -27,9 +27,9 @@ uniform sampler2D coordinatesTexture;
 uniform int pixelSize;
 uniform int viewportOffsetX;
 uniform int viewportOffsetY;
-uniform float semiAxisA;
-uniform float semiAxisB;
-uniform float semiAxisC;
+
+uniform mat4 D;
+
 
 vec3 calculateLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
@@ -58,7 +58,16 @@ void main() {
     if(fragPos3D.x == 0 && fragPos3D.y == 0 && fragPos3D.z == 0) discard;
 
     gl_FragDepth = ((gl_DepthRange.diff * computeDepth(fragPos3D)) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
-    vec3 normal = 2 * vec3(fragPos3D.x/semiAxisA/semiAxisA, fragPos3D.y/semiAxisB/semiAxisB, fragPos3D.z/semiAxisC/semiAxisC);
+
+    vec4 v = vec4(fragPos3D, 1);
+    vec3 normal = vec3(0);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 4; j++)
+            normal[i] += (D[i][j] + D[j][i]) * v[j];
+    }
+
+//    vec3 normal = 2 * vec3(fragPos3D.x/semiAxisA/semiAxisA, fragPos3D.y/semiAxisB/semiAxisB, fragPos3D.z/semiAxisC/semiAxisC);
     vec3 viewDir = normalize(viewPos - fragPos3D);
     vec3 result = vec3(1,1,0) * calculateLight(pointLight, normalize(normal), fragPos3D, viewDir);
 

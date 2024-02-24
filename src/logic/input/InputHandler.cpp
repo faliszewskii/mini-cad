@@ -103,5 +103,5 @@ void InputHandler::mouseCallback(GLFWwindow *window, double xposIn, double yposI
 void InputHandler::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
     if (!appState.currentCamera || ImGui::GetIO().WantCaptureMouse) return;
     appState.currentCamera.value().get().processMouseScroll(static_cast<float>(yoffset));
-    appState.rayCastingModule->triggerUpdate();
+    appState.rayCastingModule->triggerUpdate(appState.currentCamera.value());
 }

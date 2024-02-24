@@ -75,8 +75,11 @@ public:
 
         listCategories();
         if(selectedCategory) {
-            ImGui::SeparatorText(selectedCategory.value().get().first.c_str());
-            selectedCategory.value().get().second(appState);
+            if(ImGui::BeginChild("Workspace#Workspace", ImVec2(0, 0), ImGuiChildFlags_ResizeY)) {
+                ImGui::SeparatorText(selectedCategory.value().get().first.c_str());
+                selectedCategory.value().get().second(appState);
+                ImGui::EndChild();
+            }
         } else ImGui::SeparatorText("Select Category");
 
         ImGui::PopItemWidth();

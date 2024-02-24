@@ -7,14 +7,32 @@
 
 #include "../../../../logic/state/AppState.h"
 #include "imgui.h"
+#include "../../renderers/RayCastingModule.h"
 
 namespace CamerasWorkspace {
-    inline void renderWorkspaceCamera(Camera &camera) {
+    inline void renderWorkspaceCamera(Camera &camera, RayCastingModule& module) {
         ImGui::SeparatorText(camera.getName().c_str());
 
         ImGui::DragFloat("fov", &camera.fov);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
         ImGui::DragFloat("Near Plane", &camera.nearPlane, 0.01);
         ImGui::DragFloat("Far Plane", &camera.farPlane);
+
+        ImGui::Text("Position:");
+        ImGui::DragFloat("x##Position", glm::value_ptr(camera.position) + 0, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
+        ImGui::DragFloat("y##Position", glm::value_ptr(camera.position) + 1, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
+        ImGui::DragFloat("z##Position", glm::value_ptr(camera.position) + 2, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
+
+        ImGui::Text("Anchor:");
+        ImGui::DragFloat("x##Anchor", glm::value_ptr(camera.anchor) + 0, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
+        ImGui::DragFloat("y##Anchor", glm::value_ptr(camera.anchor) + 1, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
+        ImGui::DragFloat("z##Anchor", glm::value_ptr(camera.anchor) + 2, 0.01f);
+        if(ImGui::IsItemActive()) module.triggerUpdate(camera);
     }
 
     inline void render(AppState &appState) {
@@ -30,7 +48,7 @@ namespace CamerasWorkspace {
         ImGui::PopStyleVar();
 
         auto &selected = appState.selectionGroup.getSelectedCamera();
-        if(selected) renderWorkspaceCamera(selected->get());
+        if(selected) renderWorkspaceCamera(selected->get(), *appState.rayCastingModule);
     }
 };
 

@@ -14,7 +14,7 @@ class TorusGenerator : public MeshGenerator {
     float radius;
     float thickness;
 public:
-    explicit TorusGenerator(Mesh &target, int radialResolution = 10, int tubularResolution = 10, float radius = 1, float thickness = 0.25f)
+    explicit TorusGenerator(Mesh &target, int radialResolution = 50, int tubularResolution = 50, float radius = 1, float thickness = 0.25f)
             : MeshGenerator(target), radialResolution(radialResolution), tubularResolution(tubularResolution),
               radius(radius), thickness(thickness) {
         generate();

@@ -14,10 +14,6 @@ struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
-//    glm::vec3 tangent; TODO
-//    glm::vec3 bitangent;
-//    int m_BoneIDs[MAX_BONE_INFLUENCE];
-//    float m_Weights[MAX_BONE_INFLUENCE];
 };
 
 class Mesh : public SceneNode {
@@ -27,7 +23,7 @@ public:
     int drawingMode;
     std::optional<std::reference_wrapper<Material>> material;
 
-    Mesh(std::string name, std::vector<Vertex> vertices = std::vector<Vertex>(), std::optional<std::vector<unsigned int>> indices = {},
+    explicit Mesh(std::string name, std::vector<Vertex> vertices = std::vector<Vertex>(), std::optional<std::vector<unsigned int>> indices = {},
          std::optional<std::reference_wrapper<Material>> = {}, int drawingMode = GL_TRIANGLES);
 
     std::string getTypeName() override { return "Mesh"; };
@@ -36,9 +32,6 @@ public:
 
     int acceptVisit(SceneNodeVisitor &visitor) override;
     int acceptLeave(SceneNodeVisitor &visitor) override;
-
-    void setVertices(std::vector<Vertex> &&vertices);
-    void setIndices(std::optional<std::vector<unsigned int>> &&indices);
 
     void update(std::vector<Vertex> &&vertices, std::optional<std::vector<unsigned int>> &&indices);
 

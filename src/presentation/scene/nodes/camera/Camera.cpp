@@ -4,10 +4,12 @@
 
 #include "Camera.h"
 #include "../../../../logic/algebra/AlgebraUtils.h"
+#include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/detail/type_quat.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <utility>
+#include <GL/gl.h>
 
 
 Camera::Camera(std::string name, int screenWidth, int screenHeight, CameraMode cameraMode, glm::vec3 position,
@@ -27,13 +29,36 @@ void Camera::updateDirections() {
     right = AlgebraUtils::getRight(orientation);
 }
 
+glm::mat4 myLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
+    auto f(normalize(center - eye));
+    auto s(normalize(cross(f, up)));
+    auto u(cross(s, f));
+
+    return {
+            {s.x, u.x, -f.x, 0},
+            {s.y, u.y, -f.y, 0},
+            {s.z, u.z, -f.z, 0},
+            {-dot(s, eye), -dot(u, eye), dot(f, eye), 1},
+    };
+}
+
 glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(position, position + front, up);
+    return myLookAt(position, position + front, up);
+}
+
+glm::mat4 myPerspective(float yFov, float aspectRatio, float zNear, float zFar) {
+    float tanHalfYFov = std::tan(yFov / 2);
+
+    return {
+            {1 / aspectRatio / tanHalfYFov, 0, 0, 0},
+            {0, 1 / tanHalfYFov, 0, 0},
+            {0, 0, - (zFar + zNear) / (zFar - zNear), -1},
+            {0, 0, -(2 * zFar * zNear) / (zFar - zNear),0},
+    };
 }
 
 glm::mat4 Camera::getProjectionMatrix() const {
-    return glm::perspective(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane,
-                            farPlane); // TODO configurable
+    return myPerspective(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane);
 }
 
 glm::vec3 Camera::getViewPosition() const {

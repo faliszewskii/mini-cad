@@ -45,6 +45,7 @@ std::unique_ptr<AppState> initializeAppState() {
 //    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
     appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
     // TODO UI for adding objects.
+    appState->rayCastingModule->triggerUpdate(camera);
 
     appState->logger.logInfo("Test Info");
     appState->logger.logDebug("Test Debug");
