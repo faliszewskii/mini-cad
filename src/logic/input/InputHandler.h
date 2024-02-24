@@ -8,7 +8,6 @@
 
 #include "../../../lib/glad/glad_glfw.h"
 #include <functional>
-#include "../../presentation/scene/nodes/camera/Camera.h"
 #include "../state/AppState.h"
 
 class InputHandler {

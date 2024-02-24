@@ -7,8 +7,9 @@
 
 #include <vector>
 #include <memory>
-#include "../../presentation/scene/nodes/transformation/Transformation.h"
-#include "../../presentation/scene/nodes/mesh/Mesh.h"
+#include <glm/mat4x4.hpp>
+#include "../entities/mesh/Mesh.h"
+#include "../entities/transformation/Transformation.h"
 
 class TransformTree {
 public:

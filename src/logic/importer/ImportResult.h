@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <memory>
-#include "../../presentation/scene/nodes/material/Material.h"
 #include "../state/TransformTree.h"
 
 class AppState;

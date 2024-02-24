@@ -9,7 +9,6 @@
 #include "logic/io/IOUtils.h"
 #include "presentation/gui/GUI.h"
 #include "logic/state/AppState.h"
-#include "presentation/scene/nodes/camera/Camera.h"
 #include "logic/input/InputHandler.h"
 #include "presentation/modules/renderers/PhongRenderModule.h"
 #include "presentation/modules/renderers/RandomRenderModule.h"
@@ -64,7 +63,7 @@ int main() {
     inputHandler.setupCallbacks(openGlInstance.getWindow());
 
     {
-        GUI gui(openGlInstance.getWindow(), *appState);
+        GUI gui(openGlInstance.getWindow());
 
         AssetImporter assetImporter;
         auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));

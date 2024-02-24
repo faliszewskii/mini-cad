@@ -34,15 +34,13 @@ set(IMGUI
 
 set(INCL
         ../lib/glad/glad.c
-        presentation/scene/nodes/shader/Shader.h
+        logic/entities/shader/Shader.h
         logic/opengl/OpenGLInstance.cpp
         logic/opengl/OpenGLInstance.h
         logic/io/IOUtils.cpp
         logic/io/IOUtils.h
         logic/importer/AssetImporter.cpp
         logic/importer/AssetImporter.h
-        logic/generator/ModelGenerator.cpp
-        logic/generator/ModelGenerator.h
         logic/algebra/AlgebraUtils.cpp
         logic/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
@@ -50,42 +48,21 @@ set(INCL
         logic/state/AppState.h
         ../lib/glad/glad_glfw.h
         ../lib/uuid/uuid.h
-        presentation/scene/tree/SceneNode.h
-        presentation/scene/visitor/SceneNodeVisitor.h
-        presentation/rendering/renderVisitor/RenderSceneVisitor.cpp
-        presentation/rendering/renderVisitor/RenderSceneVisitor.h
-        presentation/scene/nodes/light/Light.cpp
-        presentation/scene/nodes/light/Light.h
-        presentation/scene/nodes/transformation/Transformation.cpp
-        presentation/scene/nodes/transformation/Transformation.h
-        presentation/scene/nodes/mesh/Mesh.cpp
-        presentation/scene/nodes/mesh/Mesh.h
-        presentation/scene/nodes/camera/Camera.cpp
-        presentation/scene/nodes/camera/Camera.h
-        presentation/gui/tree/TreeViewVisitor.cpp
-        presentation/gui/tree/TreeViewVisitor.h
+        logic/entities/SceneNode.h
+        logic/entities/light/Light.cpp
+        logic/entities/light/Light.h
+        logic/entities/transformation/Transformation.cpp
+        logic/entities/transformation/Transformation.h
+        logic/entities/mesh/Mesh.cpp
+        logic/entities/mesh/Mesh.h
+        logic/entities/camera/Camera.cpp
+        logic/entities/camera/Camera.h
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
-        presentation/gui/node/NodeDetailsVisitor.cpp
-        presentation/gui/node/NodeDetailsVisitor.h
-        presentation/scene/nodes/material/Material.cpp
-        presentation/scene/nodes/material/Material.h
-        presentation/scene/tree/Bindable.h
-        presentation/scene/nodes/frameBuffer/FrameBuffer.cpp
-        presentation/scene/nodes/frameBuffer/FrameBuffer.h
-        presentation/gui/editor/EditorNodeVisitor.cpp
-        presentation/gui/editor/EditorNodeVisitor.h
-        presentation/scene/steps/RenderingStep.cpp
-        presentation/scene/steps/RenderingStep.h
-        presentation/scene/visitor/StepVisitor.h
-        presentation/rendering/renderVisitor/ExecuteStepVisitor.cpp
-        presentation/rendering/renderVisitor/ExecuteStepVisitor.h
-        presentation/gui/tree/StepTreeViewVisitor.cpp
-        presentation/gui/tree/StepTreeViewVisitor.h
-        presentation/gui/node/StepParametersVisitor.cpp
-        presentation/gui/node/StepParametersVisitor.h
-        logic/Scene.h
-        presentation/modules/Module.cpp
+        logic/entities/material/Material.cpp
+        logic/entities/material/Material.h
+        logic/entities/frameBuffer/FrameBuffer.cpp
+        logic/entities/frameBuffer/FrameBuffer.h
         presentation/modules/Module.h
         presentation/modules/renderers/PhongRenderModule.h
         logic/algebra/Rect.h
@@ -100,38 +77,37 @@ set(INCL
         logic/utils/VariantUtil.h
         logic/state/TransformTree.h
         logic/state/SelectionGroup.h
-        presentation/modules/gui/workspaces/TransformTreeWorkspace.h
-        presentation/modules/gui/workspaces/MaterialsWorkspace.h
-        presentation/modules/gui/workspaces/LightsWorkspace.h
-        presentation/modules/gui/workspaces/CamerasWorkspace.h
-        presentation/modules/gui/workspaces/DebugOverlayModuleWorkspace.h
-        presentation/modules/gui/workspaces/GizmoModuleWorkspace.h
-        presentation/modules/gui/workspaces/LogPanelModuleWorkspace.h
-        presentation/modules/gui/workspaces/MenuBarModuleWorkspace.h
-        presentation/modules/gui/workspaces/PhongRendererModuleWorkspace.h
-        presentation/modules/gui/workspaces/NormalRendererModuleWorkspace.h
-        presentation/modules/gui/workspaces/RandomRendererModuleWorkspace.h
-        presentation/modules/gui/workspaces/ModulesWorkspaceHelpers.h
+        presentation/gui/workspaces/TransformTreeWorkspace.h
+        presentation/gui/workspaces/MaterialsWorkspace.h
+        presentation/gui/workspaces/LightsWorkspace.h
+        presentation/gui/workspaces/CamerasWorkspace.h
+        presentation/gui/workspaces/DebugOverlayModuleWorkspace.h
+        presentation/gui/workspaces/GizmoModuleWorkspace.h
+        presentation/gui/workspaces/LogPanelModuleWorkspace.h
+        presentation/gui/workspaces/MenuBarModuleWorkspace.h
+        presentation/gui/workspaces/PhongRendererModuleWorkspace.h
+        presentation/gui/workspaces/NormalRendererModuleWorkspace.h
+        presentation/gui/workspaces/RandomRendererModuleWorkspace.h
+        presentation/gui/workspaces/ModulesWorkspaceHelpers.h
         logic/state/AppState.cpp
         logic/importer/ImportResult.h
         logic/importer/ImportResult.cpp
-        presentation/modules/MeshGenerationModule.h
         logic/generator/MeshGenerator.h
         logic/generator/ParametrisedMeshGenerator.h
         logic/generator/MeshGeneratorHelpers.h
         logic/generator/ParametrisedMeshGenerator.cpp
         logic/generator/HyperbolicParaboloidGenerator.h
-        presentation/modules/gui/workspaces/MeshGeneratorsWorkspace.h
+        presentation/gui/workspaces/MeshGeneratorsWorkspace.h
         logic/generator/TorusGenerator.h
         logic/generator/SphereGenerator.h
         presentation/modules/renderers/GridModule.h
         logic/logger/Logger.h
-        presentation/modules/gui/workspaces/GridModuleWorkspace.h
+        presentation/gui/workspaces/GridModuleWorkspace.h
         logic/generator/NormOneGenerator.h
         presentation/modules/renderers/WireframeRenderModule.h
-        presentation/modules/gui/workspaces/WireframeRenderModuleWorkspace.h
+        presentation/gui/workspaces/WireframeRenderModuleWorkspace.h
         presentation/modules/renderers/RayCastingModule.h
-        presentation/modules/gui/workspaces/RayCastingModuleWorkspace.h
+        presentation/gui/workspaces/RayCastingModuleWorkspace.h
 )
 
 add_executable(opengl-sandbox main.cpp

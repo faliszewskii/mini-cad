@@ -6,12 +6,12 @@
 #define OPENGL_SANDBOX_SELECTIONGROUP_H
 
 #include <optional>
-#include "../../presentation/scene/nodes/camera/Camera.h"
-#include "../../presentation/scene/nodes/material/Material.h"
-#include "../../presentation/scene/nodes/light/Light.h"
-#include "../../presentation/scene/nodes/mesh/Mesh.h"
 #include "../generator/MeshGenerator.h"
 #include "TransformTree.h"
+#include "../entities/camera/Camera.h"
+#include "../entities/material/Material.h"
+#include "../entities/light/Light.h"
+#include "../entities/mesh/Mesh.h"
 
 
 class SelectionGroup {

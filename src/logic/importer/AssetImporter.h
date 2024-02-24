@@ -10,8 +10,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <map>
-#include "../../presentation/scene/nodes/mesh/Mesh.h"
-#include "../Scene.h"
 #include "ImportResult.h"
 
 class FailedToLoadModelException : public std::runtime_error {

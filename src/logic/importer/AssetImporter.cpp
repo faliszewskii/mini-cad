@@ -8,7 +8,6 @@
 
 #include "AssetImporter.h"
 #include "../io/stb_image.h"
-#include "../../presentation/scene/nodes/transformation/Transformation.h"
 
 ImportResult AssetImporter::importModel(const std::string &resourcePath) {
     Assimp::Importer import;
@@ -79,24 +78,12 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Materi
             vertex.normal = vector;
         }
         // texture coordinates
-        if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+        if (mesh->mTextureCoords[0])
         {
             glm::vec2 vec;
-            // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
-            // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vec;
-//            // tangent
-//            vector.x = mesh->mTangents[i].x;
-//            vector.y = mesh->mTangents[i].y;
-//            vector.z = mesh->mTangents[i].z;
-//            vertex.tangent = vector;
-//            // bitangent
-//            vector.x = mesh->mBitangents[i].x;
-//            vector.y = mesh->mBitangents[i].y;
-//            vector.z = mesh->mBitangents[i].z;
-//            vertex.bitangent = vector;
         } else
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
 
@@ -107,10 +94,8 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Materi
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-    // TODO global table of materials and SceneTreeNode only has reference to SceneNodes.
 
-
-    return {meshName.C_Str(), vertices, indices, *materials[mesh->mMaterialIndex]};
+    return Mesh{meshName.C_Str(), vertices, indices, *materials[mesh->mMaterialIndex]};
 }
 
 std::vector<std::unique_ptr<Material>> AssetImporter::processMaterials(const aiScene *scene) {
@@ -118,20 +103,7 @@ std::vector<std::unique_ptr<Material>> AssetImporter::processMaterials(const aiS
     std::vector<Texture> loadedTextures;
     for(int i = 0; i < scene->mNumMaterials; i++) {
         aiMaterial *material = scene->mMaterials[i];
-
-        // 1. diffuse maps
         std::vector<Texture> diffuseMaps = loadMaterialTextures(material, loadedTextures, aiTextureType_DIFFUSE, "texture_diffuse");
-        // TODO Multiple textures
-//    // 2. specular maps
-//    vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-//    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-//    // 3. normal maps
-//    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-//    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-//    // 4. height maps
-//    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-//    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-
         glm::vec4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
         C_STRUCT aiColor4D _diffuse;
         if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &_diffuse))
@@ -144,7 +116,6 @@ std::vector<std::unique_ptr<Material>> AssetImporter::processMaterials(const aiS
         float shininess = 0;
         if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess)) {}
 
-        // TODO Multiple textures
         materials.push_back(std::make_unique<Material>(materialName.C_Str(), diffuse,
                                                        !diffuseMaps.empty() ? diffuseMaps[0] : std::optional<Texture>(), shininess, shadingModelMap[shadingMode]));
     }

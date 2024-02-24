@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_MESHGENERATOR_H
 #define OPENGL_SANDBOX_MESHGENERATOR_H
 
-#include "../../presentation/scene/nodes/mesh/Mesh.h"
+#include "../entities/mesh/Mesh.h"
 
 class MeshGenerator {
 protected:

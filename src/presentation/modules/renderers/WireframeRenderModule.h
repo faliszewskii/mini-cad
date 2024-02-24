@@ -6,7 +6,6 @@
 #define OPENGL_SANDBOX_WIREFRAMERENDERMODULE_H
 
 #include "../Module.h"
-#include "../../scene/nodes/shader/Shader.h"
 #include "../../../logic/io/IOUtils.h"
 #include "imgui.h"
 #include "RenderHelpers.h"

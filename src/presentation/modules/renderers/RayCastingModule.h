@@ -6,9 +6,7 @@
 #define OPENGL_SANDBOX_RAYCASTINGMODULE_H
 
 #include "../Module.h"
-#include "../../scene/nodes/shader/Shader.h"
 #include "../../../logic/io/IOUtils.h"
-#include "../../scene/nodes/mesh/Mesh.h"
 #include "../../../logic/generator/MeshGeneratorHelpers.h"
 #include "../../../logic/state/AppState.h"
 #include <glm/gtc/type_ptr.hpp>

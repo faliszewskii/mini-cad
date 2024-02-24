@@ -7,7 +7,6 @@
 
 #include "../Module.h"
 #include "../../../logic/state/AppState.h"
-#include "../../scene/nodes/shader/Shader.h"
 #include "../../../logic/io/IOUtils.h"
 #include "../../../logic/generator/MeshGeneratorHelpers.h"
 

@@ -10,10 +10,6 @@
 #include <vector>
 #include <set>
 #include "../importer/AssetImporter.h"
-#include "../../presentation/scene/nodes/transformation/Transformation.h"
-#include "../../presentation/scene/nodes/camera/Camera.h"
-#include "../../presentation/scene/tree/StepTree.h"
-#include "../generator/ModelGenerator.h"
 #include "TransformTree.h"
 #include "SelectionGroup.h"
 #include "../algebra/Rect.h"
@@ -40,9 +36,6 @@ struct AppState {
     void runModules();
 
     AssetImporter assetImporter;
-    // TODO ModelGenerator ?
-    // TODO Logger
-    Scene scene;
 
     std::vector<Light> lights;
     std::vector<Camera> cameras;
@@ -72,13 +65,6 @@ struct AppState {
     bool vSync;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
-
-    // TODO Delete
-    std::optional<std::reference_wrapper<SceneNode>> selectedNode;
-    std::optional<std::reference_wrapper<RenderingStep>> selectedStep;
-    std::optional<std::reference_wrapper<SceneNode>> mainFrameBufferNode;
-    std::vector<std::unique_ptr<SceneNode>> allNodes;
-
 };
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

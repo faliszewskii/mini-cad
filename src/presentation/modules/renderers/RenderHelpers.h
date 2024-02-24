@@ -5,8 +5,6 @@
 #ifndef OPENGL_SANDBOX_RENDERHELPERS_H
 #define OPENGL_SANDBOX_RENDERHELPERS_H
 
-#include "../../scene/nodes/shader/Shader.h"
-#include "../../scene/nodes/mesh/Mesh.h"
 #include "../../../logic/state/AppState.h"
 
 namespace RenderHelpers {

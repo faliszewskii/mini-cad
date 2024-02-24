@@ -6,7 +6,6 @@
 #define OPENGL_SANDBOX_NORMALRENDERMODULE_H
 
 #include "../Module.h"
-#include "../../scene/nodes/shader/Shader.h"
 #include "../../../logic/algebra/Rect.h"
 #include "RenderHelpers.h"
 #include "../../../logic/state/AppState.h"
