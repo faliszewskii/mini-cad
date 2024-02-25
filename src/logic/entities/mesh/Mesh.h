@@ -33,7 +33,7 @@ class Mesh : public SceneNode {
     std::optional<std::vector<unsigned int>> indices;
 public:
     int drawingMode;
-    std::optional<std::reference_wrapper<Material>> material;
+    std::optional<std::reference_wrapper<Material>> material{};
 
     explicit Mesh(std::string name, std::vector<TVertex> vertices = std::vector<TVertex>(), std::optional<std::vector<unsigned int>> indices = {},
          std::optional<std::reference_wrapper<Material>> = {}, int drawingMode = GL_TRIANGLES) : SceneNode(std::move(name)),
@@ -44,7 +44,7 @@ public:
 
     std::string getTypeName() override { return "Mesh"; };
 
-    void render() {
+    void render() const {
         // draw mesh
         glBindVertexArray(VAO);
         if (indices)

@@ -9,11 +9,11 @@
 
 class MeshGenerator {
 protected:
-    Mesh<Vertex> &target;
+    std::unique_ptr<Mesh<Vertex>> target;
 public:
-    explicit MeshGenerator(Mesh<Vertex> &target) : target(target) {}
+    explicit MeshGenerator() : target(std::make_unique<Mesh<Vertex>>("Generated")) {}
 
-    [[nodiscard]] const Mesh<Vertex>& getTargetMesh() const { return target; }
+    [[nodiscard]] Mesh<Vertex>& getTargetMesh() const { return *target; }
 
     virtual void generate() = 0;
 

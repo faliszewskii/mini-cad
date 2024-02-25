@@ -28,8 +28,8 @@ protected:
     virtual float zdv(float u, float v) { return 0; };
 
 public:
-    explicit ParametrisedMeshGenerator(Mesh<Vertex>& mesh, int uCount, int vCount, float uMin, float uMax, float vMin, float vMax):
-        MeshGenerator(mesh), uCount(uCount), vCount(vCount), uMin(uMin), uMax(uMax), vMin(vMin), vMax(vMax) {}
+    explicit ParametrisedMeshGenerator(int uCount, int vCount, float uMin, float uMax, float vMin, float vMax):
+        uCount(uCount), vCount(vCount), uMin(uMin), uMax(uMax), vMin(vMin), vMax(vMax) {}
 
     void generate() final;
 

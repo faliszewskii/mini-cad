@@ -56,6 +56,11 @@ namespace RenderHelpers {
                     [&](std::unique_ptr<Mesh<Vertex>>& mesh) {
                         setUpMesh(shader, *mesh);
                         mesh->render();
+                    },
+                    [&](std::unique_ptr<MeshGenerator>& generator) {
+                        auto &mesh = generator->getTargetMesh();
+                        setUpMesh(shader, mesh);
+                        mesh.render();
                     }
                 }, entity);
             }
@@ -77,9 +82,12 @@ namespace RenderHelpers {
             shader.setUniform("model", modelStack.top());
             for(auto &entity : node.getEntities())
                 std::visit(overloaded{
-                    [&](auto& el) {
-                        el->render();
-                    }
+                        [&](std::unique_ptr<Mesh<Vertex>>& mesh) {
+                            mesh->render();
+                        },
+                        [&](std::unique_ptr<MeshGenerator>& generator) {
+                            generator->getTargetMesh().render();
+                        }
                 }, entity);
             for(auto &child : node.getChildren())
                 lambda(*child);

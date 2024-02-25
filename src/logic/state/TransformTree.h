@@ -10,6 +10,7 @@
 #include <glm/mat4x4.hpp>
 #include "../entities/mesh/Mesh.h"
 #include "../entities/transformation/Transformation.h"
+#include "../generator/MeshGenerator.h"
 
 class TransformTree {
 public:
@@ -17,7 +18,7 @@ public:
 private:
     std::optional<std::reference_wrapper<TransformTree>> parent;
     std::vector<std::unique_ptr<TransformTree>> children;
-    using EntityType = std::variant<std::unique_ptr<Mesh<Vertex>>>;
+    using EntityType = std::variant<std::unique_ptr<Mesh<Vertex>>, std::unique_ptr<MeshGenerator>>;
     std::vector<EntityType> entities;
 
 public:
@@ -31,8 +32,8 @@ public:
     }
 
     template<typename T>
-    T& addChild(T &&mesh) {
-        entities.push_back(std::forward<T>(mesh));
+    T& addChild(T &&entity) {
+        entities.push_back(std::forward<T>(entity));
         return std::get<T>(entities[entities.size()-1]);
     }
 

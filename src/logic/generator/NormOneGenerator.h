@@ -55,10 +55,10 @@ class NormOneGenerator : public ParametrisedMeshGenerator {
     float zdv(float u, float v) override { return 0; };
 
 public:
-    explicit NormOneGenerator(Mesh<Vertex> &mesh, float e = 0) :
+    explicit NormOneGenerator(float e = 0) :
 //            ParametrisedMeshGenerator(mesh, 10, 10, 0, 2 * M_PI, 0, M_PI), e(e) {
 //            ParametrisedMeshGenerator(mesh, 100, 100, 0, 2 * M_PI, 0, M_PI), e(e) {
-        ParametrisedMeshGenerator(mesh, 100, 100, 0, 2 * M_PI, 0, 2*M_PI), e(e) {
+        ParametrisedMeshGenerator(100, 100, 0, 2 * M_PI, 0, 2*M_PI), e(e) {
         ParametrisedMeshGenerator::generate();
     }
 

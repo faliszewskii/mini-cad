@@ -35,7 +35,7 @@ void ParametrisedMeshGenerator::generate() {
             MeshGeneratorHelpers::addQuad(indices, i0, i1, i2, i3);
         }
     }
-    target.update(std::move(vertices), std::move( std::optional<std::vector<unsigned int>>(indices)));
+    target->update(std::move(vertices), std::move( std::optional<std::vector<unsigned int>>(indices)));
 }
 
 MeshGenerator::ParameterMap ParametrisedMeshGenerator::getParameters() {

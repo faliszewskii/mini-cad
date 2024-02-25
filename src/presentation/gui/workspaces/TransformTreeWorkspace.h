@@ -35,6 +35,20 @@ namespace TransformTreeWorkspace {
         // TODO Mesh UI
     }
 
+    inline void renderWorkspaceGenerator(MeshGenerator &generator) {
+        ImGui::SeparatorText(generator.getName().c_str());
+        ImGui::Text("Generating for: %s", generator.getTargetMesh().getName().c_str());
+
+        for(auto &parameter : generator.getParameters()) {
+            std::visit(overloaded{
+                    [&parameter](int& value) { ImGui::DragInt(parameter.first.c_str(), &value); },
+                    [&parameter](float& value) { ImGui::DragFloat(parameter.first.c_str(), &value, 0.01); }
+            }, parameter.second);
+            if(ImGui::IsItemActive()) generator.generate();
+        }
+
+    }
+
     inline void render(AppState &appState) {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
         ImGui::BeginChild("Scene Tree#Workspace", ImVec2(-FLT_MIN, 0), ImGuiChildFlags_Border | ImGuiChildFlags_AutoResizeY);
@@ -56,12 +70,20 @@ namespace TransformTreeWorkspace {
                 for (auto &entity: node.getEntities()) {
                     auto localFlagsMesh = flags;
                     std::visit(overloaded{
-                        [&](auto &el) {
-                            if (appState.selectionGroup.getSelectedMesh() && &appState.selectionGroup.getSelectedMesh().value().get() == &*el) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
-                            ImGui::TreeNodeEx(uuids::to_string(el->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
-                                              "[M] %s", el->getName().c_str());
+                        [&](std::unique_ptr<Mesh<Vertex>>& mesh) {
+                            if (appState.selectionGroup.getSelectedMesh() && &appState.selectionGroup.getSelectedMesh().value().get() == &*mesh) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
+                            ImGui::TreeNodeEx(uuids::to_string(mesh->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
+                                              "[M] %s", mesh->getName().c_str());
                             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                                appState.selectionGroup.setFocus(*el);
+                                appState.selectionGroup.setFocus(*mesh);
+                            ImGui::TreePop();
+                        },
+                        [&](std::unique_ptr<MeshGenerator>& generator) {
+                            if (appState.selectionGroup.getSelectedMeshGenerator() && &appState.selectionGroup.getSelectedMeshGenerator().value().get() == &*generator) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
+                            ImGui::TreeNodeEx(uuids::to_string(generator->getTargetMesh().getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
+                                              "[G] %s", generator->getTargetMesh().getName().c_str());
+                            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                                appState.selectionGroup.setFocus(*generator);
                             ImGui::TreePop();
                         }
                     }, entity);
@@ -103,6 +125,8 @@ namespace TransformTreeWorkspace {
         if(selectedTransform) renderWorkspaceTransform(selectedTransform->get().transform);
         auto &selectedMesh = appState.selectionGroup.getSelectedMesh();
         if(selectedMesh) renderWorkspaceMesh(selectedMesh->get());
+        auto &selectedGenerator = appState.selectionGroup.getSelectedMeshGenerator();
+        if(selectedGenerator) renderWorkspaceGenerator(selectedGenerator->get());
     }
 };
 

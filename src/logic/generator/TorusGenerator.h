@@ -15,8 +15,8 @@ class TorusGenerator : public MeshGenerator {
     float radius;
     float thickness;
 public:
-    explicit TorusGenerator(Mesh<Vertex> &target, int radialResolution = 50, int tubularResolution = 50, float radius = 1, float thickness = 0.25f)
-            : MeshGenerator(target), radialResolution(radialResolution), tubularResolution(tubularResolution),
+    explicit TorusGenerator(int radialResolution = 50, int tubularResolution = 50, float radius = 1, float thickness = 0.25f)
+            : radialResolution(radialResolution), tubularResolution(tubularResolution),
               radius(radius), thickness(thickness) {
         generate();
     }
@@ -53,7 +53,7 @@ public:
             }
         }
 
-        target.update(std::move(vertices), std::move(indices));
+        target->update(std::move(vertices), std::move(indices));
     }
 
     ParameterMap getParameters() final {
