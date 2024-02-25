@@ -39,10 +39,10 @@ std::unique_ptr<AppState> initializeAppState() {
     appState->lights.emplace_back("Point Light", glm::vec3(1.0, 1.0f, 1.0f));
     auto &material = *appState->materials.emplace_back(std::make_unique<Material>(Material("Default Material", glm::vec4(1,0.5,0.5, 1), {}, 128)));
 
-    auto &generated = appState->transformTree.addChlid(std::make_unique<Mesh<Vertex>>("Generated"));
-    generated.material = material;
+    auto &generated = appState->transformTree.addChild(std::make_unique<Mesh<Vertex>>("Generated"));
+    generated->material = material;
 //    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
-    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(generated));
+    appState->meshGenerators.push_back(std::make_unique<TorusGenerator>(*generated));
     // TODO UI for adding objects.
     appState->rayCastingModule->triggerUpdate(camera);
 

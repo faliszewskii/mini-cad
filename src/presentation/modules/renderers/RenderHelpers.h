@@ -43,17 +43,21 @@ namespace RenderHelpers {
         shader.setUniform("material.shininess", material.getShininess());
     }
 
-    inline void renderMeshes(const TransformTree &transformTree, const Shader &shader) {
+    inline void renderMeshes(TransformTree &transformTree, const Shader &shader) {
         std::stack<glm::mat4> modelStack;
         modelStack.emplace(1.0f);
 
-        std::function<void(const TransformTree &)> lambda;
-        lambda = [&](const TransformTree &node){
+        std::function<void(TransformTree &)> lambda;
+        lambda = [&](TransformTree &node){
             modelStack.push(modelStack.top() * node.transform.getTransformation());
             shader.setUniform("model", modelStack.top());
-            for(auto &mesh : node.getMeshes()) {
-                setUpMesh(shader, *mesh);
-                mesh->render();
+            for(auto &entity : node.getEntities()) {
+                std::visit(overloaded{
+                    [&](std::unique_ptr<Mesh<Vertex>>& mesh) {
+                        setUpMesh(shader, *mesh);
+                        mesh->render();
+                    }
+                }, entity);
             }
             for(auto &child : node.getChildren())
                 lambda(*child);
@@ -63,16 +67,20 @@ namespace RenderHelpers {
         lambda(transformTree);
     }
 
-    inline void renderMeshesNoMaterial(const TransformTree &transformTree, const Shader &shader) {
+    inline void renderMeshesNoMaterial(TransformTree &transformTree, const Shader &shader) {
         std::stack<glm::mat4> modelStack;
         modelStack.emplace(1.0f);
 
-        std::function<void(const TransformTree &)> lambda;
-        lambda = [&](const TransformTree &node){
+        std::function<void(TransformTree &)> lambda;
+        lambda = [&](TransformTree &node){
             modelStack.push(modelStack.top() * node.transform.getTransformation());
             shader.setUniform("model", modelStack.top());
-            for(auto &mesh : node.getMeshes())
-                mesh->render();
+            for(auto &entity : node.getEntities())
+                std::visit(overloaded{
+                    [&](auto& el) {
+                        el->render();
+                    }
+                }, entity);
             for(auto &child : node.getChildren())
                 lambda(*child);
             modelStack.pop();

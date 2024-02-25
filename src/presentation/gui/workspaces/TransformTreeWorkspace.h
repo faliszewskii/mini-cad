@@ -53,14 +53,18 @@ namespace TransformTreeWorkspace {
             if(nodeOpen) {
                 for(auto &child : node.getChildren())
                     lambda(*child);
-                for (auto &mesh: node.getMeshes()) {
+                for (auto &entity: node.getEntities()) {
                     auto localFlagsMesh = flags;
-                    if (appState.selectionGroup.getSelectedMesh() && &appState.selectionGroup.getSelectedMesh().value().get() == &*mesh) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
-                    ImGui::TreeNodeEx(uuids::to_string(mesh->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
-                                      "[M] %s", mesh->getName().c_str());
-                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                        appState.selectionGroup.setFocus(*mesh);
-                    ImGui::TreePop();
+                    std::visit(overloaded{
+                        [&](auto &el) {
+                            if (appState.selectionGroup.getSelectedMesh() && &appState.selectionGroup.getSelectedMesh().value().get() == &*el) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
+                            ImGui::TreeNodeEx(uuids::to_string(el->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
+                                              "[M] %s", el->getName().c_str());
+                            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                                appState.selectionGroup.setFocus(*el);
+                            ImGui::TreePop();
+                        }
+                    }, entity);
                 }
                 ImGui::TreePop();
             }

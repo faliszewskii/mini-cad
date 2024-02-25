@@ -42,12 +42,12 @@ std::unique_ptr<TransformTree> AssetImporter::processNode(aiNode *node, const ai
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         auto child = processNode(node->mChildren[i], scene, materials);
-        transformTree->addChlid(std::move(child));
+        transformTree->addChild(std::move(child));
     }
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         auto mesh = std::make_unique<Mesh<Vertex>>(processMesh(scene->mMeshes[node->mMeshes[i]], materials, i));
-        transformTree->addChlid(std::move(mesh));
+        transformTree->addChild(std::move(mesh));
     }
 
     return transformTree;
