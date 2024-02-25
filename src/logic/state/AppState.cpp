@@ -13,17 +13,17 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         guiFocus(true),
         vSync(false),
         transformTree("root"),
-        menuBarModule(std::make_unique<MenuBarModule>()),
-        logPanelModule(std::make_unique<LogPanelModule>()),
-        debugOverlayModule(std::make_unique<DebugOverlayModule>(guiPanelLeftWidth)),
-        gizmoModule(std::make_unique<GizmoModule>(guiPanelLeftWidth)),
-        workspaceModule(std::make_unique<WorkspaceModule>(guiPanelLeftWidth)),
-        normalRendererModule(std::make_unique<NormalRenderModule>(guiPanelLeftWidth)),
-        phongRendererModule(std::make_unique<PhongRenderModule>(guiPanelLeftWidth)),
-        randomRendererModule(std::make_unique<RandomRenderModule>(guiPanelLeftWidth)),
-        wireframeRendererModule(std::make_unique<WireframeRenderModule>(guiPanelLeftWidth)),
-        gridModule(new GridModule(guiPanelLeftWidth)),
-        rayCastingModule(std::make_unique<RayCastingModule>(guiPanelLeftWidth))
+        menuBarModule(std::make_unique<MenuBarModule>(true)),
+        logPanelModule(std::make_unique<LogPanelModule>(true)),
+        debugOverlayModule(std::make_unique<DebugOverlayModule>(guiPanelLeftWidth, true)),
+        gizmoModule(std::make_unique<GizmoModule>(guiPanelLeftWidth, true)),
+        workspaceModule(std::make_unique<WorkspaceModule>(guiPanelLeftWidth, true)),
+        normalRendererModule(std::make_unique<NormalRenderModule>(guiPanelLeftWidth, false)),
+        phongRendererModule(std::make_unique<PhongRenderModule>(guiPanelLeftWidth, false)),
+        randomRendererModule(std::make_unique<RandomRenderModule>(guiPanelLeftWidth, false)),
+        wireframeRendererModule(std::make_unique<WireframeRenderModule>(guiPanelLeftWidth, true)),
+        gridModule(new GridModule(guiPanelLeftWidth, true)),
+        rayCastingModule(std::make_unique<RayCastingModule>(guiPanelLeftWidth, false))
         {}
 
 void AppState::runModules() {

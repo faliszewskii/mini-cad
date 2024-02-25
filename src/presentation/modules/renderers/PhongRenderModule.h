@@ -16,7 +16,7 @@ class PhongRenderModule : public Module {
     Shader shader;
 
 public:
-    explicit PhongRenderModule(int workspaceWidth) : Module(false), workspaceWidth(workspaceWidth),
+    explicit PhongRenderModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
                                                      shader(Shader("blinnPhong", IOUtils::getResource("shaders/phong/basicBlinnPhong.vert"), IOUtils::getResource("shaders/phong/basicBlinnPhong.frag"))) {}
 
     void run(AppState &appState) final {

@@ -14,9 +14,9 @@
 class GridModule : public Module {
     const int workspaceWidth;
     Shader shader;
-    std::unique_ptr<Mesh> mesh;
+    std::unique_ptr<Mesh<Vertex>> mesh;
 public:
-    explicit GridModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth),
+    explicit GridModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
                    shader(Shader("Grid", IOUtils::getResource("shaders/grid/grid.vert"), IOUtils::getResource("shaders/grid/grid.frag"))){
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -29,7 +29,7 @@ public:
 
         MeshGeneratorHelpers::addQuad(indices,0, 1, 2, 3);
 
-        mesh = std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
+        mesh = std::make_unique<Mesh<Vertex>>(Mesh<Vertex>("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
     }
 
     void run(AppState &appState) override {

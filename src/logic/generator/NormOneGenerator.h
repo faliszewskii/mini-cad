@@ -32,15 +32,16 @@ class NormOneGenerator : public ParametrisedMeshGenerator {
     constexpr static const glm::vec3 b1{0,0,1};
     constexpr const static float r = 1;
 //
+//    Walec
 //    float x(float u, float v) override { return u*a.x + r * cos(v) * glm::normalize(b0).x + r * sin(v) * glm::normalize(b1).x; };
 //    float y(float u, float v) override { return u*a.y + r * cos(v) * glm::normalize(b0).y + r * sin(v) * glm::normalize(b1).y;  };
 //    float z(float u, float v) override { return u*a.z + r * cos(v) * glm::normalize(b0).z + r * sin(v) * glm::normalize(b1).z;  };
 //
-
+//    Kula
 //    float x(float u, float v) override { return r*sin(u)*a.x + r * cos(u) * cos(v) * glm::normalize(b0).x + r * cos(u) * sin(v) * glm::normalize(b1).x; };
 //    float y(float u, float v) override { return r*sin(u)*a.y + r * cos(u) * cos(v) * glm::normalize(b0).y + r * cos(u) * sin(v) * glm::normalize(b1).y; };
 //    float z(float u, float v) override { return r*sin(u)*a.z + r * cos(u) * cos(v) * glm::normalize(b0).z + r * cos(u) * sin(v) * glm::normalize(b1).z; };
-
+//  Torus
     constexpr const static float R = 3;
     float x(float u, float v) override { return R * sin(v) * b1.x + R * cos(v) * b0.x + r * cos(u)*cos(v) * b0.x + r * cos(u)*sin(v) * b1.x + r * sin(u) * a.x; };
     float y(float u, float v) override { return R * sin(v) * b1.y + R * cos(v) * b0.y + r * cos(u)*cos(v) * b0.y + r * cos(u)*sin(v) * b1.y + r * sin(u) * a.y;  };
@@ -54,7 +55,7 @@ class NormOneGenerator : public ParametrisedMeshGenerator {
     float zdv(float u, float v) override { return 0; };
 
 public:
-    explicit NormOneGenerator(Mesh &mesh, float e = 0) :
+    explicit NormOneGenerator(Mesh<Vertex> &mesh, float e = 0) :
 //            ParametrisedMeshGenerator(mesh, 10, 10, 0, 2 * M_PI, 0, M_PI), e(e) {
 //            ParametrisedMeshGenerator(mesh, 100, 100, 0, 2 * M_PI, 0, M_PI), e(e) {
         ParametrisedMeshGenerator(mesh, 100, 100, 0, 2 * M_PI, 0, 2*M_PI), e(e) {

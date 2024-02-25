@@ -46,14 +46,14 @@ std::unique_ptr<TransformTree> AssetImporter::processNode(aiNode *node, const ai
     }
 
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        auto mesh = std::make_unique<Mesh>(processMesh(scene->mMeshes[node->mMeshes[i]], materials, i));
+        auto mesh = std::make_unique<Mesh<Vertex>>(processMesh(scene->mMeshes[node->mMeshes[i]], materials, i));
         transformTree->addChlid(std::move(mesh));
     }
 
     return transformTree;
 }
 
-Mesh AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int index) {
+Mesh<Vertex> AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int index) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -95,7 +95,7 @@ Mesh AssetImporter::processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Materi
             indices.push_back(face.mIndices[j]);
     }
 
-    return Mesh{meshName.C_Str(), vertices, indices, *materials[mesh->mMaterialIndex]};
+    return Mesh<Vertex>{meshName.C_Str(), vertices, indices, *materials[mesh->mMaterialIndex]};
 }
 
 std::vector<std::unique_ptr<Material>> AssetImporter::processMaterials(const aiScene *scene) {

@@ -16,7 +16,7 @@ class RandomRenderModule : public Module {
     Shader shader;
 
 public:
-    explicit RandomRenderModule(int workspaceWidth) : Module(false), workspaceWidth(workspaceWidth),
+    explicit RandomRenderModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
                                                       shader(Shader("random",
                          IOUtils::getResource("shaders/basic/white.vert"),
                          IOUtils::getResource("shaders/debug/random.frag"))) {}

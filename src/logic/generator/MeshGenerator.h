@@ -9,11 +9,11 @@
 
 class MeshGenerator {
 protected:
-    Mesh &target;
+    Mesh<Vertex> &target;
 public:
-    explicit MeshGenerator(Mesh &target) : target(target) {}
+    explicit MeshGenerator(Mesh<Vertex> &target) : target(target) {}
 
-    [[nodiscard]] const Mesh& getTargetMesh() const { return target; }
+    [[nodiscard]] const Mesh<Vertex>& getTargetMesh() const { return target; }
 
     virtual void generate() = 0;
 

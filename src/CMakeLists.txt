@@ -53,7 +53,6 @@ set(INCL
         logic/entities/light/Light.h
         logic/entities/transformation/Transformation.cpp
         logic/entities/transformation/Transformation.h
-        logic/entities/mesh/Mesh.cpp
         logic/entities/mesh/Mesh.h
         logic/entities/camera/Camera.cpp
         logic/entities/camera/Camera.h

@@ -16,29 +16,29 @@
 
 class SelectionGroup {
     #define GROUPS                          \
-    GROUP(Camera, CAMERA)                   \
-    GROUP(Material, MATERIAL)               \
-    GROUP(TransformTree, TRANSFORM_TREE)    \
-    GROUP(Light, LIGHT)                     \
-    GROUP(Mesh, MESH)                       \
-    GROUP(MeshGenerator, MESH_GENERATOR)
+    GROUP(Camera, , CAMERA)                   \
+    GROUP(Material, , MATERIAL)               \
+    GROUP(TransformTree, , TRANSFORM_TREE)    \
+    GROUP(Light, , LIGHT)                     \
+    GROUP(Mesh, <Vertex>, MESH)                       \
+    GROUP(MeshGenerator, , MESH_GENERATOR)
 
     enum Focus {
-        #define GROUP(T, ENUM) \
+        #define GROUP(T, TEMPLATE, ENUM) \
             ENUM,
         GROUPS
         #undef GROUP
         NONE
     } currentFocus = NONE;
 
-    #define GROUP(T, ENUM) \
-        std::optional<std::reference_wrapper<T>> selected##T;
+    #define GROUP(T, TEMPLATE, ENUM) \
+        std::optional<std::reference_wrapper<T TEMPLATE>> selected##T;
     GROUPS
     #undef GROUP
 
     void unsetFocus(Focus focus) {
         switch(focus) {
-            #define GROUP(T, ENUM)              \
+            #define GROUP(T, TEMPLATE, ENUM)              \
                 case ENUM: selected##T = {};    \
                 break;
             GROUPS
@@ -49,15 +49,15 @@ class SelectionGroup {
 
 public:
 
-    #define GROUP(T, ENUM)                                                  \
-        const std::optional<std::reference_wrapper<T>>& getSelected##T() {  \
+    #define GROUP(T, TEMPLATE, ENUM)                                                  \
+        const std::optional<std::reference_wrapper<T TEMPLATE>>& getSelected##T() {  \
             return selected##T;                                             \
         }
     GROUPS
     #undef GROUP
 
-    #define GROUP(T, ENUM)              \
-        void setFocus(T& el) {          \
+    #define GROUP(T, TEMPLATE, ENUM)    \
+        void setFocus(T TEMPLATE& el) {          \
             unsetFocus(currentFocus);   \
             selected##T = el;           \
             currentFocus = ENUM;        \

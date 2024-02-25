@@ -15,7 +15,7 @@ class WireframeRenderModule : public Module {
     Shader shader;
 
 public:
-    explicit WireframeRenderModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth),
+    explicit WireframeRenderModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
                                                       shader(Shader("random",
                                                                     IOUtils::getResource("shaders/debug/wireframe.vert"),
                                                                     IOUtils::getResource("shaders/debug/wireframe.geom"),

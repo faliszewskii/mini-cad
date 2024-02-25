@@ -67,7 +67,6 @@ void main() {
             normal[i] += (D[i][j] + D[j][i]) * v[j];
     }
 
-//    vec3 normal = 2 * vec3(fragPos3D.x/semiAxisA/semiAxisA, fragPos3D.y/semiAxisB/semiAxisB, fragPos3D.z/semiAxisC/semiAxisC);
     vec3 viewDir = normalize(viewPos - fragPos3D);
     vec3 result = vec3(1,1,0) * calculateLight(pointLight, normalize(normal), fragPos3D, viewDir);
 

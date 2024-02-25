@@ -27,7 +27,8 @@ namespace RenderHelpers {
         }
     }
 
-    inline void setUpMesh(const Shader &shader, const Mesh &mesh) {
+    template<typename TVertex>
+    inline void setUpMesh(const Shader &shader, const Mesh<TVertex> &mesh) {
         if(!mesh.material) return;
         auto &material = mesh.material.value().get();
         if (material.getDiffuseTexture()) {

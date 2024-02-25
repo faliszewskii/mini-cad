@@ -15,7 +15,7 @@
 class RayCastingModule : public Module {
     const int workspaceWidth;
     Shader shader;
-    std::unique_ptr<Mesh> mesh;
+    std::unique_ptr<Mesh<Vertex>> mesh;
     float specularFactor;
 
     int textureWidth{};
@@ -60,7 +60,7 @@ public:
     glm::vec3& getTranslation() { return translation; };
     glm::vec3& getEulerRotation() { return eulerRotation; };
 
-    explicit RayCastingModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth), specularFactor(256),
+    explicit RayCastingModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth), specularFactor(256),
             semiAxisA(0.5), semiAxisB(0.25), semiAxisC(1), isFirstPass(false), startingPixelSize(16), pixelSize(startingPixelSize),
             shaderPixelSize(pixelSize), pixelsPerLoop(2000), currentX(0), currentY(0),
             firstPassFull(false), scale(glm::vec3(1.f)), translation(0.f), eulerRotation(0.f),
@@ -77,7 +77,7 @@ public:
 
         MeshGeneratorHelpers::addQuad(indices,0, 1, 2, 3);
 
-        mesh = std::make_unique<Mesh>(Mesh("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
+        mesh = std::make_unique<Mesh<Vertex>>(Mesh<Vertex>("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
     }
 
     void run(AppState &appState) override {

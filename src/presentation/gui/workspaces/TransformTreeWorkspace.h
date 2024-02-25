@@ -28,7 +28,7 @@ namespace TransformTreeWorkspace {
         ImGui::DragFloat("z##scale", static_cast<float *>(glm::value_ptr(transform.getScaleRef())) + 2, 0.001f);
     }
 
-    inline void renderWorkspaceMesh(Mesh &mesh) {
+    inline void renderWorkspaceMesh(Mesh<Vertex> &mesh) {
         ImGui::SeparatorText(mesh.getName().c_str());
         ImGui::Text("Material: %s", mesh.material? mesh.material->get().getName().c_str() : "No material");
 

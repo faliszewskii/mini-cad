@@ -9,7 +9,7 @@
 
 class LogPanelModule : public Module {
 public:
-    explicit LogPanelModule() : Module(true) {};
+    explicit LogPanelModule(bool active) : Module(active) {};
 
     void run(AppState &appState) final {
         ImGuiWindowFlags window_flags =

@@ -6,6 +6,7 @@
 #define OPENGL_SANDBOX_TORUSGENERATOR_H
 
 #include "MeshGenerator.h"
+#include "../entities/mesh/Mesh.h"
 #include "MeshGeneratorHelpers.h"
 
 class TorusGenerator : public MeshGenerator {
@@ -14,7 +15,7 @@ class TorusGenerator : public MeshGenerator {
     float radius;
     float thickness;
 public:
-    explicit TorusGenerator(Mesh &target, int radialResolution = 50, int tubularResolution = 50, float radius = 1, float thickness = 0.25f)
+    explicit TorusGenerator(Mesh<Vertex> &target, int radialResolution = 50, int tubularResolution = 50, float radius = 1, float thickness = 0.25f)
             : MeshGenerator(target), radialResolution(radialResolution), tubularResolution(tubularResolution),
               radius(radius), thickness(thickness) {
         generate();

@@ -29,7 +29,7 @@ class WorkspaceModule : public Module {
     const int workspaceWidth;
     std::optional<std::reference_wrapper<const std::pair<std::string, std::function<void(AppState&)>>>> selectedCategory = {};
 public:
-    explicit WorkspaceModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth) {}
+    explicit WorkspaceModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth) {}
 
     void listCategories() {
         const static std::vector<std::pair<std::string, std::function<void(AppState&)>>> categories {

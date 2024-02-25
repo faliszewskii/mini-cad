@@ -26,7 +26,7 @@ private:
 
     std::unique_ptr<TransformTree> processNode(aiNode *node, const aiScene *scene, std::vector<std::unique_ptr<Material>> &materials);
 
-    Mesh processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int i);
+    Mesh<Vertex> processMesh(aiMesh *mesh, std::vector<std::unique_ptr<Material>> &materials, unsigned int i);
     std::vector<std::unique_ptr<Material>> processMaterials(const aiScene *scene);
 
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, std::vector<Texture> &loadedTextures, aiTextureType type, const std::string &typeName);

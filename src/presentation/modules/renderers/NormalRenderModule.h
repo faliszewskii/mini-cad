@@ -16,7 +16,7 @@ class NormalRenderModule : public Module {
     Shader shader;
 
 public:
-    explicit NormalRenderModule(int workspaceWidth) : Module(false), workspaceWidth(workspaceWidth),
+    explicit NormalRenderModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
               shader(Shader("normalDebug",
                             IOUtils::getResource("shaders/debug/normalDebug.vert"),
                             IOUtils::getResource("shaders/debug/normalDebug.geom"),

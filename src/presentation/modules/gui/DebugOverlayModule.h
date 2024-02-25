@@ -12,7 +12,7 @@
 class DebugOverlayModule : public Module {
     const int workspaceWidth;
 public:
-    explicit DebugOverlayModule(const int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth) {}
+    explicit DebugOverlayModule(const int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth) {}
 
     void run(AppState &appState) final {
         ImGuiWindowFlags window_flags =

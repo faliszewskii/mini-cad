@@ -15,7 +15,7 @@
 class GizmoModule : public Module {
     const int workspaceWidth;
 public:
-    explicit GizmoModule(int workspaceWidth) : Module(true), workspaceWidth(workspaceWidth) {}
+    explicit GizmoModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth) {}
 
     void run(AppState &appState) override {
         if (!appState.currentCamera) return;

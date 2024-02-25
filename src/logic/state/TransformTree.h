@@ -17,7 +17,7 @@ public:
 private:
     std::optional<std::reference_wrapper<TransformTree>> parent;
     std::vector<std::unique_ptr<TransformTree>> children;
-    std::vector<std::unique_ptr<Mesh>> meshes;
+    std::vector<std::unique_ptr<Mesh<Vertex>>> meshes;
 
 public:
     explicit TransformTree(std::string name) : transform(std::move(name)) {};
@@ -29,7 +29,7 @@ public:
         return *children[children.size()-1];
     }
 
-    Mesh& addChlid(std::unique_ptr<Mesh> &&mesh) {
+    Mesh<Vertex>& addChlid(std::unique_ptr<Mesh<Vertex>> &&mesh) {
         meshes.push_back(std::move(mesh));
         return *meshes[meshes.size()-1];
     }
@@ -38,7 +38,7 @@ public:
         return children;
     };
 
-    [[nodiscard]] const std::vector<std::unique_ptr<Mesh>>& getMeshes() const {
+    [[nodiscard]] const std::vector<std::unique_ptr<Mesh<Vertex>>>& getMeshes() const {
         return meshes;
     };
 

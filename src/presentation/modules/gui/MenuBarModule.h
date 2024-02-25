@@ -12,7 +12,7 @@
 
 class MenuBarModule : public Module {
 public:
-    explicit MenuBarModule() : Module(true) {}
+    explicit MenuBarModule(bool active) : Module(active) {}
 
     void run(AppState &appState) final {
         if (ImGui::BeginMainMenuBar()) {
