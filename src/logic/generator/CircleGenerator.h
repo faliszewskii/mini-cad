@@ -2,24 +2,26 @@
 // Created by faliszewskii on 26.02.24.
 //
 
-#ifndef OPENGL_SANDBOX_TORUSGENERATOR_H
-#define OPENGL_SANDBOX_TORUSGENERATOR_H
+#ifndef OPENGL_SANDBOX_CIRCLEGENERATOR_H
+#define OPENGL_SANDBOX_CIRCLEGENERATOR_H
 
-#include <glm/detail/type_vec3.hpp>
+
+#include <cmath>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "ParametrisedMeshGenerator.h"
 
-class TorusGenerator : public ParametrisedMeshGenerator {
+class CircleGenerator : public ParametrisedMeshGenerator {
 
     constexpr static const glm::vec<3, double> a{0,1,0};
     constexpr static const glm::vec<3, double> b0{1,0,0};
     constexpr static const glm::vec<3, double> b1{0,0,1};
-    float radius, thickness;
+    float R;
     glm::vec<3, float> p0;
 
-    float x(float u, float v) override { return radius * sin(v) * b1.x + radius * cos(v) * b0.x + thickness * cos(u)*cos(v) * b0.x + thickness * cos(u)*sin(v) * b1.x + thickness * sin(u) * a.x; };
-    float y(float u, float v) override { return radius * sin(v) * b1.y + radius * cos(v) * b0.y + thickness * cos(u)*cos(v) * b0.y + thickness * cos(u)*sin(v) * b1.y + thickness * sin(u) * a.y;  };
-    float z(float u, float v) override { return radius * sin(v) * b1.z + radius * cos(v) * b0.z + thickness * cos(u)*cos(v) * b0.z + thickness * cos(u)*sin(v) * b1.z + thickness * sin(u) * a.z;  };
+    float x(float u, float v) override { return  p0.x + std::cos(u) * R * v * b0.x + sin(u) * R * v * b1.x; };
+    float y(float u, float v) override { return p0.y + std::cos(u) * R * v * b0.y + sin(u) * R * v * b1.y; };
+    float z(float u, float v) override { return p0.z +std::cos(u) * R * v * b0.z + sin(u) * R * v * b1.z; };
     float xdu(float u, float) override { return 0; };
     float ydu(float u, float v) override { return 0; };
     float zdu(float u, float v) override { return 0; };
@@ -28,16 +30,15 @@ class TorusGenerator : public ParametrisedMeshGenerator {
     float zdv(float u, float v) override { return 0; };
 
 public:
-    explicit TorusGenerator(glm::vec<3,double> p0 = {0,0,0}, float radius = 1, float thickness = 0.25) :
-            ParametrisedMeshGenerator(50, 50, 0, 2 * M_PI, 0, 2 * M_PI),
-            radius(radius), thickness(thickness), p0(p0) {
+    explicit CircleGenerator(glm::vec<3,double> p0 = {0,0,0}, float R = 1) :
+            ParametrisedMeshGenerator(50, 50, 0, 2 * M_PI, 0, 1),
+            R(R), p0(p0) {
         ParametrisedMeshGenerator::generate();
     }
 
     ParameterMap getParameters() override {
         ParameterMap map {
-                {"radius", radius},
-                {"thickness", radius},
+                {"R", R},
                 {"p0x", *(glm::value_ptr(p0) + 0)},
                 {"p0y", *(glm::value_ptr(p0) + 1)},
                 {"p0z", *(glm::value_ptr(p0) + 2)}
@@ -48,8 +49,8 @@ public:
     }
 
     std::string getName() final {
-        return "Sphere Generator";
+        return "Circle Generator";
     };
 };
 
-#endif //OPENGL_SANDBOX_TORUSGENERATOR_H
+#endif //OPENGL_SANDBOX_CIRCLEGENERATOR_H

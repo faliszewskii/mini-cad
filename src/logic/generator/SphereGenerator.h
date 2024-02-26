@@ -1,84 +1,54 @@
 //
-// Created by faliszewskii on 19.02.24.
+// Created by faliszewskii on 26.02.24.
 //
 
 #ifndef OPENGL_SANDBOX_SPHEREGENERATOR_H
 #define OPENGL_SANDBOX_SPHEREGENERATOR_H
 
-#include "MeshGenerator.h"
-#include "MeshGeneratorHelpers.h"
+#include <glm/detail/type_vec3.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "ParametrisedMeshGenerator.h"
 
-class SphereGenerator : public MeshGenerator {
-    int meridianCount;
-    int parallelCount;
+class SphereGenerator : public ParametrisedMeshGenerator {
+
+    constexpr static const glm::vec<3, double> a{0,1,0};
+    constexpr static const glm::vec<3, double> b0{1,0,0};
+    constexpr static const glm::vec<3, double> b1{0,0,1};
+    float R;
+    glm::vec<3, float> p0;
+
+    float x(float u, float v) override { return R*sin(u)*a.x + R * cos(u) * cos(v) * glm::normalize(b0).x + R * cos(u) * sin(v) * glm::normalize(b1).x; };
+    float y(float u, float v) override { return R*sin(u)*a.y + R * cos(u) * cos(v) * glm::normalize(b0).y + R * cos(u) * sin(v) * glm::normalize(b1).y; };
+    float z(float u, float v) override { return R*sin(u)*a.z + R * cos(u) * cos(v) * glm::normalize(b0).z + R * cos(u) * sin(v) * glm::normalize(b1).z; };
+    float xdu(float u, float) override { return 0; };
+    float ydu(float u, float v) override { return 0; };
+    float zdu(float u, float v) override { return 0; };
+    float xdv(float u, float v) override { return 0; };
+    float ydv(float u, float v) override { return 0; };
+    float zdv(float u, float v) override { return 0; };
 
 public:
-    explicit SphereGenerator(Mesh &target) : MeshGenerator(target), meridianCount(10), parallelCount(10) {
-        generate();
+    explicit SphereGenerator(glm::vec<3,double> p0 = {0,0,0}, float R = 1) :
+            ParametrisedMeshGenerator(50, 50, 0, 2 * M_PI, 0, M_PI),
+            R(R), p0(p0) {
+        ParametrisedMeshGenerator::generate();
     }
 
-    void generate() final {
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-
-        // add top vertex
-        vertices.push_back(Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 1, 0), glm::vec2())); // TODO Textured sphere?
-
-        // generate vertices per stack / slice
-        for (int i = 0; i < parallelCount - 1; i++) {
-            auto phi = M_PI * double(i + 1) / double(parallelCount);
-            for (int j = 0; j < meridianCount; j++) {
-                auto theta = 2.0 * M_PI * double(j) / double(meridianCount);
-                auto x = std::sin(phi) * std::cos(theta);
-                auto y = std::cos(phi);
-                auto z = std::sin(phi) * std::sin(theta);
-                auto pos = glm::vec3(x, y, z);
-                vertices.push_back(Vertex(pos, glm::normalize(pos), glm::vec2()));
-            }
-        }
-
-        // add bottom vertex
-        vertices.push_back(Vertex(glm::vec3(0, -1, 0), glm::vec3(0, -1, 0), glm::vec2()));
-
-        for (int i = 0; i < meridianCount; ++i) {
-            auto i0 = i + 1;
-            auto i1 = (i + 1) % meridianCount + 1;
-            indices.push_back(0);
-            indices.push_back(i0);
-            indices.push_back(i1);
-            i0 = i + meridianCount * (parallelCount - 2) + 1;
-            i1 = (i + 1) % meridianCount + meridianCount * (parallelCount - 2) + 1;
-            indices.push_back(vertices.size() - 1);
-            indices.push_back(i0);
-            indices.push_back(i1);
-        }
-
-        for (int j = 0; j < parallelCount - 2; j++) {
-            auto j0 = j * meridianCount + 1;
-            auto j1 = (j + 1) * meridianCount + 1;
-            for (int i = 0; i < meridianCount; i++) {
-                auto i0 = j0 + i;
-                auto i1 = j0 + (i + 1) % meridianCount;
-                auto i2 = j1 + (i + 1) % meridianCount;
-                auto i3 = j1 + i;
-
-                MeshGeneratorHelpers::addQuad(indices, i0, i1, i2, i3);
-            }
-        }
-
-        target.update(std::move(vertices), std::move(indices));
-    }
-
-    ParameterMap getParameters() final {
-        return ParameterMap {
-                {"Meridian Count", meridianCount},
-                {"Parallel Count", parallelCount},
+    ParameterMap getParameters() override {
+        ParameterMap map {
+                {"R", R},
+                {"p0x", *(glm::value_ptr(p0) + 0)},
+                {"p0y", *(glm::value_ptr(p0) + 1)},
+                {"p0z", *(glm::value_ptr(p0) + 2)}
         };
+        auto parentMap = ParametrisedMeshGenerator::getParameters();
+        map.insert(map.end(),std::make_move_iterator(parentMap.begin()), std::make_move_iterator(parentMap.end()));
+        return map;
     }
 
     std::string getName() final {
         return "Sphere Generator";
-    }
+    };
 };
 
 #endif //OPENGL_SANDBOX_SPHEREGENERATOR_H

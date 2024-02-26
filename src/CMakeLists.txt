@@ -97,8 +97,8 @@ set(INCL
         logic/generator/ParametrisedMeshGenerator.cpp
         logic/generator/HyperbolicParaboloidGenerator.h
         presentation/gui/workspaces/MeshGeneratorsWorkspace.h
-        logic/generator/TorusGenerator.h
-        logic/generator/SphereGenerator.h
+        logic/generator/TorusGeneratorManual.h
+        logic/generator/SphereGeneratorManual.h
         presentation/modules/renderers/GridModule.h
         logic/logger/Logger.h
         presentation/gui/workspaces/GridModuleWorkspace.h
@@ -107,6 +107,10 @@ set(INCL
         presentation/gui/workspaces/WireframeRenderModuleWorkspace.h
         presentation/modules/renderers/RayCastingModule.h
         presentation/gui/workspaces/RayCastingModuleWorkspace.h
+        logic/generator/CircleGenerator.h
+        logic/generator/CylinderGenerator.h
+        logic/generator/SphereGenerator.h
+        logic/generator/TorusGenerator.h
 )
 
 add_executable(opengl-sandbox main.cpp

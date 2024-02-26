@@ -19,10 +19,14 @@
 #include "presentation/modules/gui/DebugOverlayModule.h"
 #include "presentation/modules/gui/GizmoModule.h"
 #include "presentation/modules/renderers/GridModule.h"
-#include "logic/generator/TorusGenerator.h"
+#include "logic/generator/TorusGeneratorManual.h"
 #include "presentation/modules/renderers/WireframeRenderModule.h"
 #include "logic/generator/NormOneGenerator.h"
 #include "presentation/modules/renderers/RayCastingModule.h"
+#include "logic/generator/CircleGenerator.h"
+#include "logic/generator/CylinderGenerator.h"
+#include "logic/generator/SphereGenerator.h"
+#include "logic/generator/TorusGenerator.h"
 
 // settings
 const int SCR_WIDTH = 1920;
@@ -38,12 +42,7 @@ std::unique_ptr<AppState> initializeAppState() {
     appState->currentCamera = camera;
     appState->lights.emplace_back("Point Light", glm::vec3(1.0, 1.0f, 1.0f));
     auto &material = *appState->materials.emplace_back(std::make_unique<Material>(Material("Default Material", glm::vec4(1,0.5,0.5, 1), {}, 128)));
-
-//    auto &generated = appState->transformTree.addChild(std::make_unique<Mesh<Vertex>>("Generated"));
-//    generated->material = material;
-//    appState->meshGenerators.push_back(std::make_unique<NormOneGenerator>(generated));
-    appState->transformTree.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<TorusGenerator>()));
-    // TODO UI for adding objects.
+    // TODO Add global material?
     appState->rayCastingModule->triggerUpdate(camera);
 
     appState->logger.logInfo("Test Info");
@@ -52,6 +51,7 @@ std::unique_ptr<AppState> initializeAppState() {
 
     return appState;
 }
+
 
 int main() {
     OpenGLInstance openGlInstance{};

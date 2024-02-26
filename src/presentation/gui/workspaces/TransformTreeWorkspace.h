@@ -9,8 +9,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../../../logic/state/AppState.h"
 #include "imgui.h"
+#include "../../../logic/generator/CircleGenerator.h"
+#include "../../../logic/generator/SphereGenerator.h"
+#include "../../../logic/generator/TorusGenerator.h"
+#include "../../../logic/generator/CylinderGenerator.h"
 
 namespace TransformTreeWorkspace {
+
+    void loadModelModal(AppState &appState);
+    void addTransformNode(AppState &appState);
+    void generateCylinderModel(AppState &appState, float R = 1, float H = 1);
+    void generateSphereModel(AppState &appState, float R = 1);
+    void generateTorusModel(AppState &appState, float radius = 1, float thickness = 0.25);
+
+
     inline void renderWorkspaceTransform(Transformation &transform) {
         ImGui::SeparatorText(transform.getName().c_str());
         ImGui::Text("Position:");
@@ -98,27 +110,11 @@ namespace TransformTreeWorkspace {
         ImGui::PopStyleVar();
 
         ImGui::BeginDisabled(!appState.selectionGroup.getSelectedTransformTree().has_value());
-        if(ImGui::Button("Import Model")) {
-            NFD_Init();
-
-            nfdchar_t *outPath;
-            nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
-            nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
-            if (result == NFD_OKAY) {
-                try {
-                    appState.assetImporter.importModel(outPath).addToState(appState, appState.selectionGroup.getSelectedTransformTree().value());
-                } catch (FailedToLoadModelException &ex) {
-                    // TODO Log error to log window.
-                    std::cerr << ex.what() << std::endl;
-                }
-                NFD_FreePath(outPath);
-            } else if (result == NFD_CANCEL) {
-            } else {
-                printf("Error: %s\n", NFD_GetError());
-            }
-
-            NFD_Quit();
-        }
+        if(ImGui::Button("Import Model")) loadModelModal(appState);
+        if(ImGui::Button("Add Transform Node")) addTransformNode(appState);
+        if(ImGui::Button("Generate Cylinder")) generateCylinderModel(appState);
+        if(ImGui::Button("Import Sphere")) generateSphereModel(appState);
+        if(ImGui::Button("Import Torus")) generateTorusModel(appState);
         ImGui::EndDisabled();
 
         auto &selectedTransform = appState.selectionGroup.getSelectedTransformTree();
@@ -127,6 +123,59 @@ namespace TransformTreeWorkspace {
         if(selectedMesh) renderWorkspaceMesh(selectedMesh->get());
         auto &selectedGenerator = appState.selectionGroup.getSelectedMeshGenerator();
         if(selectedGenerator) renderWorkspaceGenerator(selectedGenerator->get());
+    }
+
+    inline void loadModelModal(AppState &appState) {
+        NFD_Init();
+
+        nfdchar_t *outPath;
+        nfdfilteritem_t filterItem[1]{{"3D models", "gltf,fbx,FBX,obj"}};
+        nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+        if (result == NFD_OKAY) {
+            try {
+                appState.assetImporter.importModel(outPath).addToState(appState, appState.selectionGroup.getSelectedTransformTree().value());
+            } catch (FailedToLoadModelException &ex) {
+                // TODO Log error to log window.
+                std::cerr << ex.what() << std::endl;
+            }
+            NFD_FreePath(outPath);
+        } else if (result == NFD_CANCEL) {
+        } else {
+            printf("Error: %s\n", NFD_GetError());
+        }
+
+        NFD_Quit();
+    }
+
+
+    inline void generateCylinderModel(AppState &appState, float R, float H) {
+        // TODO naming of the entities maybe shouldn't be a base class. Maybe trait or concept. Or just a field.
+        TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
+        auto &transform = parent.addChild(std::make_unique<TransformTree>("Cylinder"));
+        transform.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<CircleGenerator>(glm::vec3{0,-H/2,0}, R)));
+        transform.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<CylinderGenerator>(glm::vec3{0,0,0}, R, H)));
+        transform.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<CircleGenerator>(glm::vec3{0,H/2,0}, R)));
+        appState.selectionGroup.setFocus(transform);
+    }
+
+    inline void generateSphereModel(AppState &appState, float R) {
+        TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
+        auto &transform = parent.addChild(std::make_unique<TransformTree>("Sphere"));
+        transform.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<SphereGenerator>(glm::vec3{0,0,0}, R)));
+        appState.selectionGroup.setFocus(transform);
+    }
+
+    inline void generateTorusModel(AppState &appState, float radius, float thickness) {
+        TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
+        auto &transform = parent.addChild(std::make_unique<TransformTree>("Torus"));
+        transform.addChild(std::unique_ptr<MeshGenerator>(std::make_unique<TorusGenerator>(glm::vec3{0,0,0}, radius, thickness)));
+        appState.selectionGroup.setFocus(transform);
+    }
+
+    inline void addTransformNode(AppState &appState) {
+        TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
+        auto &transform = parent.addChild(std::make_unique<TransformTree>("Transform"));
+        appState.selectionGroup.setFocus(transform);
     }
 };
 
