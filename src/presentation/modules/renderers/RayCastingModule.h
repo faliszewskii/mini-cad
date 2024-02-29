@@ -62,7 +62,7 @@ public:
 
     explicit RayCastingModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth), specularFactor(256),
             semiAxisA(0.5), semiAxisB(0.25), semiAxisC(1), isFirstPass(false), startingPixelSize(16), pixelSize(startingPixelSize),
-            shaderPixelSize(pixelSize), pixelsPerLoop(2000), currentX(0), currentY(0),
+            shaderPixelSize(pixelSize), pixelsPerLoop(8000), currentX(0), currentY(0),
             firstPassFull(false), scale(glm::vec3(1.f)), translation(0.f), eulerRotation(0.f),
             shader(Shader("Ray Casting", IOUtils::getResource("shaders/rayCasting/rayCasting.vert"), IOUtils::getResource("shaders/rayCasting/rayCasting.frag"))){
 
@@ -141,7 +141,9 @@ public:
             for(int i = 0; currentY < textureHeight && (i < pixelsPerLoop || firstPassFull); ) {
                 for(;currentX < textureWidth && (i < pixelsPerLoop || firstPassFull); currentX+=pixelSize, i++) {
                     glm::vec3 vPixel = findEllipsoidCoords((float) currentX / textureWidth,(float) currentY / textureHeight);
-                    glTexSubImage2D (GL_TEXTURE_2D, 0, currentX, currentY, 1, 1, GL_RGB, GL_FLOAT, glm::value_ptr(vPixel));
+                    coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 0] = vPixel.x;
+                    coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 1] = vPixel.y;
+                    coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 2] = vPixel.z;
                 }
                 if(currentX >= textureWidth) {
                     currentX = 0;
@@ -152,6 +154,7 @@ public:
                 isFirstPass = false;
                 currentY = 0;
                 pixelSize /= 2;
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, coordinatesTexture);
             }
         } else {
             if (pixelSize >= 1) {
@@ -160,8 +163,9 @@ public:
                         if (currentX / pixelSize % 2 == 0 && currentY / pixelSize % 2 == 0) continue;
                         glm::vec3 vPixel = findEllipsoidCoords((float) currentX / textureWidth,
                                                                (float) currentY / textureHeight);
-                        glTexSubImage2D(GL_TEXTURE_2D, 0, currentX, currentY, 1, 1, GL_RGB, GL_FLOAT,
-                                        glm::value_ptr(vPixel));
+                        coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 0] = vPixel.x;
+                        coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 1] = vPixel.y;
+                        coordinatesTexture[(currentX + currentY * textureWidth)*texelSize + 2] = vPixel.z;
                     }
                     if (currentX >= textureWidth) {
                         currentY += pixelSize;
@@ -172,6 +176,7 @@ public:
                     currentY = 0;
                     shaderPixelSize /= 2;
                     pixelSize /= 2;
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, coordinatesTexture);
                 }
             }
             if (!appState.guiFocus && appState.currentCamera) triggerUpdate(appState.currentCamera.value());
