@@ -48,7 +48,7 @@ public:
     }
 
     std::string getName() final {
-        return "Sphere Generator";
+        return "Torus Generator";
     };
 };
 

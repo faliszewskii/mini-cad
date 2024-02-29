@@ -28,8 +28,22 @@ public:
 
         if(!appState.currentCamera) return;
         Camera &camera = appState.currentCamera.value().get();
-        RenderHelpers::setUpCamera(camera, shader);
-        RenderHelpers::renderMeshesNoMaterial(appState.transformTree, shader);
+        RenderHelpers::setUpCamera(camera, {shader});
+        RenderHelpers::renderMeshes(appState.transformTree, {shader}, overloaded{
+                [&](std::unique_ptr<Mesh<Vertex>>& mesh) {
+                    shader.use();
+                    mesh->render();
+                },
+                [&](std::unique_ptr<MeshGenerator>& generator) {
+                    shader.use();
+                    auto &mesh = generator->getTargetMesh();
+                    mesh.render();
+                },
+                [&](std::unique_ptr<Point>& point) {
+                    shader.use();
+                    point->render(shader);
+                }
+        });
     };
 
     [[nodiscard]] std::string getName() const final {

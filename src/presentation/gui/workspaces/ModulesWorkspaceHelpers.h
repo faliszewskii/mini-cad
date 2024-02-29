@@ -9,8 +9,8 @@
 #include "imgui.h"
 
 namespace ModulesWorkspaceHelpers {
-    inline void renderModuleToggle(bool &active) {
-        ImGui::Checkbox("Toggle Module", &active);
+    inline bool renderModuleToggle(bool &active) {
+        return ImGui::Checkbox("Toggle Module", &active);
     }
 };
 

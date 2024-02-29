@@ -2,6 +2,7 @@
 // Created by faliszewskii on 17.02.24.
 //
 
+#include "../../presentation/modules/renderers/VerticalStripedLineModule.h"
 #include "../../presentation/modules/renderers/RayCastingModule.h"
 #include "../../presentation/modules/renderers/GridModule.h"
 #include "AppState.h"
@@ -23,19 +24,26 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         randomRendererModule(std::make_unique<RandomRenderModule>(guiPanelLeftWidth, false)),
         wireframeRendererModule(std::make_unique<WireframeRenderModule>(guiPanelLeftWidth, true)),
         gridModule(new GridModule(guiPanelLeftWidth, true)),
-        rayCastingModule(std::make_unique<RayCastingModule>(guiPanelLeftWidth, false))
+        rayCastingModule(std::make_unique<RayCastingModule>(guiPanelLeftWidth, false)),
+        verticalStripedLineModule(std::make_unique<VerticalStripedLineModule>(guiPanelLeftWidth, true))
         {}
 
 void AppState::runModules() {
-    if(menuBarModule->active) menuBarModule->run(*this);
-    if(debugOverlayModule->active) debugOverlayModule->run(*this);
-    if(logPanelModule->active) logPanelModule->run(*this);
-    if(workspaceModule->active) workspaceModule->run(*this);
-    if(gizmoModule->active) gizmoModule->run(*this);
     if(normalRendererModule->active) normalRendererModule->run(*this);
     if(phongRendererModule->active) phongRendererModule->run(*this);
     if(randomRendererModule->active) randomRendererModule->run(*this);
     if(wireframeRendererModule->active) wireframeRendererModule->run(*this);
     if(rayCastingModule->active) rayCastingModule->run(*this);
+    if(verticalStripedLineModule->active) verticalStripedLineModule->run(*this);
+
+    // Grid has to be at the end to maintain transparency.
     if(gridModule->active) gridModule->run(*this);
+
+
+    // UI
+    if(workspaceModule->active) workspaceModule->run(*this);
+    if(menuBarModule->active) menuBarModule->run(*this);
+    if(debugOverlayModule->active) debugOverlayModule->run(*this);
+    if(logPanelModule->active) logPanelModule->run(*this);
+    if(gizmoModule->active) gizmoModule->run(*this);
 }

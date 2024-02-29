@@ -19,14 +19,9 @@
 #include "presentation/modules/gui/DebugOverlayModule.h"
 #include "presentation/modules/gui/GizmoModule.h"
 #include "presentation/modules/renderers/GridModule.h"
-#include "logic/generator/TorusGeneratorManual.h"
 #include "presentation/modules/renderers/WireframeRenderModule.h"
-#include "logic/generator/NormOneGenerator.h"
 #include "presentation/modules/renderers/RayCastingModule.h"
-#include "logic/generator/CircleGenerator.h"
-#include "logic/generator/CylinderGenerator.h"
-#include "logic/generator/SphereGenerator.h"
-#include "logic/generator/TorusGenerator.h"
+#include "presentation/modules/renderers/VerticalStripedLineModule.h"
 
 // settings
 const int SCR_WIDTH = 1920;
@@ -64,10 +59,6 @@ int main() {
 
     {
         GUI gui(openGlInstance.getWindow());
-
-        AssetImporter assetImporter;
-        auto model = assetImporter.importModel(IOUtils::getResource("models/spitfire_mini/model/model.gltf"));
-
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();
             gui.newFrame();

@@ -21,7 +21,8 @@ class SelectionGroup {
     GROUP(TransformTree, , TRANSFORM_TREE)    \
     GROUP(Light, , LIGHT)                     \
     GROUP(Mesh, <Vertex>, MESH)                       \
-    GROUP(MeshGenerator, , MESH_GENERATOR)
+    GROUP(MeshGenerator, , MESH_GENERATOR)  \
+    GROUP(Point, , POINT)
 
     enum Focus {
         #define GROUP(T, TEMPLATE, ENUM) \

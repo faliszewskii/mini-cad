@@ -29,6 +29,7 @@ class RandomRenderModule;
 class WireframeRenderModule;
 class GridModule;
 class RayCastingModule;
+class VerticalStripedLineModule;
 
 struct AppState {
     explicit AppState(Rect<int> viewport, int guiPanelLeftWidth);
@@ -56,6 +57,7 @@ struct AppState {
     std::unique_ptr<WireframeRenderModule> wireframeRendererModule;
     std::unique_ptr<GridModule> gridModule;
     std::unique_ptr<RayCastingModule> rayCastingModule;
+    std::unique_ptr<VerticalStripedLineModule> verticalStripedLineModule;
 
     Logger logger;
     SelectionGroup selectionGroup;
@@ -63,6 +65,7 @@ struct AppState {
     bool guiFocus;
     std::pair<int, std::array<float, 100>> rollingMspf;
     bool vSync;
+    glm::vec3 cursorPosition{};
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 };

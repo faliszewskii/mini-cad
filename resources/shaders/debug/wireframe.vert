@@ -10,7 +10,6 @@ uniform mat4 model;
 
 void main()
 {
-    mat3 normalMatrix = mat3(transpose(inverse(view * model)));
     float depth = (2.0 - (1.0 + (view * model * vec4(aPos, 1.0)).z))/2.0;
     vs_out.zDepth = log(depth);
     gl_Position = view * model * vec4(aPos, 1.0);

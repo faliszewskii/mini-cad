@@ -11,6 +11,7 @@
 #include "../entities/mesh/Mesh.h"
 #include "../entities/transformation/Transformation.h"
 #include "../generator/MeshGenerator.h"
+#include "../geometry/Point.h"
 
 class TransformTree {
 public:
@@ -18,7 +19,7 @@ public:
 private:
     std::optional<std::reference_wrapper<TransformTree>> parent;
     std::vector<std::unique_ptr<TransformTree>> children;
-    using EntityType = std::variant<std::unique_ptr<Mesh<Vertex>>, std::unique_ptr<MeshGenerator>>;
+    using EntityType = std::variant<std::unique_ptr<Mesh<Vertex>>, std::unique_ptr<MeshGenerator>, std::unique_ptr<Point>>;
     std::vector<EntityType> entities;
 
 public:

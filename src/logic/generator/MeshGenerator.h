@@ -6,6 +6,7 @@
 #define OPENGL_SANDBOX_MESHGENERATOR_H
 
 #include "../entities/mesh/Mesh.h"
+#include "../vertices/Vertex.h"
 
 class MeshGenerator {
 protected:

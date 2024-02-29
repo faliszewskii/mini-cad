@@ -111,6 +111,12 @@ set(INCL
         logic/generator/CylinderGenerator.h
         logic/generator/SphereGenerator.h
         logic/generator/TorusGenerator.h
+        logic/geometry/Point.h
+        presentation/gui/workspaces/PointWorkspace.h
+        presentation/modules/renderers/VerticalStripedLineModule.h
+        logic/vertices/is_vertex.h
+        logic/vertices/Vertex.h
+        logic/vertices/EmptyVertex.h
 )
 
 add_executable(opengl-sandbox main.cpp

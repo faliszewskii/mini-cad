@@ -27,15 +27,15 @@ public:
         if(appState.selectionGroup.getSelectedTransformTree())
             gizmoTransformTree(appState);
         else if(appState.selectionGroup.getSelectedLight())
-            gizmoLight(appState);
+            gizmoPosition(appState, appState.selectionGroup.getSelectedLight()->get().position);
+        else if(appState.selectionGroup.getSelectedPoint())
+            gizmoPosition(appState, appState.selectionGroup.getSelectedPoint()->get().position);
     }
 
-    void gizmoLight(AppState &appState) {
-        auto &light = appState.selectionGroup.getSelectedLight()->get();
-        // TODO Incorporate DirLight
+    void gizmoPosition(AppState &appState, glm::vec3 &position) {
 
         glm::mat4 mat = glm::mat4(1.0f);
-        mat = glm::translate(mat, light.position);
+        mat = glm::translate(mat, position);
 
         ImGuiIO &io = ImGui::GetIO();
         ImGuizmo::SetRect(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
@@ -45,7 +45,7 @@ public:
                 ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(mat), nullptr, nullptr
         );
 
-        light.position = glm::vec3(mat[3][0], mat[3][1], mat[3][2]);
+        position = glm::vec3(mat[3][0], mat[3][1], mat[3][2]);
     }
 
     void gizmoTransformTree(AppState &appState) {

@@ -21,6 +21,7 @@ namespace TransformTreeWorkspace {
     void generateCylinderModel(AppState &appState, float R = 1, float H = 1);
     void generateSphereModel(AppState &appState, float R = 1);
     void generateTorusModel(AppState &appState, float radius = 1, float thickness = 0.25);
+    void addPoint(AppState &appState);
 
 
     inline void renderWorkspaceTransform(Transformation &transform) {
@@ -43,13 +44,14 @@ namespace TransformTreeWorkspace {
     inline void renderWorkspaceMesh(Mesh<Vertex> &mesh) {
         ImGui::SeparatorText(mesh.getName().c_str());
         ImGui::Text("Material: %s", mesh.material? mesh.material->get().getName().c_str() : "No material");
+        // TODO combobox to choose material from available
 
         // TODO Mesh UI
     }
 
     inline void renderWorkspaceGenerator(MeshGenerator &generator) {
+        renderWorkspaceMesh(generator.getTargetMesh());
         ImGui::SeparatorText(generator.getName().c_str());
-        ImGui::Text("Generating for: %s", generator.getTargetMesh().getName().c_str());
 
         for(auto &parameter : generator.getParameters()) {
             std::visit(overloaded{
@@ -97,6 +99,14 @@ namespace TransformTreeWorkspace {
                             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
                                 appState.selectionGroup.setFocus(*generator);
                             ImGui::TreePop();
+                        },
+                        [&](std::unique_ptr<Point>& point) {
+                            if (appState.selectionGroup.getSelectedPoint() && &appState.selectionGroup.getSelectedPoint().value().get() == &*point) localFlagsMesh |= ImGuiTreeNodeFlags_Selected;
+                            ImGui::TreeNodeEx(uuids::to_string(point->mesh->getUuid()).c_str(), localFlagsMesh | ImGuiTreeNodeFlags_Leaf,
+                                              "[P] %s", point->mesh->getName().c_str());
+                            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                                appState.selectionGroup.setFocus(*point);
+                            ImGui::TreePop();
                         }
                     }, entity);
                 }
@@ -113,8 +123,9 @@ namespace TransformTreeWorkspace {
         if(ImGui::Button("Import Model")) loadModelModal(appState);
         if(ImGui::Button("Add Transform Node")) addTransformNode(appState);
         if(ImGui::Button("Generate Cylinder")) generateCylinderModel(appState);
-        if(ImGui::Button("Import Sphere")) generateSphereModel(appState);
-        if(ImGui::Button("Import Torus")) generateTorusModel(appState);
+        if(ImGui::Button("Generate Sphere")) generateSphereModel(appState);
+        if(ImGui::Button("Generate Torus")) generateTorusModel(appState);
+        if(ImGui::Button("Add Point")) addPoint(appState);
         ImGui::EndDisabled();
 
         auto &selectedTransform = appState.selectionGroup.getSelectedTransformTree();
@@ -123,6 +134,7 @@ namespace TransformTreeWorkspace {
         if(selectedMesh) renderWorkspaceMesh(selectedMesh->get());
         auto &selectedGenerator = appState.selectionGroup.getSelectedMeshGenerator();
         if(selectedGenerator) renderWorkspaceGenerator(selectedGenerator->get());
+        // TODO Point Workspace
     }
 
     inline void loadModelModal(AppState &appState) {
@@ -176,6 +188,13 @@ namespace TransformTreeWorkspace {
         TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
         auto &transform = parent.addChild(std::make_unique<TransformTree>("Transform"));
         appState.selectionGroup.setFocus(transform);
+    }
+
+    inline void addPoint(AppState &appState) {
+        TransformTree &parent = appState.selectionGroup.getSelectedTransformTree().value();
+        auto &point = parent.addChild(std::make_unique<Point>());
+        appState.selectionGroup.setFocus(*point);
+
     }
 };
 

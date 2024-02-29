@@ -67,8 +67,10 @@ void main() {
             normal[i] += (D[i][j] + D[j][i]) * v[j];
     }
 
+    vec3 normNormal = normal / sqrt(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
+
     vec3 viewDir = normalize(viewPos - fragPos3D);
-    vec3 result = vec3(1,1,0) * calculateLight(pointLight, normalize(normal), fragPos3D, viewDir);
+    vec3 result = vec3(1,1,0) * calculateLight(pointLight, normNormal, fragPos3D, viewDir);
 
 
     outColor = vec4(result,1);

@@ -91,8 +91,8 @@ public:
         shader.setUniform("near", camera.nearPlane);
         shader.setUniform("far", camera.farPlane);
         shader.setUniform("specularFactor", specularFactor);
-        RenderHelpers::setUpCamera(camera, shader);
-        RenderHelpers::setUpLights(appState.lights, shader);
+        RenderHelpers::setUpCamera(camera, {shader});
+        RenderHelpers::setUpLights(appState.lights, {shader});
         shader.setUniform("coordinatesTexture", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId);
