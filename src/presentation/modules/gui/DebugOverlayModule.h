@@ -5,16 +5,15 @@
 #ifndef OPENGL_SANDBOX_DEBUGOVERLAYMODULE_H
 #define OPENGL_SANDBOX_DEBUGOVERLAYMODULE_H
 
-#include "../Module.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
-class DebugOverlayModule : public Module {
+class DebugOverlayModule {
     const int workspaceWidth;
 public:
-    explicit DebugOverlayModule(const int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth) {}
+    explicit DebugOverlayModule(const int workspaceWidth) : workspaceWidth(workspaceWidth) {}
 
-    void run(AppState &appState) final {
+    void run(AppState &appState) {
         ImGuiWindowFlags window_flags =
                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
                 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
@@ -47,10 +46,6 @@ public:
             ImGui::PlotEx(ImGuiPlotType_Lines, "", getter, appState.rollingMspf.second.data(), appState.rollingMspf.second.size(), appState.rollingMspf.first+1, NULL, 0.0f, 100, ImVec2(0, 40));
         }
         ImGui::End();
-    }
-
-    [[nodiscard]] std::string getName() const final {
-        return "Debug Overlay Module";
     }
 };
 

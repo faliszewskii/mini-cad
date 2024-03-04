@@ -7,11 +7,9 @@
 
 #include "../../../logic/state/AppState.h"
 #include "../../modules/gui/MenuBarModule.h"
-#include "ModulesWorkspaceHelpers.h"
 
 namespace MenuBarWorkspace {
     inline void render(AppState &appState) {
-        ModulesWorkspaceHelpers::renderModuleToggle(appState.menuBarModule->active);
     }
 };
 

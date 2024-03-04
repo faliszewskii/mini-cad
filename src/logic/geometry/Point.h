@@ -6,18 +6,26 @@
 #define OPENGL_SANDBOX_POINT_H
 
 #include "../entities/mesh/Mesh.h"
+#include "../vertices/Vertex.h"
+#include "../ids/IdCounter.h"
 
 class Point {
 public:
+    std::string name;
+    bool selected;
+    int id;
     std::unique_ptr<Mesh<Vertex>> mesh;
     glm::vec3 position;
 
-    Point(glm::vec3 position = {}) : position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>("Point",
+    Point(glm::vec3 position = {}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
                 std::vector<Vertex>{Vertex(glm::vec3(), glm::vec3(), glm::vec2())},
-                {},{},GL_POINTS))) {};
+                {},GL_POINTS))), name("Point"), id(IdCounter::nextId()) {};
+
+    Point(Point &&p) : selected(p.selected), position(p.position), mesh(std::move(p.mesh)), name(p.name), id(p.id) {}
 
     void render(Shader &shader) const {
         glPointSize(15);
+        shader.setUniform("selected", selected);
         shader.setUniform("position", position);
         mesh->render();
         glPointSize(1);

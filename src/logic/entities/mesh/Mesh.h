@@ -6,27 +6,20 @@
 #define OPENGL_SANDBOX_MESH_H
 
 
-#include "../SceneNode.h"
 #include "../shader/Shader.h"
-#include "../material/Material.h"
 #include "../../vertices/is_vertex.h"
 
 template<typename TVertex> requires is_vertex<TVertex>
-class Mesh : public SceneNode {
+class Mesh {
     std::vector<TVertex> vertices;
     std::optional<std::vector<unsigned int>> indices;
 public:
     int drawingMode;
-    std::optional<std::reference_wrapper<Material>> material{};
 
-    explicit Mesh(std::string name, std::vector<TVertex> vertices = std::vector<TVertex>(), std::optional<std::vector<unsigned int>> indices = {},
-         std::optional<std::reference_wrapper<Material>> material = {}, int drawingMode = GL_TRIANGLES) : SceneNode(std::move(name)),
-    vertices(std::move(vertices)), indices(std::move(indices)),
-    material(material), drawingMode(drawingMode) {
+    explicit Mesh(std::vector<TVertex> vertices = std::vector<TVertex>(), std::optional<std::vector<unsigned int>> indices = {},
+         int drawingMode = GL_TRIANGLES) : vertices(std::move(vertices)), indices(std::move(indices)), drawingMode(drawingMode) {
         setupMesh();
     }
-
-    std::string getTypeName() override { return "Mesh"; };
 
     void render() const {
         // draw mesh

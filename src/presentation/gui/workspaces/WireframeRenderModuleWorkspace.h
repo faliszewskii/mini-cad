@@ -7,11 +7,9 @@
 
 #include "../../../logic/state/AppState.h"
 #include "../../modules/renderers/WireframeRenderModule.h"
-#include "ModulesWorkspaceHelpers.h"
 
 namespace WireframeRenderModuleWorkspace {
     inline void render(AppState &appState) {
-        ModulesWorkspaceHelpers::renderModuleToggle(appState.wireframeRendererModule->active);
     }
 };
 

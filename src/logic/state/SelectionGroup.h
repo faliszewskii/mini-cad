@@ -6,22 +6,15 @@
 #define OPENGL_SANDBOX_SELECTIONGROUP_H
 
 #include <optional>
-#include "../generator/MeshGenerator.h"
-#include "TransformTree.h"
 #include "../entities/camera/Camera.h"
-#include "../entities/material/Material.h"
-#include "../entities/light/Light.h"
 #include "../entities/mesh/Mesh.h"
+#include "../vertices/Vertex.h"
+#include "../geometry/Point.h"
 
 
 class SelectionGroup {
     #define GROUPS                          \
-    GROUP(Camera, , CAMERA)                   \
-    GROUP(Material, , MATERIAL)               \
-    GROUP(TransformTree, , TRANSFORM_TREE)    \
-    GROUP(Light, , LIGHT)                     \
     GROUP(Mesh, <Vertex>, MESH)                       \
-    GROUP(MeshGenerator, , MESH_GENERATOR)  \
     GROUP(Point, , POINT)
 
     enum Focus {

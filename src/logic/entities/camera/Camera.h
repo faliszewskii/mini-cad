@@ -34,7 +34,7 @@ const float SPEED = 2.5f;
 const float SENSITIVITY = 0.01f;
 const float ZOOM_SENSITIVITY = 0.1f;
 
-class Camera : public SceneNode {
+class Camera {
 private:
     CameraMode cameraType;
 
@@ -64,7 +64,6 @@ public:
     };
 
     explicit Camera(
-            std::string name,
             int screenWidth,
             int screenHeight,
             CameraMode cameraMode = FREE,
@@ -72,9 +71,6 @@ public:
             glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::quat orientation = glm::quat(1, 0, 0, 0)
     );
-
-    std::string getTypeName() override { return "Camera"; };
-
 
     [[nodiscard]] glm::mat4 getViewMatrix() const;
     [[nodiscard]] glm::mat4 getProjectionMatrix() const;

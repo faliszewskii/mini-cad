@@ -21,7 +21,7 @@ mat4 buildTranslation(vec3 delta)
 
 void main()
 {
-    vec4 coord = projection * view * buildTranslation(position) * model * vec4(aPos, 1.0);
+    vec4 coord = projection * view * vec4(aPos + position, 1.0);
     depth = coord.z;
     gl_Position = coord;
 }

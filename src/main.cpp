@@ -6,13 +6,9 @@
 #include "logic/io/stb_image.h"
 #include "../../lib/glad/glad_glfw.h"
 #include "logic/opengl/OpenGLInstance.h"
-#include "logic/io/IOUtils.h"
 #include "presentation/gui/GUI.h"
 #include "logic/state/AppState.h"
 #include "logic/input/InputHandler.h"
-#include "presentation/modules/renderers/PhongRenderModule.h"
-#include "presentation/modules/renderers/RandomRenderModule.h"
-#include "presentation/modules/renderers/NormalRenderModule.h"
 #include "presentation/modules/gui/WorkspaceModule.h"
 #include "presentation/modules/gui/MenuBarModule.h"
 #include "presentation/modules/gui/LogPanelModule.h"
@@ -20,7 +16,6 @@
 #include "presentation/modules/gui/GizmoModule.h"
 #include "presentation/modules/renderers/GridModule.h"
 #include "presentation/modules/renderers/WireframeRenderModule.h"
-#include "presentation/modules/renderers/RayCastingModule.h"
 #include "presentation/modules/renderers/VerticalStripedLineModule.h"
 
 // settings
@@ -33,16 +28,12 @@ std::unique_ptr<AppState> initializeAppState() {
 
     auto appState = std::make_unique<AppState>(viewport, GUI_PANEL_LEFT_WIDTH);
 
-    Camera& camera = appState->cameras.emplace_back("Camera", SCR_WIDTH - GUI_PANEL_LEFT_WIDTH, SCR_HEIGHT, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f));
-    appState->currentCamera = camera;
-    appState->lights.emplace_back("Point Light", glm::vec3(1.0, 1.0f, 1.0f));
-    auto &material = *appState->materials.emplace_back(std::make_unique<Material>(Material("Default Material", glm::vec4(1,0.5,0.5, 1), {}, 128)));
-    // TODO Add global material?
-    appState->rayCastingModule->triggerUpdate(camera);
-
     appState->logger.logInfo("Test Info");
     appState->logger.logDebug("Test Debug");
     appState->logger.logError("Test Error");
+
+//    appState->torusSet.emplace_back();
+//    appState->pointSet.emplace_back();
 
     return appState;
 }

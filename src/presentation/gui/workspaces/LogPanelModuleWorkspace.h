@@ -6,12 +6,10 @@
 #define OPENGL_SANDBOX_LOGPANELMODULEWORKSPACE_H
 
 #include "../../../logic/state/AppState.h"
-#include "ModulesWorkspaceHelpers.h"
 #include "../../modules/gui/LogPanelModule.h"
 
 namespace LogPanelModuleWorkspace {
     inline void render(AppState &appState) {
-        ModulesWorkspaceHelpers::renderModuleToggle(appState.logPanelModule->active);
     }
 };
 

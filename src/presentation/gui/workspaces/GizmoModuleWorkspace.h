@@ -7,12 +7,9 @@
 
 #include "../../../logic/state/AppState.h"
 #include "../../modules/gui/GizmoModule.h"
-#include "ModulesWorkspaceHelpers.h"
 
 namespace GizmoModuleWorkspace {
     inline void render(AppState &appState) {
-        ModulesWorkspaceHelpers::renderModuleToggle(appState.gizmoModule->active);
-
         static std::map<ImGuizmo::OPERATION, std::string> operations {
                 {ImGuizmo::OPERATION::UNIVERSAL, "Universal"},
                 {ImGuizmo::OPERATION::TRANSLATE, "Translate"},

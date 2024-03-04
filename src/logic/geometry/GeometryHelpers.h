@@ -1,13 +1,13 @@
 //
-// Created by faliszewskii on 18.02.24.
+// Created by faliszewskii on 02.03.24.
 //
 
-#ifndef OPENGL_SANDBOX_MESHGENERATORHELPERS_H
-#define OPENGL_SANDBOX_MESHGENERATORHELPERS_H
+#ifndef OPENGL_SANDBOX_GEOMETRYHELPERS_H
+#define OPENGL_SANDBOX_GEOMETRYHELPERS_H
 
 #include <vector>
 
-namespace MeshGeneratorHelpers {
+namespace GeometryHelpers {
     inline void addQuad(std::vector<unsigned int> &indices, int i0, int i1, int i2, int i3) {
         indices.push_back(i0);
         indices.push_back(i1);
@@ -19,4 +19,4 @@ namespace MeshGeneratorHelpers {
     }
 }
 
-#endif //OPENGL_SANDBOX_MESHGENERATORHELPERS_H
+#endif //OPENGL_SANDBOX_GEOMETRYHELPERS_H

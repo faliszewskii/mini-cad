@@ -7,13 +7,13 @@
 #include <utility>
 
 
-Transformation::Transformation(std::string name) : SceneNode(std::move(name)), translation(),
+Transformation::Transformation() : translation(),
 orientation(glm::quat(1, 0, 0, 0)), scale(glm::vec3(1.0f)) {}
 
-Transformation::Transformation(std::string name, glm::vec3 translation, glm::quat orientation, glm::vec3 scale) :
-        SceneNode(std::move(name)), translation(translation), orientation(orientation), scale(scale)  {}
+Transformation::Transformation(glm::vec3 translation, glm::quat orientation, glm::vec3 scale) :
+        translation(translation), orientation(orientation), scale(scale)  {}
 
-Transformation::Transformation(std::string name, glm::mat4 transformation) : SceneNode(std::move(name)) {
+Transformation::Transformation(glm::mat4 transformation) {
     glm::vec3 scaleFactor;
     glm::quat orientationFactor;
     glm::vec3 translationFactor;
@@ -45,10 +45,17 @@ void Transformation::setOrientation(glm::quat newOrientation) {
     orientation = newOrientation;
 }
 
-void Transformation::setOrientation(glm::vec3 eulerAngles) {
-    throw "not implemented";
+void Transformation::addRotation(glm::vec3 eulerAngles) {
+    auto x = glm::angleAxis(eulerAngles.x, glm::vec3(1,0,0));
+    auto y = glm::angleAxis(eulerAngles.y, glm::vec3(0,1,0));
+    auto z = glm::angleAxis(eulerAngles.z, glm::vec3(0,0,1));
+    orientation *= glm::normalize(x * y * z);
 }
 
 void Transformation::setScale(glm::vec3 newScale) {
     scale = newScale;
+}
+
+glm::vec3 Transformation::getRotationAngles() const {
+    return glm::eulerAngles(orientation);
 }

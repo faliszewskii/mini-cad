@@ -5,18 +5,18 @@
 #ifndef OPENGL_SANDBOX_GRIDMODULE_H
 #define OPENGL_SANDBOX_GRIDMODULE_H
 
-#include "../Module.h"
 #include "../../../logic/state/AppState.h"
 #include "../../../logic/io/IOUtils.h"
-#include "../../../logic/generator/MeshGeneratorHelpers.h"
+#include "../../../logic/vertices/Vertex.h"
+#include "../../../logic/geometry/GeometryHelpers.h"
 
 
-class GridModule : public Module {
+class GridModule {
     const int workspaceWidth;
     Shader shader;
     std::unique_ptr<Mesh<Vertex>> mesh;
 public:
-    explicit GridModule(int workspaceWidth, bool active) : Module(active), workspaceWidth(workspaceWidth),
+    explicit GridModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
                    shader(Shader("Grid", IOUtils::getResource("shaders/grid/grid.vert"), IOUtils::getResource("shaders/grid/grid.frag"))){
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -27,26 +27,21 @@ public:
         vertices.push_back(Vertex(glm::vec3(-1,-1,0), glm::vec3(0,1,0)));
         vertices.push_back(Vertex(glm::vec3(-1,1,0), glm::vec3(0,1,0)));
 
-        MeshGeneratorHelpers::addQuad(indices,0, 1, 2, 3);
+        GeometryHelpers::addQuad(indices,0, 1, 2, 3);
 
-        mesh = std::make_unique<Mesh<Vertex>>(Mesh<Vertex>("Plane mesh", vertices, indices, {}, GL_TRIANGLES));
+        mesh = std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(vertices, indices, GL_TRIANGLES));
     }
 
-    void run(AppState &appState) override {
-        if(!appState.currentCamera) return;
+    void run(AppState &appState) {
         auto &io = ImGui::GetIO();
         glViewport(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
-        Camera &camera = appState.currentCamera->get();
+        Camera &camera = appState.camera;
         shader.use();
         shader.setUniform("near", camera.nearPlane);
         shader.setUniform("far", camera.farPlane);
         shader.setUniform("view", camera.getViewMatrix());
         shader.setUniform("projection", camera.getProjectionMatrix());
         mesh->render();
-    }
-
-    [[nodiscard]] std::string getName() const override {
-        return "Grid Module";
     }
 };
 

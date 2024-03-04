@@ -5,13 +5,12 @@
 #ifndef OPENGL_SANDBOX_LOGPANELMODULE_H
 #define OPENGL_SANDBOX_LOGPANELMODULE_H
 
-#include "../Module.h"
 
-class LogPanelModule : public Module {
+class LogPanelModule {
 public:
-    explicit LogPanelModule(bool active) : Module(active) {};
+    explicit LogPanelModule() {};
 
-    void run(AppState &appState) final {
+    void run(AppState &appState) {
         ImGuiWindowFlags window_flags =
                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
                 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
@@ -39,10 +38,6 @@ public:
             }
         }
         ImGui::End();
-    }
-
-    [[nodiscard]] std::string getName() const final {
-        return "Log Panel Module";
     }
 };
 
