@@ -2,14 +2,14 @@
 // Created by faliszewskii on 17.02.24.
 //
 
-#ifndef OPENGL_SANDBOX_CAMERASWORKSPACE_H
-#define OPENGL_SANDBOX_CAMERASWORKSPACE_H
+#ifndef OPENGL_SANDBOX_CAMERAWORKSPACE_H
+#define OPENGL_SANDBOX_CAMERAWORKSPACE_H
 
 #include <glm/gtc/type_ptr.hpp>
 #include "../../../logic/state/AppState.h"
 #include "imgui.h"
 
-namespace CamerasWorkspace {
+namespace CameraWorkspace {
 
     inline void render(AppState &appState) {
         auto &camera = appState.camera;
@@ -31,4 +31,4 @@ namespace CamerasWorkspace {
     }
 };
 
-#endif //OPENGL_SANDBOX_CAMERASWORKSPACE_H
+#endif //OPENGL_SANDBOX_CAMERAWORKSPACE_H

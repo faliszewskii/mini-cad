@@ -6,18 +6,8 @@ layout (location = 2) in vec2 aTexCoords;
 out float depth;
 
 uniform vec3 position;
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
-mat4 buildTranslation(vec3 delta)
-{
-    return mat4(
-    vec4(1.0, 0.0, 0.0, 0.0),
-    vec4(0.0, 1.0, 0.0, 0.0),
-    vec4(0.0, 0.0, 1.0, 0.0),
-    vec4(delta, 1.0));
-}
 
 void main()
 {

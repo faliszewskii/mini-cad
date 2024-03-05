@@ -17,6 +17,8 @@
 #include "presentation/modules/renderers/GridModule.h"
 #include "presentation/modules/renderers/WireframeRenderModule.h"
 #include "presentation/modules/renderers/VerticalStripedLineModule.h"
+#include "presentation/modules/renderers/CursorModule.h"
+#include "presentation/modules/renderers/CenterOfMassModule.h"
 
 // settings
 const int SCR_WIDTH = 1920;

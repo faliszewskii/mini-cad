@@ -74,7 +74,7 @@ void InputHandler::mouseButtonCallback(GLFWwindow *window, int button, int actio
                 glm::vec4 coords = m * glm::vec4(point->position, 1);
                 coords /= coords.w;
                 if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
-                    appState.selectedEntities.add(appState, *point);
+                    appState.eventPublisher.publish(SelectEntityEvent{*point});
             }
         }
     }

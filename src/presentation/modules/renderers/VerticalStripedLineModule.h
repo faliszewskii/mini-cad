@@ -33,12 +33,24 @@ public:
         shader.use();
         RenderHelpers::setUpCamera(appState.camera, shader);
         shader.setUniform("time", float(glfwGetTime()));
+        shader.setUniform("viewInv", glm::inverse(appState.camera.getViewMatrix()));
+        shader.setUniform("projectionInv", glm::inverse(appState.camera.getProjectionMatrix()));
 
-        renderVerticalLine(appState.cursorPosition);
+        auto projected = glm::vec3(appState.cursorPosition.x, 0, appState.cursorPosition.z);
+        renderStripedLine(projected, appState.cursorPosition, glm::vec4(1, 1, 1, 0.5));
+
+        if(appState.selectedEntities.size() > 1)
+            for(auto &el : appState.selectedEntities)
+                std::visit(overloaded{
+                        [&](Torus &torus){ renderStripedLine(appState.centerOfMassTransformation.translation, torus.transform.translation, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
+                        [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); }
+                }, el.second);
     }
 
-    void renderVerticalLine(glm::vec3 position) const {
-        shader.setUniform("endPointPos", position);
+    void renderStripedLine(glm::vec3 begin, glm::vec3 end, glm::vec4 color) const {
+        shader.setUniform("beginPointPos", begin);
+        shader.setUniform("endPointPos", end);
+        shader.setUniform("color", color);
         mesh.render();
     }
 };

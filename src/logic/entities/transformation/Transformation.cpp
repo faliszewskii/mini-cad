@@ -49,7 +49,7 @@ void Transformation::addRotation(glm::vec3 eulerAngles) {
     auto x = glm::angleAxis(eulerAngles.x, glm::vec3(1,0,0));
     auto y = glm::angleAxis(eulerAngles.y, glm::vec3(0,1,0));
     auto z = glm::angleAxis(eulerAngles.z, glm::vec3(0,0,1));
-    orientation *= glm::normalize(x * y * z);
+    orientation *= glm::normalize(z * y * x);
 }
 
 void Transformation::setScale(glm::vec3 newScale) {

@@ -63,8 +63,7 @@ set(INCL
         presentation/modules/gui/GizmoModule.h
         logic/utils/VariantUtil.h
         logic/state/SelectionGroup.h
-        presentation/gui/workspaces/TransformTreeWorkspace.h
-        presentation/gui/workspaces/CamerasWorkspace.h
+        presentation/gui/workspaces/CameraWorkspace.h
         presentation/gui/workspaces/DebugOverlayModuleWorkspace.h
         presentation/gui/workspaces/GizmoModuleWorkspace.h
         presentation/gui/workspaces/LogPanelModuleWorkspace.h
@@ -90,6 +89,14 @@ set(INCL
         presentation/gui/workspaces/CursorWorkspace.h
         presentation/modules/renderers/CenterOfMassModule.h
         logic/concepts/has_selected.h
+        presentation/modules/renderers/CursorModule.h
+        logic/events/broadcaster/EventPublisher.h
+        logic/events/CreateTorusEvent.h
+        logic/handlers/ObjectCreationHandler.h
+        logic/events/CreatePointEvent.h
+        logic/events/EntitySelectionChangedEvent.h
+        logic/events/SelectEntityEvent.h
+        logic/state/EntityType.h
 )
 
 add_executable(opengl-sandbox main.cpp

@@ -16,6 +16,7 @@
 #include "../../gui/workspaces/WireframeRenderModuleWorkspace.h"
 #include "../../gui/workspaces/EntityListWorkspace.h"
 #include "../../gui/workspaces/CursorWorkspace.h"
+#include "../../gui/workspaces/CameraWorkspace.h"
 
 class WorkspaceModule {
     const int workspaceWidth;
@@ -25,8 +26,9 @@ public:
 
     void listCategories() {
         const static std::vector<std::pair<std::string, std::function<void(AppState&)>>> categories {
-                {"Entity List", EntityListWorkspace::render},
-                {"Cursor", CursorWorkspace::render},
+                {"Entity List",             EntityListWorkspace::render},
+                {"Cursor",                  CursorWorkspace::render},
+                {"Camera",                  CameraWorkspace::render},
                 {"Wireframe Render Module", WireframeRenderModuleWorkspace::render},
                 {"Log Panel Module",        LogPanelModuleWorkspace::render},
                 {"Debug Overlay Module",    DebugOverlayModuleWorkspace::render},

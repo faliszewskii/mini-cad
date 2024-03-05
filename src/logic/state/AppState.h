@@ -17,6 +17,11 @@
 #include "../geometry/Torus.h"
 #include "../concepts/has_id.h"
 #include "../concepts/has_selected.h"
+#include "../events/broadcaster/EventPublisher.h"
+#include "../events/CreateTorusEvent.h"
+#include "../events/CreatePointEvent.h"
+#include "../events/SelectEntityEvent.h"
+#include "EntityType.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -26,6 +31,8 @@ class GizmoModule;
 class WireframeRenderModule;
 class GridModule;
 class VerticalStripedLineModule;
+class CursorModule;
+class CenterOfMassModule;
 
 struct AppState {
     explicit AppState(Rect<int> viewport, int guiPanelLeftWidth);
@@ -40,36 +47,16 @@ struct AppState {
     std::unique_ptr<WireframeRenderModule> wireframeRendererModule;
     std::unique_ptr<GridModule> gridModule;
     std::unique_ptr<VerticalStripedLineModule> verticalStripedLineModule;
+    std::unique_ptr<CursorModule> cursorModule;
+    std::unique_ptr<CenterOfMassModule> centerOfMassModule;
 
     std::map<int, std::unique_ptr<Torus>> torusSet;
     std::map<int, std::unique_ptr<Point>> pointSet;
 
-    class SelectedEntities {
-        template<typename ...RefT> using ReferenceVariant = std::variant<std::reference_wrapper<RefT>...>;
-        template<typename ...T> requires (has_id<T> && ...) && (has_selected<T> && ...) using EntityTypeTemp = ReferenceVariant<T...>;
-        using EntityType = EntityTypeTemp<Torus, Point>;
-
-    public:
-        std::map<int, EntityType> set;
-
-        auto getEntities() {
-            return std::views::values(set);
-        }
-
-        template<typename T>
-        void add(AppState &appState, T &entity) {
-            if (!appState.keyboardCtrlMode) clear();
-            set.emplace(entity.id, entity);
-            entity.selected = true;
-        }
-
-        void clear() {
-            for(auto &el : set) std::visit([](auto &el){el.get().selected = false;}, el.second);
-            set.clear();
-        }
-    } selectedEntities;
+    std::map<int, EntityType> selectedEntities;
 
 
+    EventPublisher<CreateTorusEvent, CreatePointEvent, SelectEntityEvent> eventPublisher;
 //    EventDispatcher eventDispatcher;
     // TODO You can subscribe to a event described by some type with a lambda. You got a notification each time the event is triggered.
     // TODO Deleted sth event should be a type with the reference to the object or sth. This could be achieved with a template.
@@ -83,6 +70,9 @@ struct AppState {
     std::pair<int, std::array<float, 100>> rollingMspf;
     bool vSync;
     glm::vec3 cursorPosition{};
+
+//    glm::vec3 centerOfMass{0,1,0};
+    Transformation centerOfMassTransformation;
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 

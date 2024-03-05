@@ -18,7 +18,7 @@ public:
     glm::vec3 position;
 
     Point(glm::vec3 position = {}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
-                std::vector<Vertex>{Vertex(glm::vec3(), glm::vec3(), glm::vec2())},
+                {Vertex(glm::vec3(), glm::vec3(), glm::vec2())},
                 {},GL_POINTS))), name("Point"), id(IdCounter::nextId()) {};
 
     Point(Point &&p) : selected(p.selected), position(p.position), mesh(std::move(p.mesh)), name(p.name), id(p.id) {}
