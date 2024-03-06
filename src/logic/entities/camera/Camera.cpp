@@ -46,7 +46,7 @@ glm::mat4 Camera::getViewMatrix() const {
     return myLookAt(position, position + front, up);
 }
 
-glm::mat4 myPerspective(float yFov, float aspectRatio, float zNear, float zFar) {
+glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
     float tanHalfYFov = std::tan(yFov / 2);
 
     return {
@@ -58,7 +58,7 @@ glm::mat4 myPerspective(float yFov, float aspectRatio, float zNear, float zFar) 
 }
 
 glm::mat4 Camera::getProjectionMatrix() const {
-    return myPerspective(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane);
+    return myProjection(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane);
 }
 
 glm::vec3 Camera::getViewPosition() const {

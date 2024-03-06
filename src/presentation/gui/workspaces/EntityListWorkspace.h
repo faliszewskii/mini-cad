@@ -71,36 +71,54 @@ namespace EntityListWorkspace {
     inline void renderWorkspaceMultiple(std::map<int, EntityType> &selected, AppState &appState) {
         ImGui::SeparatorText(("Selected " + std::to_string(selected.size()) + " entities").c_str());
         bool modified = false;
-        auto &transform = appState.centerOfMassTransformation;
+        auto &centerTransform = appState.centerOfMassTransformation;
 
-        auto position = glm::vec3( transform.getTranslationRef());
+        auto position = glm::vec<3,double>(centerTransform.getTranslationRef());
         ImGui::Text("Position:");
-        modified |= ImGui::DragFloat("x##position", glm::value_ptr(position) + 0, 0.01f);
-        modified |= ImGui::DragFloat("y##position", glm::value_ptr(position) + 1, 0.01f);
-        modified |= ImGui::DragFloat("z##position", glm::value_ptr(position) + 2, 0.01f);
+        modified |= ImGui::DragScalar("x##position", ImGuiDataType_Double, glm::value_ptr(position) + 0, 0.01f);
+        modified |= ImGui::DragScalar("y##position", ImGuiDataType_Double, glm::value_ptr(position) + 1, 0.01f);
+        modified |= ImGui::DragScalar("z##position", ImGuiDataType_Double, glm::value_ptr(position) + 2, 0.01f);
 
-        auto angle = glm::vec3(transform.getRotationAngles());
+        auto angle = glm::vec<3, double>(centerTransform.getRotationAngles());
         ImGui::Text("Rotation:");
-        modified |= ImGui::DragFloat("x##orientation", glm::value_ptr(angle) + 0, 0.01f);
-        modified |= ImGui::DragFloat("y##orientation", glm::value_ptr(angle) + 1, 0.01f);
-        modified |= ImGui::DragFloat("z##orientation", glm::value_ptr(angle) + 2, 0.01f);
+        modified |= ImGui::DragScalar("x##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 0, 0.01f);
+        modified |= ImGui::DragScalar("y##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 1, 0.01f);
+        modified |= ImGui::DragScalar("z##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 2, 0.01f);
 
-        auto scale = glm::vec3(transform.getScaleRef());
+        auto scale = glm::vec<3,double>(centerTransform.getScaleRef());
         ImGui::Text("Scale:");
-        modified |= ImGui::DragFloat("x##scale", glm::value_ptr(scale) + 0, 0.001f);
-        modified |= ImGui::DragFloat("y##scale", glm::value_ptr(scale) + 1, 0.001f);
-        modified |= ImGui::DragFloat("z##scale", glm::value_ptr(scale) + 2, 0.001f);
+        modified |= ImGui::DragScalar("x##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 0, 0.001f);
+        modified |= ImGui::DragScalar("y##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 1, 0.001f);
+        modified |= ImGui::DragScalar("z##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 2, 0.001f);
 
-        if(modified) {
-            glm::mat4 T{1.0f};
-            auto translationDiff = position - transform.getTranslationRef();
-            T = glm::translate(T, translationDiff);
-            transform.setTransformation(T * transform.getTransformation());
-            for(auto &el : appState.selectedEntities)
+        if(modified) { // TODO Maybe into an event ????
+            auto translationDiff = position - centerTransform.getTranslationRef();
+            auto angleDiff = angle - centerTransform.getRotationAngles();
+            auto scaleDiff = scale - centerTransform.getScaleRef();
+            auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), glm::vec<3,double>(1)+scaleDiff);
+            centerTransform.setTransformation(T * centerTransform.getTransformation());
+
+            centerTransform.setTranslation(position);
+            centerTransform.setRotation(angle);
+            centerTransform.setScale(scale);
+
+            for(auto &el : appState.selectedEntities) { // TODO Scale w ogóle nie działa.
                 std::visit(overloaded{
-                        [&](Torus &torus){torus.transform.setTransformation(T * torus.transform.getTransformation()); },
-                        [&](Point &point){ point.position = translationDiff + point.position; }
-                }, el.second); // TODO Rotation, Scale
+                        [&](Torus &torus) {
+                            torus.transform.setTranslation(
+                                    torus.transform.getTranslationRef() - centerTransform.translation);
+                            torus.transform.setTransformation(T * torus.transform.getTransformation());
+                            torus.transform.setTranslation(
+                                    torus.transform.getTranslationRef() + centerTransform.translation);
+                        },
+                        [&](Point &point) {
+                            point.position -= centerTransform.translation;
+                            point.position = T * glm::vec4(point.position, 1);
+                            point.position += centerTransform.translation;
+                        }
+                }, el.second);
+                // TODO Zbadać osie obrotu. Torusów jak i środka masy. Środek masy wygląda na to, że jest niezależny od początkowego obrotu obiektów.
+            }
         }
     }
 
@@ -143,28 +161,28 @@ namespace EntityListWorkspace {
     inline void renderWorkspaceTransform(Transformation &transform) {
         ImGui::SeparatorText("Transform");
 
-        auto position = static_cast<float *>(glm::value_ptr(transform.getTranslationRef()));
+        auto position = static_cast<double *>(glm::value_ptr(transform.getTranslationRef()));
         ImGui::Text("Position:");
-        ImGui::DragFloat("x##position", position + 0, 0.01f);
-        ImGui::DragFloat("y##position", position + 1, 0.01f);
-        ImGui::DragFloat("z##position", position + 2, 0.01f);
+        ImGui::DragScalar("x##position", ImGuiDataType_Double, position + 0, 0.01f);
+        ImGui::DragScalar("y##position", ImGuiDataType_Double, position + 1, 0.01f);
+        ImGui::DragScalar("z##position", ImGuiDataType_Double, position + 2, 0.01f);
 
         auto oldAngle = transform.getRotationAngles();
-        auto newAngle = glm::vec3(oldAngle);
-        auto angleRef = static_cast<float *>(glm::value_ptr(newAngle));
+        auto newAngle = glm::vec<3,double>(oldAngle);
+        auto angleRef = static_cast<double *>(glm::value_ptr(newAngle));
         ImGui::Text("Rotation:");
-        if(ImGui::DragFloat("x##orientation", angleRef + 0, 0.01f))
+        if(ImGui::DragScalar("x##orientation", ImGuiDataType_Double, angleRef + 0, 0.01f))
             transform.addRotation(glm::vec3(newAngle.x - oldAngle.x, 0, 0));
-        if(ImGui::DragFloat("y##orientation", angleRef + 1, 0.01f))
+        if(ImGui::DragScalar("y##orientation", ImGuiDataType_Double, angleRef + 1, 0.01f))
             transform.addRotation(glm::vec3(0, newAngle.y - oldAngle.y, 0));
-        if(ImGui::DragFloat("z##orientation", angleRef + 2, 0.01f))
+        if(ImGui::DragScalar("z##orientation", ImGuiDataType_Double, angleRef + 2, 0.01f))
             transform.addRotation(glm::vec3(0, 0, newAngle.z - oldAngle.z));
 
-        auto scale = static_cast<float *>(glm::value_ptr(transform.getScaleRef()));
+        auto scale = static_cast<double *>(glm::value_ptr(transform.getScaleRef()));
         ImGui::Text("Scale:");
-        ImGui::DragFloat("x##scale", scale + 0, 0.001f);
-        ImGui::DragFloat("y##scale", scale + 1, 0.001f);
-        ImGui::DragFloat("z##scale", scale + 2, 0.001f);
+        ImGui::DragScalar("x##scale", ImGuiDataType_Double, scale + 0, 0.001f);
+        ImGui::DragScalar("y##scale", ImGuiDataType_Double, scale + 1, 0.001f);
+        ImGui::DragScalar("z##scale", ImGuiDataType_Double, scale + 2, 0.001f);
     }
 
     template<typename T> requires has_name<T> && has_id<T>

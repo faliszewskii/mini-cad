@@ -33,8 +33,6 @@ public:
         shader.use();
         RenderHelpers::setUpCamera(appState.camera, shader);
         shader.setUniform("time", float(glfwGetTime()));
-        shader.setUniform("viewInv", glm::inverse(appState.camera.getViewMatrix()));
-        shader.setUniform("projectionInv", glm::inverse(appState.camera.getProjectionMatrix()));
 
         auto projected = glm::vec3(appState.cursorPosition.x, 0, appState.cursorPosition.z);
         renderStripedLine(projected, appState.cursorPosition, glm::vec4(1, 1, 1, 0.5));

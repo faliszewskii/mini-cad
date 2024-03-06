@@ -6,23 +6,15 @@ uniform vec4 color;
 uniform vec3 beginPointPos;
 uniform vec3 endPointPos;
 
-uniform mat4 viewInv;
-uniform mat4 projectionInv;
-
 out vec4 FragColor;
 
 in vec3 fragPos;
 
 void main()
 {
-    const float segmentLenght = 0.01f;
-    const float speed = 25;
-    vec3 v = endPointPos - beginPointPos;
-    vec4 worldSpacePos = viewInv * projectionInv * vec4(fragPos, 1);
-    worldSpacePos /= worldSpacePos.w;
+    const float segmentLength = 0.01f;
+    const float speed = 2.5;
 
-    float ratio = (worldSpacePos.xyz - beginPointPos).length() / v.length();
-//    int segment = int((fragPos.y - sign(fragPos.y) * time/speed) / segmentLenght);
-//    FragColor = segment%2==0 ? color : vec4(0);
-    FragColor = vec4(ratio, 1, 0, 1);
+    int isSegment = int(length(fragPos - beginPointPos)  / segmentLength - time * speed);
+    FragColor = isSegment % 2 == 0 ? vec4(color) : vec4(0);
 }

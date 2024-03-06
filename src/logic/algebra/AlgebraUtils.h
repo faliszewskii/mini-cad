@@ -24,7 +24,7 @@ public:
         return glm::normalize(q * glm::vec3(1.0f, 0, 0));
     }
 
-    static void decomposeMtx(const glm::mat4 &m, glm::vec3 &pos, glm::quat &rot, glm::vec3 &scale);
+    static void decomposeMtx(const glm::mat<4, 4, double> &m, glm::vec<3, double> &pos, glm::qua<double> &rot, glm::vec<3, double> &scale);
 };
 
 
