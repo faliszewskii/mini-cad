@@ -91,25 +91,24 @@ namespace EntityListWorkspace {
         modified |= ImGui::DragScalar("y##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 1, 0.001f);
         modified |= ImGui::DragScalar("z##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 2, 0.001f);
 
+        // TODO Zastanowić się nad reprezentacją kątów. Jako 3 macierze? Kwaternion ok? Co z kolejnością obrotów? Globalnie czy lokalnie? Zainspirować się ImGuizmo
         if(modified) { // TODO Maybe into an event ????
             auto translationDiff = position - centerTransform.getTranslationRef();
             auto angleDiff = angle - centerTransform.getRotationAngles();
-            auto scaleDiff = scale - centerTransform.getScaleRef();
-            auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), glm::vec<3,double>(1)+scaleDiff);
+            auto scaleRatio = scale / centerTransform.getScaleRef();
+            auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), scaleRatio);
             centerTransform.setTransformation(T * centerTransform.getTransformation());
 
             centerTransform.setTranslation(position);
             centerTransform.setRotation(angle);
             centerTransform.setScale(scale);
 
-            for(auto &el : appState.selectedEntities) { // TODO Scale w ogóle nie działa.
+            for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                         [&](Torus &torus) {
-                            torus.transform.setTranslation(
-                                    torus.transform.getTranslationRef() - centerTransform.translation);
+                            torus.transform.setTranslation(torus.transform.getTranslationRef() - centerTransform.translation);
                             torus.transform.setTransformation(T * torus.transform.getTransformation());
-                            torus.transform.setTranslation(
-                                    torus.transform.getTranslationRef() + centerTransform.translation);
+                            torus.transform.setTranslation(torus.transform.getTranslationRef() + centerTransform.translation);
                         },
                         [&](Point &point) {
                             point.position -= centerTransform.translation;
@@ -117,7 +116,6 @@ namespace EntityListWorkspace {
                             point.position += centerTransform.translation;
                         }
                 }, el.second);
-                // TODO Zbadać osie obrotu. Torusów jak i środka masy. Środek masy wygląda na to, że jest niezależny od początkowego obrotu obiektów.
             }
         }
     }

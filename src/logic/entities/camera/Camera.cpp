@@ -42,6 +42,7 @@ glm::mat4 myLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
     };
 }
 
+
 glm::mat4 Camera::getViewMatrix() const {
     return myLookAt(position, position + front, up);
 }
