@@ -37,6 +37,10 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             auto point = std::make_unique<Point>(event.position);
             this->pointSet.emplace(point->id, std::move(point));
         });
+        eventPublisher.subscribe([&](const CreateBezierC0Event &event) {
+            auto bezier = std::make_unique<BezierC0>();
+            this->bezierC0Set.emplace(bezier->id, std::move(bezier));
+        });
         eventPublisher.subscribe([&](const SelectEntityEvent &event) {
             auto &set = this->selectedEntities;
             if (!this->keyboardCtrlMode) {
@@ -57,7 +61,8 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
                 for(auto &el : set) {
                     std::visit(overloaded{
                             [&](Torus &torus) { center += torus.transform.translation; },
-                            [&](Point &point) { center += point.position; }
+                            [&](Point &point) { center += point.position; },
+                            [&](BezierC0 &bezier) { /*TODO*/ }
                     }, el.second);
                 }
                 center /= set.size();

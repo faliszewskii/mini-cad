@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include "../../../lib/glad/glad_glfw.h"
+#include <glm/vec3.hpp>
 
 class Logger {
 

@@ -22,8 +22,8 @@ public:
         else
             ImGuizmo::Enable(true);
 
-        if(appState.selectionGroup.getSelectedPoint())
-            gizmoPosition(appState, appState.selectionGroup.getSelectedPoint()->get().position);
+//        if(appState.selectionGroup.getSelectedPoint())
+//            gizmoPosition(appState, appState.selectionGroup.getSelectedPoint()->get().position);
     }
 
     void gizmoPosition(AppState &appState, glm::vec3 &position) {

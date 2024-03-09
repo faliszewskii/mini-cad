@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 #include <set>
-#include "SelectionGroup.h"
 #include "../algebra/Rect.h"
 #include "imgui.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
@@ -22,6 +21,9 @@
 #include "../events/CreatePointEvent.h"
 #include "../events/SelectEntityEvent.h"
 #include "EntityType.h"
+#include "../entities/camera/Camera.h"
+#include "../geometry/BezierC0.h"
+#include "../events/CreateBezierC0Event.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -52,18 +54,18 @@ struct AppState {
 
     std::map<int, std::unique_ptr<Torus>> torusSet;
     std::map<int, std::unique_ptr<Point>> pointSet;
+    std::map<int, std::unique_ptr<BezierC0>> bezierC0Set;
 
     std::map<int, EntityType> selectedEntities;
 
 
-    EventPublisher<CreateTorusEvent, CreatePointEvent, SelectEntityEvent> eventPublisher;
+    EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent> eventPublisher;
 //    EventDispatcher eventDispatcher;
     // TODO You can subscribe to a event described by some type with a lambda. You got a notification each time the event is triggered.
     // TODO Deleted sth event should be a type with the reference to the object or sth. This could be achieved with a template.
     // TODO System should be able to subscribe to it
 
     Logger logger;
-    SelectionGroup selectionGroup;
     Camera camera;
     bool guiFocus;
     int guiPanelLeftWidth;

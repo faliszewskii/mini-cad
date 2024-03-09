@@ -8,6 +8,7 @@
 #include "../../../logic/state/AppState.h"
 #include "../../../logic/concepts/has_name.h"
 #include "../../../logic/events/SelectEntityEvent.h"
+#include "../../../logic/events/CreateBezierC0Event.h"
 
 namespace EntityListWorkspace {
 
@@ -19,7 +20,7 @@ namespace EntityListWorkspace {
     template<typename T> requires has_name<T>
     void renderNameInput(T &el);
     template<typename T> requires has_name<T> && has_id<T>
-    void renderListing(std::map<int, std::unique_ptr<T>> &list, const std::string &entityName, AppState &appState);
+    void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState);
     void renderWorkspaceSelected(AppState &appState);
 
     void renderDeleteButton(AppState &appState);
@@ -30,10 +31,20 @@ namespace EntityListWorkspace {
         ImGui::SameLine();
         if (ImGui::Button("Add Point"))
             appState.eventPublisher.publish(CreatePointEvent{appState.cursorPosition});
-        renderDeleteButton(appState);
-        renderListing(appState.torusSet, "Toruses", appState);
-        renderListing(appState.pointSet, "Points", appState);
+        ImGui::SameLine();
+        if (ImGui::Button("Add Bezier C0"))
+            appState.eventPublisher.publish(CreateBezierC0Event{});
 
+        renderDeleteButton(appState);
+
+        if(ImGui::CollapsingHeader("Scene objects", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::BeginListBox("Objects#Workspace", ImVec2(-FLT_MIN, 0))) {
+                renderListing(appState.torusSet, appState);
+                renderListing(appState.pointSet, appState);
+                renderListing(appState.bezierC0Set, appState);
+                ImGui::EndListBox();
+            }
+        }
         renderWorkspaceSelected(appState);
     }
 
@@ -43,7 +54,8 @@ namespace EntityListWorkspace {
             for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                        [&](Torus &torus) { appState.torusSet.erase(appState.torusSet.find(torus.id)); },
-                       [&](Point &point) { appState.pointSet.erase(appState.pointSet.find(point.id)); }
+                       [&](Point &point) { appState.pointSet.erase(appState.pointSet.find(point.id)); },
+                       [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); }
                     }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
@@ -59,7 +71,8 @@ namespace EntityListWorkspace {
             else if (selected.size() == 1) {
                 std::visit(overloaded{
                         [](Torus &torus) { renderWorkspaceTorus(torus); },
-                        [](Point &point) { renderWorkspacePoint(point); }
+                        [](Point &point) { renderWorkspacePoint(point); },
+                        [](BezierC0 &bezier) { /*TODO*/ }
                 }, selected.begin()->second);
             } else {
                 renderWorkspaceMultiple(selected, appState);
@@ -114,6 +127,11 @@ namespace EntityListWorkspace {
                             point.position -= centerTransform.translation;
                             point.position = T * glm::vec4(point.position, 1);
                             point.position += centerTransform.translation;
+                        },
+                        [&](BezierC0 &bezier) {
+                            /*TODO*/
+                            // Czy zaznaczenie Beziera oznacza podczas transformacji, że każdy punkt obracamy?
+                            // Może trzeba będzie rozdzielić selected entities na klasę gdzie każdy obiekt jest oddzielnie.
                         }
                 }, el.second);
             }
@@ -184,15 +202,10 @@ namespace EntityListWorkspace {
     }
 
     template<typename T> requires has_name<T> && has_id<T>
-    inline void renderListing(std::map<int, std::unique_ptr<T>> &list, const std::string &entityName, AppState &appState) {
-        if(ImGui::CollapsingHeader(entityName.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::BeginListBox((entityName + std::string("#Workspace")).c_str(), ImVec2(-FLT_MIN, 0))) {
-                for (auto &el: std::views::values(list)) {
-                    if (ImGui::Selectable((el->name + "##" + std::to_string(el->id)).c_str(), appState.selectedEntities.contains(el->id))) {
-                        appState.eventPublisher.publish(SelectEntityEvent{*el});
-                    }
-                }
-                ImGui::EndListBox();
+    inline void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState) {
+        for (auto &el: std::views::values(list)) {
+            if (ImGui::Selectable((el->name + "##" + std::to_string(el->id)).c_str(), appState.selectedEntities.contains(el->id))) {
+                appState.eventPublisher.publish(SelectEntityEvent{*el});
             }
         }
     }

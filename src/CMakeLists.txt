@@ -62,7 +62,6 @@ set(INCL
         presentation/modules/gui/DebugOverlayModule.h
         presentation/modules/gui/GizmoModule.h
         logic/utils/VariantUtil.h
-        logic/state/SelectionGroup.h
         presentation/gui/workspaces/CameraWorkspace.h
         presentation/gui/workspaces/DebugOverlayModuleWorkspace.h
         presentation/gui/workspaces/GizmoModuleWorkspace.h
@@ -97,6 +96,8 @@ set(INCL
         logic/events/EntitySelectionChangedEvent.h
         logic/events/SelectEntityEvent.h
         logic/state/EntityType.h
+        logic/geometry/BezierC0.h
+        logic/events/CreateBezierC0Event.h
 )
 
 add_executable(opengl-sandbox main.cpp

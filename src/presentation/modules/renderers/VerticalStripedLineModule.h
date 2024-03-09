@@ -41,7 +41,8 @@ public:
             for(auto &el : appState.selectedEntities)
                 std::visit(overloaded{
                         [&](Torus &torus){ renderStripedLine(appState.centerOfMassTransformation.translation, torus.transform.translation, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
-                        [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); }
+                        [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
+                        [&](BezierC0 &bezier){ /*TODO*/ }
                 }, el.second);
     }
 

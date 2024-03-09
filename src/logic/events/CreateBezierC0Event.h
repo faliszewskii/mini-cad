@@ -1,0 +1,11 @@
+//
+// Created by faliszewskii on 09.03.24.
+//
+
+#ifndef OPENGL_SANDBOX_CREATEBEZIERC0EVENT_H
+#define OPENGL_SANDBOX_CREATEBEZIERC0EVENT_H
+
+struct CreateBezierC0Event {
+};
+
+#endif //OPENGL_SANDBOX_CREATEBEZIERC0EVENT_H
