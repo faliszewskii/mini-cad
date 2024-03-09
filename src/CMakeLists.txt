@@ -98,6 +98,7 @@ set(INCL
         logic/state/EntityType.h
         logic/geometry/BezierC0.h
         logic/events/CreateBezierC0Event.h
+        logic/vertices/PositionVertex.h
 )
 
 add_executable(opengl-sandbox main.cpp

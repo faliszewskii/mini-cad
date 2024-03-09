@@ -11,7 +11,7 @@
 
 template<typename TVertex> requires is_vertex<TVertex>
 class Mesh {
-    std::vector<TVertex> vertices;
+    std::vector<TVertex> vertices; // TODO Are these fields even needed here? Maybe they should be only as setup args and held separatly if update will be needed.
     std::optional<std::vector<unsigned int>> indices;
 public:
     int drawingMode;

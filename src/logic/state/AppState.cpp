@@ -40,7 +40,7 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
                 auto &last = (selectedEntities.rbegin())->second;
                 if(holds_alternative<std::reference_wrapper<BezierC0>>(last)) {
                     BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(last);
-                    bezier.controlPoints.emplace_back(*result.first->second);
+                    bezier.addPoint(*result.first->second);
                 }
             }
         });
@@ -52,7 +52,7 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             for(auto &el : selectedEntities) { // TODO Consider separating selected entities into object types.
                 if(holds_alternative<std::reference_wrapper<Point>>(el.second)) {
                     Point &point = std::get<std::reference_wrapper<Point>>(el.second);
-                    result.first->second->controlPoints.emplace_back(point);
+                    result.first->second->addPoint(point);
                 }
             }
         });

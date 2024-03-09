@@ -13,6 +13,7 @@ class WireframeRenderModule {
     const int workspaceWidth;
     Shader shader;
     Shader pointShader;
+    Shader bezierShader;
 
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
@@ -20,9 +21,14 @@ public:
                             IOUtils::getResource("shaders/debug/wireframe.vert"),
                             IOUtils::getResource("shaders/debug/wireframe.geom"),
                             IOUtils::getResource("shaders/basic/depthColor.frag"))),
-           pointShader(Shader("point",
+            pointShader(Shader("point",
                            IOUtils::getResource("shaders/basic/point.vert"),
-                           IOUtils::getResource("shaders/basic/depthColor.frag"))) {}
+                           IOUtils::getResource("shaders/basic/depthColor.frag"))),
+            bezierShader(Shader("bezier",
+                            IOUtils::getResource("shaders/bezier/bezier.vert"),
+                            IOUtils::getResource("shaders/bezier/bezier.geom"),
+                            IOUtils::getResource("shaders/bezier/bezier.frag")))
+                           {}
 
     void run(AppState &appState) {
         ImGuiIO &io = ImGui::GetIO();
@@ -33,11 +39,19 @@ public:
         shader.setUniform("selected", false);
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
+
         pointShader.use();
         pointShader.setUniform("selected", false);
         RenderHelpers::setUpCamera(appState.camera, pointShader);
         for(auto &point : std::views::values(appState.pointSet))
             point->render(pointShader);
+
+        bezierShader.use();
+        bezierShader.setUniform("selected", false);
+        RenderHelpers::setUpCamera(appState.camera, bezierShader);
+        for(auto &bezier : std::views::values(appState.bezierC0Set)) {
+            bezier->render(bezierShader);
+        }
     };
 };
 #endif //OPENGL_SANDBOX_WIREFRAMERENDERMODULE_H

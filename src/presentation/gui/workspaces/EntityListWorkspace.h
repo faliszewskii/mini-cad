@@ -83,6 +83,7 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
+        ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(Point &point : bezier.controlPoints) {
                 if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), appState.selectedEntities.contains(point.id))) {
@@ -139,6 +140,7 @@ namespace EntityListWorkspace {
                             point.position -= centerTransform.translation;
                             point.position = T * glm::vec4(point.position, 1);
                             point.position += centerTransform.translation;
+                            // TODO Should check for Bezier update !
                         },
                         [&](BezierC0 &bezier) {
                             /*TODO*/
@@ -184,6 +186,8 @@ namespace EntityListWorkspace {
         ImGui::DragFloat("x##position", static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
         ImGui::DragFloat("y##position", static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
         ImGui::DragFloat("z##position", static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
+
+        // TODO Should check for Bezier update on modified == true!
     }
 
     inline void renderWorkspaceTransform(Transformation &transform) {
