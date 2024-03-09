@@ -15,6 +15,7 @@ namespace EntityListWorkspace {
     void renderWorkspaceTorus(Torus &torus);
     void renderWorkspaceTransform(Transformation &transform);
     void renderWorkspacePoint(Point &point);
+    void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
     void renderWorkspaceMultiple(std::map<int, EntityType> &selected, AppState &appState);
 
     template<typename T> requires has_name<T>
@@ -72,12 +73,23 @@ namespace EntityListWorkspace {
                 std::visit(overloaded{
                         [](Torus &torus) { renderWorkspaceTorus(torus); },
                         [](Point &point) { renderWorkspacePoint(point); },
-                        [](BezierC0 &bezier) { /*TODO*/ }
+                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); }
                 }, selected.begin()->second);
             } else {
                 renderWorkspaceMultiple(selected, appState);
             }
             ImGui::EndChild();
+        }
+    }
+
+    inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
+        if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
+            for(Point &point : bezier.controlPoints) {
+                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), appState.selectedEntities.contains(point.id))) {
+                    appState.eventPublisher.publish(SelectEntityEvent{point});
+                }
+            }
+            ImGui::EndListBox();
         }
     }
 

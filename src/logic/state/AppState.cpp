@@ -35,11 +35,26 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         });
         eventPublisher.subscribe([&](const CreatePointEvent &event) {
             auto point = std::make_unique<Point>(event.position);
-            this->pointSet.emplace(point->id, std::move(point));
+            auto result = this->pointSet.emplace(point->id, std::move(point));
+            if(!selectedEntities.empty()) { // TODO Move this to entirely different handler for bezier that is called on PointCreatedEvent.
+                auto &last = (selectedEntities.rbegin())->second;
+                if(holds_alternative<std::reference_wrapper<BezierC0>>(last)) {
+                    BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(last);
+                    bezier.controlPoints.emplace_back(*result.first->second);
+                }
+            }
         });
         eventPublisher.subscribe([&](const CreateBezierC0Event &event) {
             auto bezier = std::make_unique<BezierC0>();
-            this->bezierC0Set.emplace(bezier->id, std::move(bezier));
+            auto result = this->bezierC0Set.emplace(bezier->id, std::move(bezier));
+
+            // Add all currently selected points;
+            for(auto &el : selectedEntities) { // TODO Consider separating selected entities into object types.
+                if(holds_alternative<std::reference_wrapper<Point>>(el.second)) {
+                    Point &point = std::get<std::reference_wrapper<Point>>(el.second);
+                    result.first->second->controlPoints.emplace_back(point);
+                }
+            }
         });
         eventPublisher.subscribe([&](const SelectEntityEvent &event) {
             auto &set = this->selectedEntities;
