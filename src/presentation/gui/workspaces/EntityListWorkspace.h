@@ -9,12 +9,13 @@
 #include "../../../logic/concepts/has_name.h"
 #include "../../../logic/events/SelectEntityEvent.h"
 #include "../../../logic/events/CreateBezierC0Event.h"
+#include "../../../logic/events/PointMovedEvent.h"
 
 namespace EntityListWorkspace {
 
     void renderWorkspaceTorus(Torus &torus);
     void renderWorkspaceTransform(Transformation &transform);
-    void renderWorkspacePoint(Point &point);
+    void renderWorkspacePoint(Point &point, AppState &appState);
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
     void renderWorkspaceMultiple(std::map<int, EntityType> &selected, AppState &appState);
 
@@ -72,7 +73,7 @@ namespace EntityListWorkspace {
             else if (selected.size() == 1) {
                 std::visit(overloaded{
                         [](Torus &torus) { renderWorkspaceTorus(torus); },
-                        [](Point &point) { renderWorkspacePoint(point); },
+                        [&](Point &point) { renderWorkspacePoint(point, appState); },
                         [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); }
                 }, selected.begin()->second);
             } else {
@@ -178,16 +179,18 @@ namespace EntityListWorkspace {
             el.name = std::string(nameBuffer);
     }
 
-    inline void renderWorkspacePoint(Point &point) {
+    inline void renderWorkspacePoint(Point &point, AppState &appState) {
         ImGui::SeparatorText(point.name.c_str());
         renderNameInput(point);
 
         ImGui::Text("Position:");
-        ImGui::DragFloat("x##position", static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
-        ImGui::DragFloat("y##position", static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
-        ImGui::DragFloat("z##position", static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
+        bool pointMoved = false;
+        pointMoved |= ImGui::DragFloat("x##position", static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
+        pointMoved |= ImGui::DragFloat("y##position", static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
+        pointMoved |= ImGui::DragFloat("z##position", static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
 
-        // TODO Should check for Bezier update on modified == true!
+        // TODO Maybe changes in point position also should be done through events?
+        if(pointMoved) appState.eventPublisher.publish(PointMovedEvent{point});
     }
 
     inline void renderWorkspaceTransform(Transformation &transform) {

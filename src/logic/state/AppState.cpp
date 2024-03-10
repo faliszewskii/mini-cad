@@ -84,6 +84,14 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
                 centerOfMassTransformation = Transformation{center};
             }
         });
+        eventPublisher.subscribe([&](const PointMovedEvent &event) {
+            // TODO There should be a data structure that would allow to query for Bezier that is build from given point.
+            for(auto &bezier : this->bezierC0Set) {
+                for(int i = 0; i < bezier.second->controlPoints.size(); i++)
+                    if(bezier.second->controlPoints[i].get().id == event.point.id)
+                        bezier.second->updatePoint(event.point, i);
+            }
+        });
     }
 
 void AppState::runModules() {

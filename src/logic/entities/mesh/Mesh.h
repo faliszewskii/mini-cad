@@ -34,7 +34,28 @@ public:
     void update(std::vector<TVertex> &&newVertices, std::optional<std::vector<unsigned int>> &&newIndices) {
         vertices = std::move(newVertices);
         indices = std::move(newIndices);
-        setupMesh();
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TVertex), &vertices[0], GL_STATIC_DRAW);
+
+        if (indices) {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.value().size() * sizeof(unsigned int), &indices.value()[0],
+                         GL_STATIC_DRAW);
+        }
+
+        glBindVertexArray(0);
+    }
+
+    void update(TVertex vertex, int i) {
+        vertices[i] = vertex;
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, i * sizeof(TVertex), sizeof(TVertex), &vertex);
+
+        glBindVertexArray(0);
     }
 
 private:
@@ -44,13 +65,13 @@ private:
     void setupMesh() {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TVertex), &vertices[0], GL_STATIC_DRAW);
 
         if (indices) {
-            glGenBuffers(1, &EBO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.value().size() * sizeof(unsigned int), &indices.value()[0],
                          GL_STATIC_DRAW);

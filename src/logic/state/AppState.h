@@ -24,6 +24,7 @@
 #include "../entities/camera/Camera.h"
 #include "../geometry/BezierC0.h"
 #include "../events/CreateBezierC0Event.h"
+#include "../events/PointMovedEvent.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -59,7 +60,7 @@ struct AppState {
     std::map<int, EntityType> selectedEntities;
 
 
-    EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent> eventPublisher;
+    EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent> eventPublisher;
 //    EventDispatcher eventDispatcher;
     // TODO You can subscribe to a event described by some type with a lambda. You got a notification each time the event is triggered.
     // TODO Deleted sth event should be a type with the reference to the object or sth. This could be achieved with a template.

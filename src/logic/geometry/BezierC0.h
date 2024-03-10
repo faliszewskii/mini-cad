@@ -37,6 +37,10 @@ public:
         mesh.update(std::move(vertices), std::move(indices));
     }
 
+    void updatePoint(Point &point, int i) {
+        mesh.update({point.position}, i);
+    }
+
     void render(Shader &shader) const {
         glLineWidth(2);
         shader.setUniform("selected", selected);
