@@ -56,7 +56,11 @@ namespace EntityListWorkspace {
             for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                        [&](Torus &torus) { appState.torusSet.erase(appState.torusSet.find(torus.id)); },
-                       [&](Point &point) { appState.pointSet.erase(appState.pointSet.find(point.id)); },
+                       [&](Point &point) {
+                           int id = point.id;
+                           appState.pointSet.erase(appState.pointSet.find(id));
+                           appState.eventPublisher.publish(PointDeletedEvent{id});
+                       },
                        [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); }
                     }, el.second);
             }
@@ -84,9 +88,14 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
+        ImGui::SeparatorText("Bezier C0");
+        ImGui::Text("Segment count: %d", bezier.segmentCount);
+        ImGui::DragInt("segments", &bezier.segmentCount);
+        ImGui::Checkbox("Draw Polyline", &bezier.drawPolyline);
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
-            for(Point &point : bezier.controlPoints) {
+            for(auto &pPoint : bezier.controlPoints) {
+                Point &point = pPoint.second;
                 if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), appState.selectedEntities.contains(point.id))) {
                     appState.eventPublisher.publish(SelectEntityEvent{point});
                 }
@@ -99,6 +108,16 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText(("Selected " + std::to_string(selected.size()) + " entities").c_str());
         bool modified = false;
         auto &centerTransform = appState.centerOfMassTransformation;
+
+        // Because first element is Bézier curve we can add following points to it
+        if(std::holds_alternative<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second)) {
+            if(ImGui::Button("Add points to curve")) {
+                BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second);
+                for(auto &el : appState.selectedEntities)
+                    if(std::holds_alternative<std::reference_wrapper<Point>>(el.second))
+                        bezier.addPoint(std::get<std::reference_wrapper<Point>>(el.second));
+            }
+        }
 
         auto position = glm::vec<3,double>(centerTransform.getTranslationRef());
         ImGui::Text("Position:");
@@ -141,7 +160,7 @@ namespace EntityListWorkspace {
                             point.position -= centerTransform.translation;
                             point.position = T * glm::vec4(point.position, 1);
                             point.position += centerTransform.translation;
-                            // TODO Should check for Bezier update !
+                            appState.eventPublisher.publish(PointMovedEvent{point});
                         },
                         [&](BezierC0 &bezier) {
                             /*TODO*/

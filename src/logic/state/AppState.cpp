@@ -88,8 +88,16 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             // TODO There should be a data structure that would allow to query for Bezier that is build from given point.
             for(auto &bezier : this->bezierC0Set) {
                 for(int i = 0; i < bezier.second->controlPoints.size(); i++)
-                    if(bezier.second->controlPoints[i].get().id == event.point.id)
+                    if(bezier.second->controlPoints[i].first == event.point.id)
                         bezier.second->updatePoint(event.point, i);
+            }
+        });
+        eventPublisher.subscribe([&](const PointDeletedEvent &event) {
+            // TODO There should be a data structure that would allow to query for Bezier that is build from given point.
+            for(auto &bezier : this->bezierC0Set) {
+                for(int i = 0; i < bezier.second->controlPoints.size(); i++)
+                    if(bezier.second->controlPoints[i].first == event.id)
+                        bezier.second->removePoint(i);
             }
         });
     }

@@ -100,6 +100,7 @@ set(INCL
         logic/events/CreateBezierC0Event.h
         logic/vertices/PositionVertex.h
         logic/events/PointMovedEvent.h
+        logic/events/PointDeletedEvent.h
 )
 
 add_executable(opengl-sandbox main.cpp

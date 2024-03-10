@@ -49,13 +49,11 @@ public:
 
         /// Un-animated
         shader.setUniform("time", 0.f);
-        for(auto &el : appState.selectedEntities) { // TODO Consider separating selected entities into object types.
-            if(holds_alternative<std::reference_wrapper<BezierC0>>(el.second)) {
-                BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(el.second);
-                if(!bezier.controlPoints.empty())
-                    for(int i=0; i<bezier.controlPoints.size()-1; i++)
-                        renderStripedLine(bezier.controlPoints[i].get().position, bezier.controlPoints[i+1].get().position);
-            }
+        for(auto &pBezier : appState.bezierC0Set) {
+            BezierC0 &bezier = *pBezier.second;
+            if(bezier.drawPolyline && !bezier.controlPoints.empty())
+                for(int i=0; i<bezier.controlPoints.size()-1; i++)
+                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i+1].second.get().position);
         }
     }
 
