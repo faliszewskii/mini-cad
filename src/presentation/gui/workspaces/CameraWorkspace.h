@@ -20,14 +20,20 @@ namespace CameraWorkspace {
         ImGui::DragFloat("Far Plane", &camera.farPlane);
 
         ImGui::Text("Position:");
-        ImGui::DragFloat("x##Position", glm::value_ptr(camera.position) + 0, 0.01f);
-        ImGui::DragFloat("y##Position", glm::value_ptr(camera.position) + 1, 0.01f);
-        ImGui::DragFloat("z##Position", glm::value_ptr(camera.position) + 2, 0.01f);
+        ImGui::DragScalar("x##Position", ImGuiDataType_Double, glm::value_ptr(camera.position) + 0, 0.01f);
+        ImGui::DragScalar("y##Position", ImGuiDataType_Double, glm::value_ptr(camera.position) + 1, 0.01f);
+        ImGui::DragScalar("z##Position", ImGuiDataType_Double, glm::value_ptr(camera.position) + 2, 0.01f);
 
         ImGui::Text("Anchor:");
-        ImGui::DragFloat("x##Anchor", glm::value_ptr(camera.anchor) + 0, 0.01f);
-        ImGui::DragFloat("y##Anchor", glm::value_ptr(camera.anchor) + 1, 0.01f);
-        ImGui::DragFloat("z##Anchor", glm::value_ptr(camera.anchor) + 2, 0.01f);
+        bool anchorModified = false;
+        glm::vec<3, double> anchor = camera.anchor;
+        anchorModified |= ImGui::DragScalar("x##Anchor", ImGuiDataType_Double, glm::value_ptr(anchor) + 0, 0.01f);
+        anchorModified |= ImGui::DragScalar("y##Anchor", ImGuiDataType_Double, glm::value_ptr(anchor) + 1, 0.01f);
+        anchorModified |= ImGui::DragScalar("z##Anchor", ImGuiDataType_Double, glm::value_ptr(anchor) + 2, 0.01f);
+        if(anchorModified) {
+            camera.position += anchor - camera.anchor;
+            camera.anchor = anchor;
+        }
     }
 };
 

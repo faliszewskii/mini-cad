@@ -33,9 +33,11 @@ public:
 
         ImGuiIO &io = ImGui::GetIO();
         ImGuizmo::SetRect(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
+        glm::mat4 view = appState.camera.getViewMatrix();
+        glm::mat4 proj = appState.camera.getProjectionMatrix();
         ImGuizmo::Manipulate(
-                static_cast<const float *>(glm::value_ptr(appState.camera.getViewMatrix())),
-                static_cast<const float *>(glm::value_ptr(appState.camera.getProjectionMatrix())),
+                static_cast<const float *>(glm::value_ptr(view)),
+                static_cast<const float *>(glm::value_ptr(proj)),
                 ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(mat), nullptr, nullptr
         );
 

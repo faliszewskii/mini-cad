@@ -38,23 +38,23 @@ class Camera {
 private:
     CameraMode cameraType;
 
-    glm::quat orientation;
+    glm::qua<double> orientation;
 
     float movementSpeed;
     float mouseSensitivity;
     float zoomSensitivity; // TODO Maybe change based on how close anchor to
-    glm::vec3 front;
-    glm::vec3 up;
-    glm::vec3 right;
+    glm::vec<3, double> front;
+    glm::vec<3, double> up;
+    glm::vec<3, double> right;
 
 public:
-    glm::vec3 position;
-    glm::vec3 anchor;
+    glm::vec<3, double> position;
+    glm::vec<3, double> anchor;
     float nearPlane;
     float farPlane;
     float fov;
 
-    std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping{
+    std::map<CameraMode, void (Camera::*)(double, double)> mouseHandlerMapping{
             {CameraMode::FREE,   &Camera::processMouseMovementFree},
             {CameraMode::ANCHOR, &Camera::processMouseMovementAnchor}
     };
@@ -67,25 +67,25 @@ public:
             int screenWidth,
             int screenHeight,
             CameraMode cameraMode = FREE,
-            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3 anchor = glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::quat orientation = glm::quat(1, 0, 0, 0)
+            glm::vec<3, double> position = glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec<3, double> anchor = glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::qua<double> orientation = glm::quat(1, 0, 0, 0)
     );
 
-    [[nodiscard]] glm::mat4 getViewMatrix() const;
-    [[nodiscard]] glm::mat4 getProjectionMatrix() const;
-    [[nodiscard]] glm::vec3 getViewPosition() const;
+    [[nodiscard]] glm::mat<4,4,double> getViewMatrix() const;
+    [[nodiscard]] glm::mat<4,4,double> getProjectionMatrix() const;
+    [[nodiscard]] glm::vec<3, double> getViewPosition() const;
 
     void processKeyboard(CameraMovement direction, float deltaTime);
-    void processMouseMovement(float xoffset, float yoffset);
-    void processMouseScroll(float yoffset);
+    void processMouseMovement(double xoffset, double yoffset);
+    void processMouseScroll(double yoffset);
 
     int screenWidth;
     int screenHeight;
 private:
 
-    void processMouseMovementFree(float xoffset, float yoffset);
-    void processMouseMovementAnchor(float xoffset, float yoffset);
+    void processMouseMovementFree(double xoffset, double yoffset);
+    void processMouseMovementAnchor(double xoffset, double yoffset);
 
     void processKeyboardFree(CameraMovement direction, float deltaTime);
     void processKeyboardAnchor(CameraMovement direction, float deltaTime);

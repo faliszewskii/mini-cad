@@ -12,8 +12,8 @@
 #include <GL/gl.h>
 
 
-Camera::Camera(int screenWidth, int screenHeight, CameraMode cameraMode, glm::vec3 position, glm::vec3 anchor,
-               glm::quat orientation) : screenWidth(screenWidth), screenHeight(screenHeight),
+Camera::Camera(int screenWidth, int screenHeight, CameraMode cameraMode, glm::vec<3, double> position, glm::vec<3, double> anchor,
+               glm::qua<double> orientation) : screenWidth(screenWidth), screenHeight(screenHeight),
                                                           cameraType(cameraMode),
                                                           position(position), anchor(anchor), orientation(orientation),
                                                           movementSpeed(SPEED), mouseSensitivity(SENSITIVITY),
@@ -43,11 +43,11 @@ glm::mat4 myLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
 }
 
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat<4,4,double> Camera::getViewMatrix() const {
     return myLookAt(position, position + front, up);
 }
 
-glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
+glm::mat<4,4,double> myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
     float tanHalfYFov = std::tan(yFov / 2);
 
     return {
@@ -58,11 +58,11 @@ glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
     };
 }
 
-glm::mat4 Camera::getProjectionMatrix() const {
+glm::mat<4,4,double> Camera::getProjectionMatrix() const {
     return myProjection(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane);
 }
 
-glm::vec3 Camera::getViewPosition() const {
+glm::vec<3, double> Camera::getViewPosition() const {
     return position;
 }
 
@@ -70,28 +70,28 @@ void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
     (this->*keyboardHandlerMapping[cameraType])(direction, deltaTime);
 }
 
-void Camera::processMouseMovement(float xoffset, float yoffset) {
+void Camera::processMouseMovement(double xoffset, double yoffset) {
     (this->*mouseHandlerMapping[cameraType])(xoffset, yoffset);
 }
 
-void Camera::processMouseMovementAnchor(float xoffset, float yoffset) {
+void Camera::processMouseMovementAnchor(double xoffset, double yoffset) {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
 
-    glm::quat rotationX = glm::angleAxis(xoffset, up);
-    glm::quat rotationY = glm::angleAxis(yoffset, right);
+    glm::qua<double> rotationX = glm::angleAxis(xoffset, up);
+    glm::qua<double> rotationY = glm::angleAxis(yoffset, right);
 
-    position = glm::vec3(rotationX * rotationY * glm::vec4(position - anchor, 1)) + anchor;
+    position = glm::vec<3, double>(rotationX * rotationY * glm::vec<4, double>(position - anchor, 1)) + anchor;
     orientation = glm::normalize(rotationX * rotationY * orientation);
     updateDirections();
 }
 
-void Camera::processMouseScroll(float yoffset) {
+void Camera::processMouseScroll(double yoffset) {
     yoffset *= zoomSensitivity;
     position += front * yoffset;
 }
 
-void Camera::processMouseMovementFree(float xoffset, float yoffset) {
+void Camera::processMouseMovementFree(double xoffset, double yoffset) {
     // TODO
 //    xoffset *= mouseSensitivity;
 //    yoffset *= mouseSensitivity;
@@ -113,7 +113,7 @@ void Camera::processMouseMovementFree(float xoffset, float yoffset) {
 }
 
 void Camera::processKeyboardFree(CameraMovement direction, float deltaTime) {
-    float velocity = movementSpeed * deltaTime;
+    double velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
         position += front * velocity;
     if (direction == BACKWARD)
@@ -125,7 +125,7 @@ void Camera::processKeyboardFree(CameraMovement direction, float deltaTime) {
 }
 
 void Camera::processKeyboardAnchor(CameraMovement direction, float deltaTime) {
-    float velocity = movementSpeed * deltaTime;
+    double velocity = movementSpeed * deltaTime;
     if (direction == FORWARD)
         anchor += front * velocity;
     if (direction == BACKWARD)

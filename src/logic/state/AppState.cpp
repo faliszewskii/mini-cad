@@ -10,6 +10,7 @@
 #include "../../presentation/modules/gui/DebugOverlayModule.h"
 #include "../../presentation/modules/gui/MenuBarModule.h"
 #include "../../presentation/modules/gui/WorkspaceModule.h"
+#include "../events/SelectionChangedEvent.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             camera(viewport.width, viewport.height, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)),
@@ -29,6 +30,7 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             centerOfMassModule(std::make_unique<CenterOfMassModule>(guiPanelLeftWidth)) {
         glfwSwapInterval(vSync);
 
+        // TODO Distribute event handlers into its own files !!!
         eventPublisher.subscribe([&](const CreateTorusEvent &event){
             auto torus = std::make_unique<Torus>(event.position);
             this->torusSet.emplace(torus->id, std::move(torus));
@@ -70,7 +72,11 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
                 }
             }, event.selected);
 
-            // Center of mass
+            this->eventPublisher.publish(SelectionChangedEvent{});
+        });
+        eventPublisher.subscribe([&](const SelectionChangedEvent &event) {
+            // Center of mass on Selection Changed.
+            auto &set = this->selectedEntities;
             if(set.size() > 1) {
                 glm::vec3 center = glm::vec3();
                 for(auto &el : set) {
@@ -83,6 +89,10 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
                 center /= set.size();
                 centerOfMassTransformation = Transformation{center};
             }
+        });
+        eventPublisher.subscribe([&](const SelectionChangedEvent &event) {
+            // Reset Bezier subselection
+            this->selectedBezierPoints.clear();
         });
         eventPublisher.subscribe([&](const PointMovedEvent &event) {
             // TODO There should be a data structure that would allow to query for Bezier that is build from given point.

@@ -101,6 +101,7 @@ set(INCL
         logic/vertices/PositionVertex.h
         logic/events/PointMovedEvent.h
         logic/events/PointDeletedEvent.h
+        logic/events/SelectionChangedEvent.h
 )
 
 add_executable(opengl-sandbox main.cpp
