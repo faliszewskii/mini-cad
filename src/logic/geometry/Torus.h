@@ -16,7 +16,7 @@ class Torus {
     int tubularResolution;
     float radius;
     float thickness;
-    std::unique_ptr<Mesh<Vertex>> mesh;
+    Mesh<Vertex> mesh;
 
 public:
     Transformation transform;
@@ -26,7 +26,7 @@ public:
 
     explicit Torus(glm::vec3 position = {}, int radialResolution = 50, int tubularResolution = 50, float radius = 0.75, float thickness = 0.25f)
             : radialResolution(radialResolution), tubularResolution(tubularResolution), name("Torus"), id(IdCounter::nextId()),
-              selected(false), radius(radius), thickness(thickness), mesh(std::make_unique<Mesh<Vertex>>()), transform(position) {
+              selected(false), radius(radius), thickness(thickness), mesh({},{},GL_LINES), transform(position) {
         generate();
     }
 
@@ -36,7 +36,7 @@ public:
     void render(Shader &shader) {
         shader.setUniform("selected", selected);
         shader.setUniform("model", transform.getTransformation());
-        mesh->render();
+        mesh.render();
     }
 
     void generate() {
@@ -67,11 +67,15 @@ public:
                 auto i2 = i_next * tubularResolution + j_next;
                 auto i3 = i_next * tubularResolution + j;
 
-                GeometryHelpers::addQuad(indices, i0, i1, i2, i3);
+                indices.push_back(i0);
+                indices.push_back(i1);
+                indices.push_back(i0);
+                indices.push_back(i3);
+//                GeometryHelpers::addQuad(indices, i0, i1, i2, i3);
             }
         }
 
-        mesh->update(std::move(vertices), std::move(indices));
+        mesh.update(std::move(vertices), std::move(indices));
     }
 
     using ParameterMap = std::vector<std::pair<std::string, std::variant<std::reference_wrapper<int>, std::reference_wrapper<float>>>>;

@@ -18,16 +18,15 @@ class WireframeRenderModule {
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
             shader(Shader("wireframe",
-                            IOUtils::getResource("shaders/debug/wireframe.vert"),
-                            IOUtils::getResource("shaders/debug/wireframe.geom"),
-                            IOUtils::getResource("shaders/basic/depthColor.frag"))),
+                            IOUtils::getResource("shaders/basic/position.vert"),
+                            IOUtils::getResource("shaders/basic/selection.frag"))),
             pointShader(Shader("point",
                            IOUtils::getResource("shaders/basic/point.vert"),
-                           IOUtils::getResource("shaders/basic/depthColor.frag"))),
+                           IOUtils::getResource("shaders/basic/selection.frag"))),
             bezierShader(Shader("bezier",
                             IOUtils::getResource("shaders/bezier/bezier.vert"),
                             IOUtils::getResource("shaders/bezier/bezier.geom"),
-                            IOUtils::getResource("shaders/bezier/bezier.frag")))
+                            IOUtils::getResource("shaders/basic/selection.frag")))
                            {}
 
     void run(AppState &appState) {
