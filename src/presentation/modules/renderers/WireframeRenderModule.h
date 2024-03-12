@@ -26,7 +26,7 @@ public:
             bezierShader(Shader("bezier",
                             IOUtils::getResource("shaders/bezier/bezier.vert"),
                             IOUtils::getResource("shaders/bezier/bezier.geom"),
-                            IOUtils::getResource("shaders/basic/selection.frag")))
+                            IOUtils::getResource("shaders/bezier/bezier.frag")))
                            {}
 
     void run(AppState &appState) {
@@ -47,6 +47,8 @@ public:
 
         bezierShader.use();
         bezierShader.setUniform("selected", false);
+        bezierShader.setUniform("windowWidth", int(io.DisplaySize.x));
+        bezierShader.setUniform("windowHeight", int(io.DisplaySize.y));
         RenderHelpers::setUpCamera(appState.camera, bezierShader);
         for(auto &bezier : std::views::values(appState.bezierC0Set)) {
             bezier->render(bezierShader);

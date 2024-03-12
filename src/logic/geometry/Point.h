@@ -24,7 +24,7 @@ public:
     Point(Point &&p) : selected(p.selected), position(p.position), mesh(std::move(p.mesh)), name(p.name), id(p.id) {}
 
     void render(Shader &shader) const {
-        glPointSize(15);
+        glPointSize(10);
         shader.setUniform("selected", selected);
         shader.setUniform("position", position);
         mesh->render();

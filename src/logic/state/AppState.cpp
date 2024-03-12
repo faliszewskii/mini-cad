@@ -67,7 +67,7 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             std::visit(overloaded{
                 [&](auto &el){
                     auto &entity = el.get();
-                    set.emplace(entity.id, entity);
+                    set.emplace_back(entity.id, entity);
                     entity.selected = true;
                 }
             }, event.selected);
@@ -79,14 +79,15 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             auto &set = this->selectedEntities;
             if(set.size() > 1) {
                 glm::vec3 center = glm::vec3();
+                int n = 0;
                 for(auto &el : set) {
                     std::visit(overloaded{
-                            [&](Torus &torus) { center += torus.transform.translation; },
-                            [&](Point &point) { center += point.position; },
-                            [&](BezierC0 &bezier) { /*TODO*/ }
+                            [&](Torus &torus) { center += torus.transform.translation; n++; },
+                            [&](Point &point) { center += point.position; n++; },
+                            [&](BezierC0 &bezier) { /* ignore */ }
                     }, el.second);
                 }
-                center /= set.size();
+                center /= n;
                 centerOfMassTransformation = Transformation{center};
             }
         });

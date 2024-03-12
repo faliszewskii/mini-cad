@@ -17,7 +17,7 @@ namespace EntityListWorkspace {
     void renderWorkspaceTransform(Transformation &transform);
     void renderWorkspacePoint(Point &point, AppState &appState);
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
-    void renderWorkspaceMultiple(std::map<int, EntityType> &selected, AppState &appState);
+    void renderWorkspaceMultiple(AppState &appState);
 
     template<typename T> requires has_name<T>
     void renderNameInput(T &el);
@@ -81,7 +81,7 @@ namespace EntityListWorkspace {
                         [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); }
                 }, selected.begin()->second);
             } else {
-                renderWorkspaceMultiple(selected, appState);
+                renderWorkspaceMultiple(appState);
             }
             ImGui::EndChild();
         }
@@ -89,14 +89,16 @@ namespace EntityListWorkspace {
 
     inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
         ImGui::SeparatorText("Bezier C0");
-        ImGui::Text("Segment count: %d", bezier.segmentCount);
-        ImGui::DragInt("segments", &bezier.segmentCount);
+        renderNameInput(bezier);
+
+        ImGui::DragInt("Adaptation Multiplier", &bezier.adaptationMultiplier);
         ImGui::Checkbox("Draw Polyline", &bezier.drawPolyline);
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(auto &pPoint : bezier.controlPoints) {
                 Point &point = pPoint.second;
-                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), appState.selectedEntities.contains(point.id))) {
+                auto &entities = appState.selectedEntities;
+                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
                     appState.eventPublisher.publish(SelectEntityEvent{point});
                 }
             }
@@ -104,8 +106,8 @@ namespace EntityListWorkspace {
         }
     }
 
-    inline void renderWorkspaceMultiple(std::map<int, EntityType> &selected, AppState &appState) {
-        ImGui::SeparatorText(("Selected " + std::to_string(selected.size()) + " entities").c_str());
+    inline void renderWorkspaceMultiple(AppState &appState) {
+        ImGui::SeparatorText(("Selected " + std::to_string(appState.selectedEntities.size()) + " entities").c_str());
         bool modified = false;
         auto &centerTransform = appState.centerOfMassTransformation;
 
@@ -149,23 +151,33 @@ namespace EntityListWorkspace {
             centerTransform.setRotation(angle);
             centerTransform.setScale(scale);
 
+            std::set<int> moved;
             for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                         [&](Torus &torus) {
+                            moved.emplace(torus.id);
                             torus.transform.setTranslation(torus.transform.getTranslationRef() - centerTransform.translation);
                             torus.transform.setTransformation(T * torus.transform.getTransformation());
                             torus.transform.setTranslation(torus.transform.getTranslationRef() + centerTransform.translation);
                         },
                         [&](Point &point) {
+                            if(moved.contains(point.id)) return;
+                            moved.emplace(point.id);
                             point.position -= centerTransform.translation;
                             point.position = T * glm::vec4(point.position, 1);
                             point.position += centerTransform.translation;
                             appState.eventPublisher.publish(PointMovedEvent{point});
                         },
                         [&](BezierC0 &bezier) {
-                            /*TODO*/
-                            // Czy zaznaczenie Beziera oznacza podczas transformacji, że każdy punkt obracamy?
-                            // Może trzeba będzie rozdzielić selected entities na klasę gdzie każdy obiekt jest oddzielnie.
+                            for(auto &pPoint : bezier.controlPoints) {
+                                if(moved.contains(pPoint.first)) continue;
+                                moved.emplace(pPoint.first);
+                                Point &point = pPoint.second;
+                                point.position -= centerTransform.translation;
+                                point.position = T * glm::vec4(point.position, 1);
+                                point.position += centerTransform.translation;
+                                appState.eventPublisher.publish(PointMovedEvent{point});
+                            }
                         }
                 }, el.second);
             }
@@ -241,8 +253,9 @@ namespace EntityListWorkspace {
 
     template<typename T> requires has_name<T> && has_id<T>
     inline void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState) {
+        auto &entities = appState.selectedEntities;
         for (auto &el: std::views::values(list)) {
-            if (ImGui::Selectable((el->name + "##" + std::to_string(el->id)).c_str(), appState.selectedEntities.contains(el->id))) {
+            if (ImGui::Selectable((el->name + "##" + std::to_string(el->id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == el->id;}))) {
                 appState.eventPublisher.publish(SelectEntityEvent{*el});
             }
         }

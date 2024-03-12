@@ -18,11 +18,11 @@ public:
     int id;
 
     bool drawPolyline;
-    int segmentCount;
+    int adaptationMultiplier=20;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
     BezierC0() : name("Bezier C0"), selected(false), id(IdCounter::nextId()), mesh({},{},GL_LINES_ADJACENCY),
-        segmentCount(255), drawPolyline(false) {}
+        drawPolyline(false) {}
 
     bool pointAlreadyAdded(Point &point) {
         return std::ranges::any_of(controlPoints, [&](auto &controlPoint){return controlPoint.first == point.id; });
@@ -61,10 +61,8 @@ public:
 
     void render(Shader &shader) {
         glLineWidth(2);
-        shader.setUniform("selected", selected);
-        // TODO Calculate the Bernstein polygon projection on the screen and calculate segmentCount := (2*h + 2*w).
-        // TODO Display debug data on GUI. (w, h, segmentCount)
-        shader.setUniform("segmentCount", segmentCount); // TODO Adaptive segment count.
+        shader.setUniform("adaptationMultiplier", adaptationMultiplier);
+//        shader.setUniform("segmentCount", segmentCount); // TODO Adaptive segment count.
         mesh.render();
         glLineWidth(1);
     }
