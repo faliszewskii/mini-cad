@@ -21,7 +21,7 @@ public:
     int adaptationMultiplier=20;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
-    BezierC0() : name("Bezier C0"), selected(false), id(IdCounter::nextId()), mesh({},{},GL_LINES_ADJACENCY),
+    BezierC0() : name("Bezier C0"), selected(false), id(IdCounter::nextId()), mesh({},{},GL_PATCHES),
         drawPolyline(false) {}
 
     bool pointAlreadyAdded(Point &point) {
@@ -63,6 +63,7 @@ public:
     void render(Shader &shader) {
         glLineWidth(2);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         mesh.render();
         glLineWidth(1);
     }

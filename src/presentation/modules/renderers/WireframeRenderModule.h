@@ -24,8 +24,9 @@ public:
                            IOUtils::getResource("shaders/basic/point.vert"),
                            IOUtils::getResource("shaders/basic/selection.frag"))),
             bezierShader(Shader("bezier",
-                            IOUtils::getResource("shaders/bezier/bezier.vert"),
-                            IOUtils::getResource("shaders/bezier/bezier.geom"),
+                                IOUtils::getResource("shaders/bezier/bezier.vert"),
+                                IOUtils::getResource("shaders/bezier/bezier.tesc"),
+                                IOUtils::getResource("shaders/bezier/bezier.tese"),
                             IOUtils::getResource("shaders/bezier/bezier.frag"))) // TODO DEBUG change to selection.frag
                            {}
 
