@@ -50,11 +50,12 @@ public:
             vertices.emplace_back(point.second.get().position);
         }
         std::vector<unsigned int> indices;
-        for(int i = 3; i < controlPoints.size(); i += 3) {
-            indices.push_back(i-3);
-            indices.push_back(i-2);
-            indices.push_back(i-1);
+        int s = controlPoints.size();
+        for(int i = 0; i < s; i += 3) {
             indices.push_back(i);
+            indices.push_back(i+1 < s ? i+1 : s-1);
+            indices.push_back(i+2 < s ? i+2 : s-1);
+            indices.push_back(i+3 < s ? i+3 : s-1);
         }
         mesh.update(std::move(vertices), std::move(indices));
     }
@@ -62,7 +63,6 @@ public:
     void render(Shader &shader) {
         glLineWidth(2);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
-//        shader.setUniform("segmentCount", segmentCount); // TODO Adaptive segment count.
         mesh.render();
         glLineWidth(1);
     }

@@ -26,7 +26,7 @@ public:
             bezierShader(Shader("bezier",
                             IOUtils::getResource("shaders/bezier/bezier.vert"),
                             IOUtils::getResource("shaders/bezier/bezier.geom"),
-                            IOUtils::getResource("shaders/bezier/bezier.frag")))
+                            IOUtils::getResource("shaders/bezier/bezier.frag"))) // TODO DEBUG change to selection.frag
                            {}
 
     void run(AppState &appState) {
