@@ -44,13 +44,20 @@ public:
                 std::visit(overloaded{
                         [&](Torus &torus){ renderStripedLine(appState.centerOfMassTransformation.translation, torus.transform.translation, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
                         [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
-                        [&](BezierC0 &bezier){ /*TODO*/ }
+                        [&](BezierC0 &bezier){ /* ignore */ },
+                        [&](BezierC2 &bezier){ /* ignore */ }
                 }, el.second);
 
         /// Un-animated
         shader.setUniform("time", 0.f);
         for(auto &pBezier : appState.bezierC0Set) {
             BezierC0 &bezier = *pBezier.second;
+            if(bezier.drawPolyline && !bezier.controlPoints.empty())
+                for(int i=0; i<bezier.controlPoints.size()-1; i++)
+                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i+1].second.get().position);
+        }
+        for(auto &pBezier : appState.bezierC2Set) { // TODO Code duplication
+            BezierC2 &bezier = *pBezier.second;
             if(bezier.drawPolyline && !bezier.controlPoints.empty())
                 for(int i=0; i<bezier.controlPoints.size()-1; i++)
                     renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i+1].second.get().position);

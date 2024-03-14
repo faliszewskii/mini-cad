@@ -12,10 +12,6 @@
 #include "../ids/IdCounter.h"
 
 class Torus {
-    int radialResolution;
-    int tubularResolution;
-    float radius;
-    float thickness;
     Mesh<Vertex> mesh;
 
 public:
@@ -23,6 +19,10 @@ public:
     std::string name;
     bool selected;
     int id;
+    int radialResolution;
+    int tubularResolution;
+    float radius;
+    float thickness;
 
     explicit Torus(glm::vec3 position = {}, int radialResolution = 50, int tubularResolution = 50, float radius = 0.75, float thickness = 0.25f)
             : radialResolution(radialResolution), tubularResolution(tubularResolution), name("Torus"), id(IdCounter::nextId()),

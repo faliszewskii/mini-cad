@@ -17,6 +17,7 @@ namespace EntityListWorkspace {
     void renderWorkspaceTransform(Transformation &transform);
     void renderWorkspacePoint(Point &point, AppState &appState);
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
+    void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
 
     template<typename T> requires has_name<T>
@@ -36,6 +37,8 @@ namespace EntityListWorkspace {
         ImGui::SameLine();
         if (ImGui::Button("Add Bezier C0"))
             appState.eventPublisher.publish(CreateBezierC0Event{});
+        if (ImGui::Button("Add Bezier C2"))
+            appState.eventPublisher.publish(CreateBezierC2Event{});
 
         renderDeleteButton(appState);
 
@@ -44,6 +47,7 @@ namespace EntityListWorkspace {
                 renderListing(appState.torusSet, appState);
                 renderListing(appState.pointSet, appState);
                 renderListing(appState.bezierC0Set, appState);
+                renderListing(appState.bezierC2Set, appState);
                 ImGui::EndListBox();
             }
         }
@@ -61,7 +65,8 @@ namespace EntityListWorkspace {
                            appState.pointSet.erase(appState.pointSet.find(id));
                            appState.eventPublisher.publish(PointDeletedEvent{id});
                        },
-                       [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); }
+                       [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); },
+                       [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); }
                     }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
@@ -78,7 +83,8 @@ namespace EntityListWorkspace {
                 std::visit(overloaded{
                         [](Torus &torus) { renderWorkspaceTorus(torus); },
                         [&](Point &point) { renderWorkspacePoint(point, appState); },
-                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); }
+                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
+                        [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); }
                 }, selected.begin()->second);
             } else {
                 renderWorkspaceMultiple(appState);
@@ -89,6 +95,25 @@ namespace EntityListWorkspace {
 
     inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
         ImGui::SeparatorText("Bezier C0");
+        renderNameInput(bezier);
+
+        ImGui::DragInt("Adaptation Multiplier", &bezier.adaptationMultiplier);
+        ImGui::Checkbox("Draw Polyline", &bezier.drawPolyline);
+        ImGui::SeparatorText("Control Points");
+        if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
+            for(auto &pPoint : bezier.controlPoints) {
+                Point &point = pPoint.second;
+                auto &entities = appState.selectedEntities;
+                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                    appState.eventPublisher.publish(SelectEntityEvent{point});
+                }
+            }
+            ImGui::EndListBox();
+        }
+    }
+
+    inline void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState) { // TODO Extreme code duplication from above
+        ImGui::SeparatorText("Bezier C2");
         renderNameInput(bezier);
 
         ImGui::DragInt("Adaptation Multiplier", &bezier.adaptationMultiplier);
@@ -178,6 +203,17 @@ namespace EntityListWorkspace {
                                 point.position += centerTransform.translation;
                                 appState.eventPublisher.publish(PointMovedEvent{point});
                             }
+                        },
+                        [&](BezierC2 &bezier) { // TODO Extreme duplication with above
+                            for(auto &pPoint : bezier.controlPoints) {
+                                if(moved.contains(pPoint.first)) continue;
+                                moved.emplace(pPoint.first);
+                                Point &point = pPoint.second;
+                                point.position -= centerTransform.translation;
+                                point.position = T * glm::vec4(point.position, 1);
+                                point.position += centerTransform.translation;
+                                appState.eventPublisher.publish(PointMovedEvent{point});
+                            }
                         }
                 }, el.second);
             }
@@ -191,13 +227,12 @@ namespace EntityListWorkspace {
         renderWorkspaceTransform(torus.transform);
 
         ImGui::SeparatorText("Parameters");
-                for(auto &parameter : torus.getParameters()) {
-            std::visit(overloaded{
-                    [&parameter](int& value) { ImGui::DragInt(parameter.first.c_str(), &value); },
-                    [&parameter](float& value) { ImGui::DragFloat(parameter.first.c_str(), &value, 0.01); }
-            }, parameter.second);
-            if(ImGui::IsItemActive()) torus.generate();
-        }
+        bool modified = false;
+        modified |= ImGui::DragFloat("Radius", &torus.radius, 0.01, torus.thickness < 0.001 ? 0.001: torus.thickness, FLT_MAX);
+        modified |= ImGui::DragFloat("Thickness", &torus.thickness, 0.01, 0.001, torus.radius);
+        modified |= ImGui::DragInt("Radial Resolution", &torus.radialResolution, 1, 3, FLT_MAX);
+        modified |= ImGui::DragInt("Tubular Resolution", &torus.tubularResolution, 1, 3, FLT_MAX);
+        if(modified) torus.generate();
     }
 
     template<typename T> requires has_name<T>

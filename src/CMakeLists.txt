@@ -102,6 +102,8 @@ set(INCL
         logic/events/PointMovedEvent.h
         logic/events/PointDeletedEvent.h
         logic/events/SelectionChangedEvent.h
+        logic/geometry/BezierC2.h
+        logic/events/CreateBezierC2Event.h
 )
 
 add_executable(opengl-sandbox main.cpp
@@ -109,7 +111,7 @@ add_executable(opengl-sandbox main.cpp
         ${INCL}
 )
 
-set(CFLAGS -std=c++23 -fmodules-ts)
+set(CFLAGS -std=c++23 -fmodules-ts#[[ -O3]])
 set(LDFLAGS -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lassimp -luuid nfd)
 
 target_include_directories(opengl-sandbox PRIVATE ../lib/imgui)

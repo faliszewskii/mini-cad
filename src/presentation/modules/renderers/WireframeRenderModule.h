@@ -14,6 +14,7 @@ class WireframeRenderModule {
     Shader shader;
     Shader pointShader;
     Shader bezierShader;
+    Shader bezierC2Shader;
 
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
@@ -27,7 +28,12 @@ public:
                                 IOUtils::getResource("shaders/bezier/bezier.vert"),
                                 IOUtils::getResource("shaders/bezier/bezier.tesc"),
                                 IOUtils::getResource("shaders/bezier/bezier.tese"),
-                            IOUtils::getResource("shaders/bezier/bezier.frag"))) // TODO DEBUG change to selection.frag
+                            IOUtils::getResource("shaders/bezier/bezier.frag"))), // TODO DEBUG change to selection.frag
+            bezierC2Shader(Shader("bezierC2",
+                                 IOUtils::getResource("shaders/bezierC2/bezierC2.vert"),
+                                 IOUtils::getResource("shaders/bezierC2/bezierC2.tesc"),
+                                 IOUtils::getResource("shaders/bezierC2/bezierC2.tese"),
+                                 IOUtils::getResource("shaders/bezierC2/bezierC2.frag"))) // TODO DEBUG change to selection.frag
                            {}
 
     void run(AppState &appState) {
@@ -54,6 +60,16 @@ public:
         for(auto &bezier : std::views::values(appState.bezierC0Set)) {
             bezier->render(bezierShader);
         }
+
+        bezierC2Shader.use();
+        bezierC2Shader.setUniform("selected", false);
+        bezierC2Shader.setUniform("windowWidth", int(io.DisplaySize.x));
+        bezierC2Shader.setUniform("windowHeight", int(io.DisplaySize.y));
+        RenderHelpers::setUpCamera(appState.camera, bezierC2Shader);
+        for(auto &bezier : std::views::values(appState.bezierC2Set)) {
+            bezier->render(bezierC2Shader);
+        }
     };
 };
+
 #endif //OPENGL_SANDBOX_WIREFRAMERENDERMODULE_H

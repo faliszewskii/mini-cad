@@ -27,6 +27,8 @@
 #include "../events/PointMovedEvent.h"
 #include "../events/PointDeletedEvent.h"
 #include "../events/SelectionChangedEvent.h"
+#include "../geometry/BezierC2.h"
+#include "../events/CreateBezierC2Event.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -58,13 +60,14 @@ struct AppState {
     std::map<int, std::unique_ptr<Torus>> torusSet;
     std::map<int, std::unique_ptr<Point>> pointSet;
     std::map<int, std::unique_ptr<BezierC0>> bezierC0Set;
+    std::map<int, std::unique_ptr<BezierC2>> bezierC2Set;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
     std::map<int, std::reference_wrapper<Point>> selectedBezierPoints;
 
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
-        PointDeletedEvent, SelectionChangedEvent> eventPublisher;
+        PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event> eventPublisher;
 
     Logger logger;
     Camera camera;
