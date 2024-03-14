@@ -21,23 +21,35 @@ using ShaderType = std::variant<bool, int, float, glm::vec3, glm::vec4, glm::mat
 class Shader : public SceneNode {
 public:
     unsigned int ID;
+
     std::string vertexPath;
+    std::string tesselationControlPath;
+    std::string tesselationEvaluationPath;
     std::string geometryPath;
     std::string fragmentPath;
+
     int maxUniformNameLength;
     int uniformCount;
     std::unique_ptr<char[]> uniformNameBuffer;
     bool active;
 
     Shader(std::string name, std::string vertexShaderPath, std::string fragmentShaderPath) : SceneNode(std::move(name)),
-    vertexPath(std::move(vertexShaderPath)), geometryPath(), fragmentPath(std::move(fragmentShaderPath)) {
-        initShader(vertexPath, geometryPath, fragmentPath);
+    vertexPath(std::move(vertexShaderPath)), geometryPath(), fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(),
+    tesselationEvaluationPath() {
+        initShader();
     }
     Shader(std::string name, std::string vertexShaderPath, std::string geometryShaderPath, std::string fragmentShaderPath) :
     SceneNode(std::move(name)), vertexPath(std::move(vertexShaderPath)), geometryPath(std::move(geometryShaderPath)),
-    fragmentPath(std::move(fragmentShaderPath)) {
-        initShader(vertexPath, geometryPath, fragmentPath);
+    fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(), tesselationEvaluationPath()  {
+        initShader();
     }
+    Shader(std::string name, std::string vertexShaderPath, std::string tesselationControlPath, std::string tesselationEvaluationPath, std::string fragmentShaderPath) :
+            SceneNode(std::move(name)), vertexPath(std::move(vertexShaderPath)), geometryPath(),
+            fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(std::move(tesselationControlPath)),
+            tesselationEvaluationPath(std::move(tesselationEvaluationPath))  {
+        initShader();
+    }
+
 
     std::string getTypeName() override { return "Shader"; };
 
@@ -67,20 +79,32 @@ public:
         return shader;
     }
 
-    void initShader(const std::string& vertexShaderPath, const std::string& geometryShader, const std::string& fragmentShaderPath) {
-        unsigned int vertex, geometry, fragment;
-        vertex = loadShader(vertexShaderPath, GL_VERTEX_SHADER, "VERTEX");
-        if(!geometryShader.empty()) geometry = loadShader(geometryShader, GL_GEOMETRY_SHADER, "GEOMETRY");
-        fragment = loadShader(fragmentShaderPath, GL_FRAGMENT_SHADER, "FRAGMENT");
+    void initShader() {
+        unsigned int vertex, tesselationControl, tesselationEvaluation, geometry, fragment;
+
+        vertex = loadShader(vertexPath, GL_VERTEX_SHADER, "VERTEX");
+        if(!tesselationControlPath.empty()) tesselationControl = loadShader(tesselationControlPath, GL_TESS_CONTROL_SHADER, "TESS_CTRL");
+        if(!tesselationEvaluationPath.empty()) tesselationEvaluation = loadShader(tesselationEvaluationPath, GL_TESS_EVALUATION_SHADER, "TESS_EVAL");
+        if(!geometryPath.empty()) geometry = loadShader(geometryPath, GL_GEOMETRY_SHADER, "GEOMETRY");
+        fragment = loadShader(fragmentPath, GL_FRAGMENT_SHADER, "FRAGMENT");
+
         ID = glCreateProgram();
+
         glAttachShader(ID, vertex);
-        if(!geometryShader.empty()) glAttachShader(ID, geometry);
+        if(!tesselationControlPath.empty()) glAttachShader(ID, tesselationControl);
+        if(!tesselationEvaluationPath.empty()) glAttachShader(ID, tesselationEvaluation);
+        if(!geometryPath.empty()) glAttachShader(ID, geometry);
         glAttachShader(ID, fragment);
+
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
+
         glDeleteShader(vertex);
-        if(!geometryShader.empty()) glDeleteShader(geometry);
+        if(!tesselationControlPath.empty()) glDeleteShader(tesselationControl);
+        if(!tesselationEvaluationPath.empty()) glDeleteShader(tesselationEvaluation);
+        if(!geometryPath.empty()) glDeleteShader(geometry);
         glDeleteShader(fragment);
+
         initFields();
     }
 
@@ -101,7 +125,7 @@ public:
     // Hot-reload the shader
     void hotReload() {
         glDeleteProgram(ID);
-        initShader(vertexPath, geometryPath, fragmentPath);
+        initShader();
         // What about uniforms that have to be set on init (like color in flat).
     }
     // ------------------------------------------------------------------------
