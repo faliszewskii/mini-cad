@@ -10,6 +10,9 @@
 
 namespace WireframeRenderModuleWorkspace {
     inline void render(AppState &appState) {
+        if(ImGui::Button("Hot Reload")) {
+            appState.wireframeRendererModule->hotReload();
+        }
     }
 };
 

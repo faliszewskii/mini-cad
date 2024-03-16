@@ -169,7 +169,7 @@ namespace EntityListWorkspace {
             auto translationDiff = position - centerTransform.getTranslationRef();
             auto angleDiff = angle - centerTransform.getRotationAngles();
             auto scaleRatio = scale / centerTransform.getScaleRef();
-            auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), scaleRatio);
+                auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), scaleRatio);
             centerTransform.setTransformation(T * centerTransform.getTransformation());
 
             centerTransform.setTranslation(position);
@@ -229,7 +229,7 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText("Parameters");
         bool modified = false;
         modified |= ImGui::DragFloat("Radius", &torus.radius, 0.01, torus.thickness < 0.001 ? 0.001: torus.thickness, FLT_MAX);
-        modified |= ImGui::DragFloat("Thickness", &torus.thickness, 0.01, 0.001, torus.radius);
+        modified |= ImGui::DragFloat("Thickness", &torus.thickness, 0.01, 0.0009, torus.radius);
         modified |= ImGui::DragInt("Radial Resolution", &torus.radialResolution, 1, 3, FLT_MAX);
         modified |= ImGui::DragInt("Tubular Resolution", &torus.tubularResolution, 1, 3, FLT_MAX);
         if(modified) torus.generate();

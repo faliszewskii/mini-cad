@@ -1,6 +1,6 @@
 #version 460 core
 
-layout (vertices = 5) out;
+layout (vertices = 7) out;
 
 uniform int adaptationMultiplier;
 uniform int windowWidth;
@@ -11,10 +11,13 @@ uniform mat4 view;
 
 patch out float patchColorek;
 
+in float v_knot[];
+out float tc_knot[];
+
 int calculateSegmentCount() {
     float l = 0;
-    vec2 p[5];
-    int n = 5;
+    vec2 p[7];
+    int n = 7;
 
     for(int i=0; i<n; i++) {
         vec4 pos = (projection * view * vec4(gl_in[i].gl_Position.xyz, 1));
@@ -40,4 +43,5 @@ void main()
     patchColorek = segments / 255.f;
 
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    tc_knot[gl_InvocationID] = v_knot[gl_InvocationID];
 }

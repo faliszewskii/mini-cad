@@ -70,6 +70,13 @@ public:
             bezier->render(bezierC2Shader);
         }
     };
+
+    void hotReload() {
+        shader.hotReload();
+        pointShader.hotReload();
+        bezierShader.hotReload();
+        bezierC2Shader.hotReload();
+    }
 };
 
 #endif //OPENGL_SANDBOX_WIREFRAMERENDERMODULE_H

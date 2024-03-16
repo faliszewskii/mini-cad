@@ -11,7 +11,7 @@
 #include <glm/ext/quaternion_float.hpp>
 
 class Transformation {
-public: // TODO Refactor whole
+public:
     glm::vec<3, double> translation;
     glm::qua<double> orientation;
     glm::vec<3, double> scale;

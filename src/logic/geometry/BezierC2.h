@@ -8,10 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include "Point.h"
-#include "../vertices/PositionVertex.h"
+#include "../vertices/SplineVertex.h"
 
 class BezierC2 {
-    Mesh<PositionVertex> mesh;
+    Mesh<SplineVertex> mesh;
 public:
     std::string name;
     bool selected;
@@ -40,31 +40,42 @@ public:
     }
 
     void updatePoint(Point &point, int i) {
-        mesh.update({point.position}, i);
+        mesh.update({point.position, static_cast<float>(i)}, i);
     }
 
     void updateMesh() {
-        std::vector<PositionVertex> vertices;
+        std::vector<SplineVertex> vertices;
         vertices.reserve(controlPoints.size());
-        for(auto &point : controlPoints) {
-            vertices.emplace_back(point.second.get().position);
+        for(int i=0; i<controlPoints.size(); i++) {
+            auto &point = controlPoints[i];
+            vertices.emplace_back(point.second.get().position, i);
         }
         std::vector<unsigned int> indices;
         int s = controlPoints.size();
         for(int i = 0; i < s; i ++) {
-            indices.push_back(i-2>=0? i-2 : 0);
-            indices.push_back(i-1>=0? i-1 : 0);
+            indices.push_back(i-3 >= 0 ? i-3 : 0);
+            indices.push_back(i-2 >= 0 ? i-2 : 0);
+            indices.push_back(i-1 >= 0 ? i-1 : 0);
             indices.push_back(i);
-            indices.push_back(i+1<s? i+1 : s-1);
-            indices.push_back(i+2<s? i+2 : s-1);
+            indices.push_back(i+1 < s ? i+1 : s-1);
+            indices.push_back(i+2 < s ? i+2 : s-1);
+            indices.push_back(i+3 < s ? i+3 : s-1);
+            // TODO Add padding on the right
         }
+//        for(int i = 0; i < s; i ++) {
+//            indices.push_back(i-2>=0? i-2 : 0);
+//            indices.push_back(i-1>=0? i-1 : 0);
+//            indices.push_back(i);
+//            indices.push_back(i+1<s? i+1 : s-1);
+//            indices.push_back(i+2<s? i+2 : s-1);
+//        }
         mesh.update(std::move(vertices), std::move(indices));
     }
 
     void render(Shader &shader) {
         glLineWidth(2);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
-        glPatchParameteri(GL_PATCH_VERTICES, 5);
+        glPatchParameteri(GL_PATCH_VERTICES, 7);
         mesh.render();
         glLineWidth(1);
     }

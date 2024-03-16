@@ -104,6 +104,7 @@ set(INCL
         logic/events/SelectionChangedEvent.h
         logic/geometry/BezierC2.h
         logic/events/CreateBezierC2Event.h
+        logic/vertices/SplineVertex.h
 )
 
 add_executable(opengl-sandbox main.cpp
