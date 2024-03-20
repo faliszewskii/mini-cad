@@ -13,15 +13,15 @@
 class BezierC2 {
     Mesh<SplineVertex> mesh;
 public:
+    int id;
     std::string name;
     bool selected;
-    int id;
 
     bool drawPolyline;
     int adaptationMultiplier=20;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
-    BezierC2() : name("Bezier C2"), selected(false), id(IdCounter::nextId()), mesh({},{},GL_PATCHES),
+    BezierC2() : id(IdCounter::nextId()), name("Bezier C2  ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
                  drawPolyline(false) {}
 
     bool pointAlreadyAdded(Point &point) {

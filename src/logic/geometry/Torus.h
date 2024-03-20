@@ -25,7 +25,7 @@ public:
     float thickness;
 
     explicit Torus(glm::vec3 position = {}, int radialResolution = 50, int tubularResolution = 50, float radius = 0.75, float thickness = 0.25f)
-            : radialResolution(radialResolution), tubularResolution(tubularResolution), name("Torus"), id(IdCounter::nextId()),
+            : radialResolution(radialResolution), tubularResolution(tubularResolution), id(IdCounter::nextId()), name("Torus (" + std::to_string(id) + ")"),
               selected(false), radius(radius), thickness(thickness), mesh({},{},GL_LINES), transform(position) {
         generate();
     }
