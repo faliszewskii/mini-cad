@@ -10,6 +10,7 @@
 #include "../../../logic/events/SelectEntityEvent.h"
 #include "../../../logic/events/CreateBezierC0Event.h"
 #include "../../../logic/events/PointMovedEvent.h"
+#include <glm/gtx/euler_angles.hpp>
 
 namespace EntityListWorkspace {
 
@@ -146,30 +147,32 @@ namespace EntityListWorkspace {
             }
         }
 
-        auto position = glm::vec<3,double>(centerTransform.getTranslationRef());
+        auto position = glm::vec3(centerTransform.getTranslationRef());
         ImGui::Text("Position:");
-        modified |= ImGui::DragScalar("x##position", ImGuiDataType_Double, glm::value_ptr(position) + 0, 0.01f);
-        modified |= ImGui::DragScalar("y##position", ImGuiDataType_Double, glm::value_ptr(position) + 1, 0.01f);
-        modified |= ImGui::DragScalar("z##position", ImGuiDataType_Double, glm::value_ptr(position) + 2, 0.01f);
+        modified |= ImGui::DragScalar("x##position", ImGuiDataType_Float, glm::value_ptr(position) + 0, 0.01f);
+        modified |= ImGui::DragScalar("y##position", ImGuiDataType_Float, glm::value_ptr(position) + 1, 0.01f);
+        modified |= ImGui::DragScalar("z##position", ImGuiDataType_Float, glm::value_ptr(position) + 2, 0.01f);
 
-        auto angle = glm::vec<3, double>(centerTransform.getRotationAngles());
+        auto angle = glm::vec3(centerTransform.getRotationAngles());
         ImGui::Text("Rotation:");
-        modified |= ImGui::DragScalar("x##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 0, 0.01f);
-        modified |= ImGui::DragScalar("y##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 1, 0.01f);
-        modified |= ImGui::DragScalar("z##orientation", ImGuiDataType_Double, glm::value_ptr(angle) + 2, 0.01f);
+        modified |= ImGui::DragScalar("x##orientation", ImGuiDataType_Float, glm::value_ptr(angle) + 0, 0.01f);
+        modified |= ImGui::DragScalar("y##orientation", ImGuiDataType_Float, glm::value_ptr(angle) + 1, 0.01f);
+        modified |= ImGui::DragScalar("z##orientation", ImGuiDataType_Float, glm::value_ptr(angle) + 2, 0.01f);
 
-        auto scale = glm::vec<3,double>(centerTransform.getScaleRef());
+        auto scale = glm::vec3(centerTransform.getScaleRef());
         ImGui::Text("Scale:");
-        modified |= ImGui::DragScalar("x##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 0, 0.001f);
-        modified |= ImGui::DragScalar("y##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 1, 0.001f);
-        modified |= ImGui::DragScalar("z##scale", ImGuiDataType_Double, glm::value_ptr(scale) + 2, 0.001f);
+        modified |= ImGui::DragScalar("x##scale", ImGuiDataType_Float, glm::value_ptr(scale) + 0, 0.001f);
+        modified |= ImGui::DragScalar("y##scale", ImGuiDataType_Float, glm::value_ptr(scale) + 1, 0.001f);
+        modified |= ImGui::DragScalar("z##scale", ImGuiDataType_Float, glm::value_ptr(scale) + 2, 0.001f);
 
         // TODO Zastanowić się nad reprezentacją kątów. Jako 3 macierze? Kwaternion ok? Co z kolejnością obrotów? Globalnie czy lokalnie? Zainspirować się ImGuizmo
+        // TODO Podzielić na różne modified
+        // TODO Event center of mass translated, rotated etc.
         if(modified) { // TODO Maybe into an event ????
             auto translationDiff = position - centerTransform.getTranslationRef();
             auto angleDiff = angle - centerTransform.getRotationAngles();
             auto scaleRatio = scale / centerTransform.getScaleRef();
-                auto T = glm::translate(glm::mat<4,4,double>{1.0f}, translationDiff) * glm::mat4_cast(glm::qua<double>(angleDiff)) * glm::scale(glm::mat<4,4,double>(1.0f), scaleRatio);
+                auto T = glm::translate(glm::mat4{1.0f}, translationDiff) * glm::mat4_cast(glm::quat(angleDiff)) * glm::scale(glm::mat4(1.0f), scaleRatio);
             centerTransform.setTransformation(T * centerTransform.getTransformation());
 
             centerTransform.setTranslation(position);
@@ -180,17 +183,29 @@ namespace EntityListWorkspace {
             for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                         [&](Torus &torus) {
-                            moved.emplace(torus.id);
-                            torus.transform.setTranslation(torus.transform.getTranslationRef() - centerTransform.translation);
-                            torus.transform.setTransformation(T * torus.transform.getTransformation());
-                            torus.transform.setTranslation(torus.transform.getTranslationRef() + centerTransform.translation);
+                            moved.emplace(torus.id); // Add addTranslation
+                            torus.transform.setTranslation(torus.transform.translation + translationDiff);
+
+                            torus.transform.setScale(torus.transform.scale * scaleRatio);
+                            torus.transform.setTranslation(torus.transform.translation +
+                                (torus.transform.translation - centerTransform.translation) * (scaleRatio - glm::vec3(1)));
+
+                            torus.transform.setOrientation(glm::quat(angleDiff) * torus.transform.getOrientationRef());
+                            torus.transform.setTranslation(centerTransform.translation +
+                                glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
+                            torus.transform.setTranslation(centerTransform.translation +
+                                glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
+                            torus.transform.setTranslation(centerTransform.translation +
+                                glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
                         },
                         [&](Point &point) {
                             if(moved.contains(point.id)) return;
                             moved.emplace(point.id);
-                            point.position -= centerTransform.translation;
-                            point.position = T * glm::vec4(point.position, 1);
-                            point.position += centerTransform.translation;
+                            point.position += translationDiff;
+                            point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
+                            point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
+                            point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
+                            point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
                             appState.eventPublisher.publish(PointMovedEvent{point});
                         },
                         [&](BezierC0 &bezier) {
@@ -198,9 +213,11 @@ namespace EntityListWorkspace {
                                 if(moved.contains(pPoint.first)) continue;
                                 moved.emplace(pPoint.first);
                                 Point &point = pPoint.second;
-                                point.position -= centerTransform.translation;
-                                point.position = T * glm::vec4(point.position, 1);
-                                point.position += centerTransform.translation;
+                                point.position += translationDiff;// TODO Move all three occurrences out from here. Maybe to point class
+                                point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
                                 appState.eventPublisher.publish(PointMovedEvent{point});
                             }
                         },
@@ -209,9 +226,11 @@ namespace EntityListWorkspace {
                                 if(moved.contains(pPoint.first)) continue;
                                 moved.emplace(pPoint.first);
                                 Point &point = pPoint.second;
-                                point.position -= centerTransform.translation;
-                                point.position = T * glm::vec4(point.position, 1);
-                                point.position += centerTransform.translation;
+                                point.position += translationDiff;
+                                point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
+                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
                                 appState.eventPublisher.publish(PointMovedEvent{point});
                             }
                         }
@@ -262,28 +281,28 @@ namespace EntityListWorkspace {
     inline void renderWorkspaceTransform(Transformation &transform) {
         ImGui::SeparatorText("Transform");
 
-        auto position = static_cast<double *>(glm::value_ptr(transform.getTranslationRef()));
+        auto position = static_cast<float *>(glm::value_ptr(transform.getTranslationRef()));
         ImGui::Text("Position:");
-        ImGui::DragScalar("x##position", ImGuiDataType_Double, position + 0, 0.01f);
-        ImGui::DragScalar("y##position", ImGuiDataType_Double, position + 1, 0.01f);
-        ImGui::DragScalar("z##position", ImGuiDataType_Double, position + 2, 0.01f);
+        ImGui::DragScalar("x##position", ImGuiDataType_Float, position + 0, 0.01f);
+        ImGui::DragScalar("y##position", ImGuiDataType_Float, position + 1, 0.01f);
+        ImGui::DragScalar("z##position", ImGuiDataType_Float, position + 2, 0.01f);
 
         auto oldAngle = transform.getRotationAngles();
-        auto newAngle = glm::vec<3,double>(oldAngle);
-        auto angleRef = static_cast<double *>(glm::value_ptr(newAngle));
+        auto newAngle = glm::vec3(oldAngle);
+        auto angleRef = static_cast<float *>(glm::value_ptr(newAngle));
         ImGui::Text("Rotation:");
-        if(ImGui::DragScalar("x##orientation", ImGuiDataType_Double, angleRef + 0, 0.01f))
+        if(ImGui::DragScalar("x##orientation", ImGuiDataType_Float, angleRef + 0, 0.01f))
             transform.addRotation(glm::vec3(newAngle.x - oldAngle.x, 0, 0));
-        if(ImGui::DragScalar("y##orientation", ImGuiDataType_Double, angleRef + 1, 0.01f))
+        if(ImGui::DragScalar("y##orientation", ImGuiDataType_Float, angleRef + 1, 0.01f))
             transform.addRotation(glm::vec3(0, newAngle.y - oldAngle.y, 0));
-        if(ImGui::DragScalar("z##orientation", ImGuiDataType_Double, angleRef + 2, 0.01f))
+        if(ImGui::DragScalar("z##orientation", ImGuiDataType_Float, angleRef + 2, 0.01f))
             transform.addRotation(glm::vec3(0, 0, newAngle.z - oldAngle.z));
 
-        auto scale = static_cast<double *>(glm::value_ptr(transform.getScaleRef()));
+        auto scale = static_cast<float *>(glm::value_ptr(transform.getScaleRef()));
         ImGui::Text("Scale:");
-        ImGui::DragScalar("x##scale", ImGuiDataType_Double, scale + 0, 0.001f);
-        ImGui::DragScalar("y##scale", ImGuiDataType_Double, scale + 1, 0.001f);
-        ImGui::DragScalar("z##scale", ImGuiDataType_Double, scale + 2, 0.001f);
+        ImGui::DragScalar("x##scale", ImGuiDataType_Float, scale + 0, 0.001f);
+        ImGui::DragScalar("y##scale", ImGuiDataType_Float, scale + 1, 0.001f);
+        ImGui::DragScalar("z##scale", ImGuiDataType_Float, scale + 2, 0.001f);
     }
 
     template<typename T> requires has_name<T> && has_id<T>

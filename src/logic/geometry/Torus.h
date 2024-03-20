@@ -16,9 +16,9 @@ class Torus {
 
 public:
     Transformation transform;
+    int id;
     std::string name;
     bool selected;
-    int id;
     int radialResolution;
     int tubularResolution;
     float radius;

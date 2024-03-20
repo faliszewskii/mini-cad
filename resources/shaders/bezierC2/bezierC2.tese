@@ -27,11 +27,11 @@ main()
 {
     // Na wejściu mam
     float t = gl_TessCoord.x; // 0 -> 1
-    float x = tc_knot[3] + t;
+    float x = tc_knot[3] + t; // x jest na środku, od czwartego [3] do piątego węzłą.
 
     float knots[7] = {tc_knot[0], tc_knot[1], tc_knot[2], tc_knot[3], tc_knot[4], tc_knot[5], tc_knot[6]};
 
-    vec3 coefficients[4] = vec3[](gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz, gl_in[3].gl_Position.xyz);
+    vec3 coefficients[4] = vec3[](gl_in[2].gl_Position.xyz, gl_in[3].gl_Position.xyz, gl_in[4].gl_Position.xyz, gl_in[5].gl_Position.xyz);
     vec4 pos = vec4( deBoor(x, coefficients, knots, 3), 1.f );
     gl_Position = projection * view * pos;
     colorek = patchColorek;

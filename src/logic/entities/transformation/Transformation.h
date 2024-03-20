@@ -12,30 +12,30 @@
 
 class Transformation {
 public:
-    glm::vec<3, double> translation;
-    glm::qua<double> orientation;
-    glm::vec<3, double> scale;
+    glm::vec3 translation;
+    glm::quat orientation;
+    glm::vec3 scale;
 
     explicit Transformation();
-    explicit Transformation(glm::mat<4,4,double> transformation);
-    explicit Transformation(glm::vec<3, double> position, glm::qua<double> orientation = glm::qua<double>(1,0,0,0),
-                   glm::vec<3, double> scale = glm::vec<3, double>(1.0f));
+    explicit Transformation(glm::mat4 transformation);
+    explicit Transformation(glm::vec3 position, glm::quat orientation = glm::quat(1,0,0,0),
+                   glm::vec3 scale = glm::vec3(1.0f));
 
-    [[nodiscard]] glm::mat<4,4,double> getTransformation() const;
-    void setTransformation(glm::mat<4,4,double> transformation);
+    [[nodiscard]] glm::mat4 getTransformation() const;
+    void setTransformation(glm::mat4 transformation);
 
-    void setTranslation(glm::vec<3, double> newTranslation);
-    void setOrientation(glm::qua<double> newOrientation);
-    void addRotation(glm::vec<3, double> eulerAngles);
-    void setScale(glm::vec<3, double> newScale);
+    void setTranslation(glm::vec3 newTranslation);
+    void setOrientation(glm::quat newOrientation);
+    void addRotation(glm::vec3 eulerAngles);
+    void setScale(glm::vec3 newScale);
 
-    glm::vec<3, double> &getTranslationRef() { return translation; };
-    glm::qua<double> &getOrientationRef() { return orientation; };
-    glm::vec<3, double> &getScaleRef() { return scale; };
+    glm::vec3 &getTranslationRef() { return translation; };
+    glm::quat &getOrientationRef() { return orientation; };
+    glm::vec3 &getScaleRef() { return scale; };
 
-    [[nodiscard]] glm::vec<3, double> getRotationAngles() const;
+    [[nodiscard]] glm::vec3 getRotationAngles() const;
 
-    void setRotation(glm::vec<3, double> rotation);
+    void setRotation(glm::vec3 rotation);
 };
 
 
