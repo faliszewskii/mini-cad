@@ -34,9 +34,6 @@ std::unique_ptr<AppState> initializeAppState() {
     appState->logger.logDebug("Test Debug");
     appState->logger.logError("Test Error");
 
-//    appState->torusSet.emplace_back();
-//    appState->pointSet.emplace_back();
-
     return appState;
 }
 

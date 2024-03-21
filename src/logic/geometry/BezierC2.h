@@ -21,7 +21,7 @@ public:
     int adaptationMultiplier=20;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
-    BezierC2() : id(IdCounter::nextId()), name("Bezier C2  ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
+    BezierC2() : id(IdCounter::nextId()), name("Bezier C2 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
                  drawPolyline(false) {}
 
     bool pointAlreadyAdded(Point &point) {
@@ -51,7 +51,7 @@ public:
             vertices.emplace_back(point.second.get().position, i);
         }
         std::vector<unsigned int> indices;
-        int s = controlPoints.size();
+        auto s = controlPoints.size();
         for(int i = 0; i < s; i ++) {
             indices.push_back(i-3 >= 0 ? i-3 : 0);
             indices.push_back(i-2 >= 0 ? i-2 : 0);
@@ -60,15 +60,7 @@ public:
             indices.push_back(i+1 < s ? i+1 : s-1);
             indices.push_back(i+2 < s ? i+2 : s-1);
             indices.push_back(i+3 < s ? i+3 : s-1);
-            // TODO Add padding on the right
         }
-//        for(int i = 0; i < s; i ++) {
-//            indices.push_back(i-2>=0? i-2 : 0);
-//            indices.push_back(i-1>=0? i-1 : 0);
-//            indices.push_back(i);
-//            indices.push_back(i+1<s? i+1 : s-1);
-//            indices.push_back(i+2<s? i+2 : s-1);
-//        }
         mesh.update(std::move(vertices), std::move(indices));
     }
 

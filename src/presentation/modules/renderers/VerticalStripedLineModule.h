@@ -21,7 +21,7 @@ class VerticalStripedLineModule {
 public:
     explicit VerticalStripedLineModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
         mesh(Mesh<EmptyVertex>({EmptyVertex{}}, {}, GL_POINTS)), // TODO I don't need names here. Maybe they are not neede anywhere at all.
-        shader(Shader("verticalLine",
+        shader(Shader(
                         IOUtils::getResource("shaders/basic/empty.vert"),
                         IOUtils::getResource("shaders/verticalLine/verticalLine.geom"),
                         IOUtils::getResource("shaders/verticalLine/verticalLine.frag"))) {}

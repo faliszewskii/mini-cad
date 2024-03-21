@@ -64,28 +64,16 @@ public:
                 auto j_next = (j + 1) % tubularResolution;
                 auto i0 = i * tubularResolution + j;
                 auto i1 = i * tubularResolution + j_next;
-                auto i2 = i_next * tubularResolution + j_next;
                 auto i3 = i_next * tubularResolution + j;
 
                 indices.push_back(i0);
                 indices.push_back(i1);
                 indices.push_back(i0);
                 indices.push_back(i3);
-//                GeometryHelpers::addQuad(indices, i0, i1, i2, i3);
             }
         }
 
         mesh.update(std::move(vertices), std::move(indices));
-    }
-
-    using ParameterMap = std::vector<std::pair<std::string, std::variant<std::reference_wrapper<int>, std::reference_wrapper<float>>>>;
-    ParameterMap getParameters() {
-        return ParameterMap {
-                {"Radial Resolution", radialResolution},
-                {"Tubular Resolution", tubularResolution},
-                {"Radius", radius},
-                {"Thickness", thickness},
-        };
     }
 };
 

@@ -172,8 +172,6 @@ namespace EntityListWorkspace {
             auto translationDiff = position - centerTransform.getTranslationRef();
             auto angleDiff = angle - centerTransform.getRotationAngles();
             auto scaleRatio = scale / centerTransform.getScaleRef();
-                auto T = glm::translate(glm::mat4{1.0f}, translationDiff) * glm::mat4_cast(glm::quat(angleDiff)) * glm::scale(glm::mat4(1.0f), scaleRatio);
-            centerTransform.setTransformation(T * centerTransform.getTransformation());
 
             centerTransform.setTranslation(position);
             centerTransform.setRotation(angle);
@@ -186,10 +184,6 @@ namespace EntityListWorkspace {
                             moved.emplace(torus.id); // Add addTranslation
                             torus.transform.setTranslation(torus.transform.translation + translationDiff);
 
-                            torus.transform.setScale(torus.transform.scale * scaleRatio);
-                            torus.transform.setTranslation(torus.transform.translation +
-                                (torus.transform.translation - centerTransform.translation) * (scaleRatio - glm::vec3(1)));
-
                             torus.transform.setOrientation(glm::quat(angleDiff) * torus.transform.getOrientationRef());
                             torus.transform.setTranslation(centerTransform.translation +
                                 glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
@@ -197,6 +191,10 @@ namespace EntityListWorkspace {
                                 glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
                             torus.transform.setTranslation(centerTransform.translation +
                                 glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
+
+
+                            torus.transform.setTranslation(torus.transform.translation +
+                                                           (torus.transform.translation - centerTransform.translation) * (scaleRatio - glm::vec3(1)));
                         },
                         [&](Point &point) {
                             if(moved.contains(point.id)) return;
@@ -270,9 +268,9 @@ namespace EntityListWorkspace {
 
         ImGui::Text("Position:");
         bool pointMoved = false;
-        pointMoved |= ImGui::DragFloat("x##position", static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
-        pointMoved |= ImGui::DragFloat("y##position", static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
-        pointMoved |= ImGui::DragFloat("z##position", static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
+        pointMoved |= ImGui::DragFloat(("x##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
+        pointMoved |= ImGui::DragFloat(("y##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
+        pointMoved |= ImGui::DragFloat(("z##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
 
         // TODO Maybe changes in point position also should be done through events?
         if(pointMoved) appState.eventPublisher.publish(PointMovedEvent{point});

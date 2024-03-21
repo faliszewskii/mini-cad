@@ -18,18 +18,18 @@ class WireframeRenderModule {
 
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
-            shader(Shader("wireframe",
+            shader(Shader(
                             IOUtils::getResource("shaders/basic/position.vert"),
                             IOUtils::getResource("shaders/basic/selection.frag"))),
-            pointShader(Shader("point",
+            pointShader(Shader(
                            IOUtils::getResource("shaders/basic/point.vert"),
                            IOUtils::getResource("shaders/basic/selection.frag"))),
-            bezierShader(Shader("bezier",
+            bezierShader(Shader(
                                 IOUtils::getResource("shaders/bezier/bezier.vert"),
                                 IOUtils::getResource("shaders/bezier/bezier.tesc"),
                                 IOUtils::getResource("shaders/bezier/bezier.tese"),
                             IOUtils::getResource("shaders/bezier/bezier.frag"))), // TODO DEBUG change to selection.frag
-            bezierC2Shader(Shader("bezierC2",
+            bezierC2Shader(Shader(
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.vert"),
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.tesc"),
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.tese"),

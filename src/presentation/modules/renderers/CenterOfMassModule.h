@@ -17,7 +17,7 @@ class CenterOfMassModule {
 public:
     CenterOfMassModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
         mesh(Mesh<Vertex>({Vertex(glm::vec3(), glm::vec3(), glm::vec2())}, {}, GL_POINTS)),
-        shader(Shader("centerOfMassShader",
+        shader(Shader(
                         IOUtils::getResource("shaders/basic/point.vert"),
                         IOUtils::getResource("shaders/basic/depthColor.frag"))) {}
 

@@ -17,7 +17,7 @@ class GridModule {
     std::unique_ptr<Mesh<Vertex>> mesh;
 public:
     explicit GridModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
-                   shader(Shader("Grid", IOUtils::getResource("shaders/grid/grid.vert"), IOUtils::getResource("shaders/grid/grid.frag"))){
+                   shader(Shader(IOUtils::getResource("shaders/grid/grid.vert"), IOUtils::getResource("shaders/grid/grid.frag"))){
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
         auto normal = glm::vec3(0,1,0);

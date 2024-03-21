@@ -58,16 +58,16 @@ void InputHandler::mouseButtonCallback(GLFWwindow *window, int button, int actio
         appState.guiFocus = false;
     else {
         appState.guiFocus = true;
+        double xpos, ypos;
+        auto &io = ImGui::GetIO();
+        glfwGetCursorPos(window, &xpos, &ypos);
+        xpos = (xpos - appState.guiPanelLeftWidth) / (io.DisplaySize.x - appState.guiPanelLeftWidth);
+        xpos = xpos * 2 - 1;
+        ypos = ypos / io.DisplaySize.y;
+        ypos = -2 * ypos + 1;
+        glm::mat4 view = appState.camera.getViewMatrix();
+        glm::mat4 projection = appState.camera.getProjectionMatrix();
         if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-            double xpos, ypos;
-            auto &io = ImGui::GetIO();
-            glfwGetCursorPos(window, &xpos, &ypos);
-            xpos = (xpos - appState.guiPanelLeftWidth) / (io.DisplaySize.x - appState.guiPanelLeftWidth);
-            xpos = xpos * 2 - 1;
-            ypos = ypos / io.DisplaySize.y;
-            ypos = -2 * ypos + 1;
-            glm::mat4 view = appState.camera.getViewMatrix();
-            glm::mat4 projection = appState.camera.getProjectionMatrix();
             glm::mat4 m = projection * view;
             float epsilon = 0.01;
             for(auto &point : std::views::values(appState.pointSet)) { // TODO Maybe not on every click.
@@ -76,6 +76,11 @@ void InputHandler::mouseButtonCallback(GLFWwindow *window, int button, int actio
                 if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
                     appState.eventPublisher.publish(SelectEntityEvent{*point});
             }
+        }
+        if(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+            glm::vec4 world = glm::inverse(projection * view) * glm::vec4(xpos, ypos, 0.995f, 1.f);
+            world /= world.w;
+            appState.cursorPosition = world;
         }
     }
 }

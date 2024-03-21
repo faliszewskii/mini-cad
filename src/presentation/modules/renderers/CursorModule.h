@@ -20,7 +20,7 @@ class CursorModule {
 
 public:
     CursorModule(int workspaceWidth) : workspaceWidth(workspaceWidth), mesh(Mesh<EmptyVertex>({EmptyVertex{}}, {}, GL_POINTS)),
-        shader(Shader("cursorShader",
+        shader(Shader(
                       IOUtils::getResource("shaders/basic/empty.vert"),
                       IOUtils::getResource("shaders/cursor/cursor.geom"),
                       IOUtils::getResource("shaders/cursor/cursor.frag"))) {}

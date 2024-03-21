@@ -17,12 +17,10 @@ public:
     glm::vec3 scale;
 
     explicit Transformation();
-    explicit Transformation(glm::mat4 transformation);
     explicit Transformation(glm::vec3 position, glm::quat orientation = glm::quat(1,0,0,0),
                    glm::vec3 scale = glm::vec3(1.0f));
 
     [[nodiscard]] glm::mat4 getTransformation() const;
-    void setTransformation(glm::mat4 transformation);
 
     void setTranslation(glm::vec3 newTranslation);
     void setOrientation(glm::quat newOrientation);

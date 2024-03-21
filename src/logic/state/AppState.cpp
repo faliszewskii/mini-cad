@@ -14,7 +14,7 @@
 #include "../events/CreateBezierC2Event.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
-            camera(viewport.width, viewport.height, CameraMode::ANCHOR, glm::vec3(0.0f, 0.0f, 3.0f)),
+            camera(viewport.width, viewport.height, CameraMode::ANCHOR, glm::vec3(0.0f, 3.0f, 3.0f), glm::vec3(0.f), glm::vec3(-M_PI/4,0,0)),
             guiFocus(true),
             vSync(true),
             keyboardCtrlMode(false),
@@ -80,15 +80,16 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
             if (!this->keyboardCtrlMode) {
                 for(auto &el : set) std::visit([](auto &el){el.get().selected = false;}, el.second);
                 set.clear();
-            }
+            } // TODO what if object is already selected and I have ctrl
             std::visit(overloaded{
-                [&](auto &el){
-                    auto &entity = el.get();
-                    set.emplace_back(entity.id, entity);
-                    entity.selected = true;
-                }
+                    [&](auto &el){
+                        auto &entity = el.get();
+                        {
+                            set.emplace_back(entity.id, entity);
+                            entity.selected = true;
+                        }
+                    }
             }, event.selected);
-
             this->eventPublisher.publish(SelectionChangedEvent{});
         });
         eventPublisher.subscribe([&](const SelectionChangedEvent &event) {

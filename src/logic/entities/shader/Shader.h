@@ -18,7 +18,7 @@
 
 using ShaderType = std::variant<bool, int, float, glm::vec3, glm::vec4, glm::mat4>;
 
-class Shader : public SceneNode {
+class Shader {
 public:
     unsigned int ID;
 
@@ -31,27 +31,24 @@ public:
     int maxUniformNameLength;
     int uniformCount;
     std::unique_ptr<char[]> uniformNameBuffer;
-    bool active;
+    bool active = true;
 
-    Shader(std::string name, std::string vertexShaderPath, std::string fragmentShaderPath) : SceneNode(std::move(name)),
+    Shader(std::string vertexShaderPath, std::string fragmentShaderPath) :
     vertexPath(std::move(vertexShaderPath)), geometryPath(), fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(),
     tesselationEvaluationPath() {
         initShader();
     }
-    Shader(std::string name, std::string vertexShaderPath, std::string geometryShaderPath, std::string fragmentShaderPath) :
-    SceneNode(std::move(name)), vertexPath(std::move(vertexShaderPath)), geometryPath(std::move(geometryShaderPath)),
+    Shader(std::string vertexShaderPath, std::string geometryShaderPath, std::string fragmentShaderPath) :
+    vertexPath(std::move(vertexShaderPath)), geometryPath(std::move(geometryShaderPath)),
     fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(), tesselationEvaluationPath()  {
         initShader();
     }
-    Shader(std::string name, std::string vertexShaderPath, std::string tesselationControlPath, std::string tesselationEvaluationPath, std::string fragmentShaderPath) :
-            SceneNode(std::move(name)), vertexPath(std::move(vertexShaderPath)), geometryPath(),
+    Shader(std::string vertexShaderPath, std::string tesselationControlPath, std::string tesselationEvaluationPath, std::string fragmentShaderPath) :
+            vertexPath(std::move(vertexShaderPath)), geometryPath(),
             fragmentPath(std::move(fragmentShaderPath)), tesselationControlPath(std::move(tesselationControlPath)),
             tesselationEvaluationPath(std::move(tesselationEvaluationPath))  {
         initShader();
     }
-
-
-    std::string getTypeName() override { return "Shader"; };
 
     void setActive(bool toggle) { active = toggle; };
 
@@ -130,20 +127,6 @@ public:
     }
     // ------------------------------------------------------------------------
     // uniform setter
-
-    /*void setUniforms(UniformMapOld &uniforms) const {
-        int length, size;
-        unsigned int type;
-
-        use();
-        for (int i = 0; i < uniformCount; i++) {
-            glGetActiveUniform(ID, (GLuint) i, maxUniformNameLength, &length, &size, &type, uniformNameBuffer.get());
-//            std::cerr <<"name: " << uniformNameBuffer << ", length: " << length << ", size: " << size << ", type: " << type << std::endl;
-            auto stack = uniforms[uniformNameBuffer.get()];
-            if (stack.empty()) continue;
-            setUniform(uniformNameBuffer.get(), stack.top());
-        }
-    }*/
 
     void setUniform(const std::string &name, ShaderType &&value) const {
         std::visit(overloaded{

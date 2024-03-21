@@ -13,28 +13,8 @@ orientation(glm::quat(1, 0, 0, 0)), scale(glm::vec3(1.0f)) {}
 Transformation::Transformation(glm::vec3 translation, glm::quat orientation, glm::vec3 scale) :
         translation(translation), orientation(orientation), scale(scale)  {}
 
-Transformation::Transformation(glm::mat4 transformation) {
-    glm::vec3 scaleFactor{};
-    glm::quat orientationFactor{};
-    glm::vec3 translationFactor{};
-    AlgebraUtils::decomposeMtx(transformation, translationFactor, orientationFactor, scaleFactor);
-    setTranslation(translationFactor);
-    setOrientation(orientationFactor);
-    setScale(scaleFactor);
-}
-
 glm::mat4 Transformation::getTransformation() const {
     return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(orientation) * glm::scale(glm::mat4(1.0f), scale);
-}
-
-void Transformation::setTransformation(glm::mat4 transformation) {
-    glm::vec3 scale{};
-    glm::quat rotation{};
-    glm::vec3 translation{};
-    AlgebraUtils::decomposeMtx(transformation, translation, rotation, scale);
-    setTranslation(translation);
-    setOrientation(glm::normalize(rotation));
-    setScale(scale);
 }
 
 void Transformation::setTranslation(glm::vec3 newTranslation) {
