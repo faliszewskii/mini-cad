@@ -51,11 +51,15 @@ public:
         }
         std::vector<unsigned int> indices;
         int s = controlPoints.size();
-        for(int i = 0; i < s; i += 3) {
+        for(int i = 3; i < s; i += 3) {
+            indices.push_back(i-3);
+            indices.push_back(i-2);
+            indices.push_back(i-1);
             indices.push_back(i);
-            indices.push_back(i+1 < s ? i+1 : s-1);
-            indices.push_back(i+2 < s ? i+2 : s-1);
-            indices.push_back(i+3 < s ? i+3 : s-1);
+//            indices.push_back(i);
+//            indices.push_back(i+1 < s ? i+1 : s-1);
+//            indices.push_back(i+2 < s ? i+2 : s-1);
+//            indices.push_back(i+3 < s ? i+3 : s-1);
         }
         mesh.update(std::move(vertices), std::move(indices));
     }
