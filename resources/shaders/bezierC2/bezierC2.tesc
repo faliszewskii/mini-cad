@@ -1,6 +1,6 @@
 #version 460 core
 
-layout (vertices = 7) out;
+layout (vertices = 4) out;
 
 uniform int adaptationMultiplier;
 uniform int windowWidth;
@@ -16,8 +16,8 @@ out float tc_knot[];
 
 int calculateSegmentCount() {
     float l = 0;
-    vec2 p[7];
-    int n = 7;
+    vec2 p[4];
+    int n = 4;
 
     for(int i=0; i<n; i++) {
         vec4 pos = (projection * view * vec4(gl_in[i].gl_Position.xyz, 1));

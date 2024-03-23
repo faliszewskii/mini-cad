@@ -90,21 +90,28 @@ set(INCL
         logic/concepts/has_selected.h
         presentation/modules/renderers/CursorModule.h
         logic/events/broadcaster/EventPublisher.h
-        logic/events/CreateTorusEvent.h
+        logic/events/create/CreateTorusEvent.h
         logic/handlers/ObjectCreationHandler.h
-        logic/events/CreatePointEvent.h
-        logic/events/EntitySelectionChangedEvent.h
-        logic/events/SelectEntityEvent.h
+        logic/events/create/CreatePointEvent.h
+        logic/events/selection/SelectEntityEvent.h
         logic/state/EntityType.h
         logic/geometry/BezierC0.h
-        logic/events/CreateBezierC0Event.h
+        logic/events/create/CreateBezierC0Event.h
         logic/vertices/PositionVertex.h
-        logic/events/PointMovedEvent.h
-        logic/events/PointDeletedEvent.h
-        logic/events/SelectionChangedEvent.h
+        logic/events/point/PointMovedEvent.h
+        logic/events/point/PointDeletedEvent.h
+        logic/events/selection/SelectionChangedEvent.h
         logic/geometry/BezierC2.h
-        logic/events/CreateBezierC2Event.h
+        logic/events/create/CreateBezierC2Event.h
         logic/vertices/SplineVertex.h
+        logic/events/create/CreateEventsHandler.h
+        logic/events/selection/SelectionEventsHandler.h
+        logic/events/point/PointEventsHandler.h
+        logic/events/input/MouseButtonEvent.h
+        logic/events/input/InputEventsHandler.h
+        logic/events/input/MouseMovedEvent.h
+        logic/events/input/MouseScrolledEvent.h
+        logic/events/input/KeyEvent.h
 )
 
 add_executable(opengl-sandbox main.cpp

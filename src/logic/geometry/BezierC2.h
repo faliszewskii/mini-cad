@@ -11,7 +11,7 @@
 #include "../vertices/SplineVertex.h"
 
 class BezierC2 {
-    Mesh<SplineVertex> mesh;
+    Mesh<PositionVertex> mesh;
 public:
     int id;
     std::string name;
@@ -40,26 +40,22 @@ public:
     }
 
     void updatePoint(Point &point, int i) {
-        mesh.update({point.position, static_cast<float>(i)}, i);
+        mesh.update({point.position}, i);
     }
 
     void updateMesh() {
-        std::vector<SplineVertex> vertices;
+        std::vector<PositionVertex> vertices;
         vertices.reserve(controlPoints.size());
-        for(int i=0; i<controlPoints.size(); i++) {
-            auto &point = controlPoints[i];
-            vertices.emplace_back(point.second.get().position, i);
+        for(auto & point : controlPoints) {
+            vertices.emplace_back(point.second.get().position);
         }
         std::vector<unsigned int> indices;
         auto s = controlPoints.size();
-        for(int i = 0; i < s; i ++) {
-            indices.push_back(i-3 >= 0 ? i-3 : 0);
-            indices.push_back(i-2 >= 0 ? i-2 : 0);
-            indices.push_back(i-1 >= 0 ? i-1 : 0);
+        for(int i = 3; i < s; i ++) {
+            indices.push_back(i-3);
+            indices.push_back(i-2);
+            indices.push_back(i-1);
             indices.push_back(i);
-            indices.push_back(i+1 < s ? i+1 : s-1);
-            indices.push_back(i+2 < s ? i+2 : s-1);
-            indices.push_back(i+3 < s ? i+3 : s-1);
         }
         mesh.update(std::move(vertices), std::move(indices));
     }
@@ -67,7 +63,7 @@ public:
     void render(Shader &shader) {
         glLineWidth(2);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
-        glPatchParameteri(GL_PATCH_VERTICES, 7);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         mesh.render();
         glLineWidth(1);
     }

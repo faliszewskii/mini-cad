@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_SELECTENTITYEVENT_H
 #define OPENGL_SANDBOX_SELECTENTITYEVENT_H
 
-#include "../state/EntityType.h"
+#include "../../state/EntityType.h"
 
 struct SelectEntityEvent {
     EntityType selected;

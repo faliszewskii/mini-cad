@@ -7,9 +7,9 @@
 
 #include "../../../logic/state/AppState.h"
 #include "../../../logic/concepts/has_name.h"
-#include "../../../logic/events/SelectEntityEvent.h"
-#include "../../../logic/events/CreateBezierC0Event.h"
-#include "../../../logic/events/PointMovedEvent.h"
+#include "../../../logic/events/selection/SelectEntityEvent.h"
+#include "../../../logic/events/create/CreateBezierC0Event.h"
+#include "../../../logic/events/point/PointMovedEvent.h"
 #include <glm/gtx/euler_angles.hpp>
 
 namespace EntityListWorkspace {
@@ -63,7 +63,7 @@ namespace EntityListWorkspace {
                        [&](Torus &torus) { appState.torusSet.erase(appState.torusSet.find(torus.id)); },
                        [&](Point &point) {
                            int id = point.id;
-                           appState.pointSet.erase(appState.pointSet.find(id));
+                           appState.pointSet.erase(appState.pointSet.find(id)); // TODO Event Delete Point
                            appState.eventPublisher.publish(PointDeletedEvent{id});
                        },
                        [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); },
@@ -139,7 +139,7 @@ namespace EntityListWorkspace {
 
         // Because first element is Bézier curve we can add following points to it
         if(std::holds_alternative<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second)) {
-            if(ImGui::Button("Add points to curve")) {
+            if(ImGui::Button("Add points to curve")) { // TODO Create Event Handler
                 BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second);
                 for(auto &el : appState.selectedEntities)
                     if(std::holds_alternative<std::reference_wrapper<Point>>(el.second))
@@ -165,10 +165,9 @@ namespace EntityListWorkspace {
         modified |= ImGui::DragScalar("y##scale", ImGuiDataType_Float, glm::value_ptr(scale) + 1, 0.001f);
         modified |= ImGui::DragScalar("z##scale", ImGuiDataType_Float, glm::value_ptr(scale) + 2, 0.001f);
 
-        // TODO Zastanowić się nad reprezentacją kątów. Jako 3 macierze? Kwaternion ok? Co z kolejnością obrotów? Globalnie czy lokalnie? Zainspirować się ImGuizmo
         // TODO Podzielić na różne modified
         // TODO Event center of mass translated, rotated etc.
-        if(modified) { // TODO Maybe into an event ????
+        if(modified) {
             auto translationDiff = position - centerTransform.getTranslationRef();
             auto angleDiff = angle - centerTransform.getRotationAngles();
             auto scaleRatio = scale / centerTransform.getScaleRef();
@@ -192,7 +191,7 @@ namespace EntityListWorkspace {
                             torus.transform.setTranslation(centerTransform.translation +
                                 glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(torus.transform.translation-centerTransform.translation, 1)));
 
-
+                            torus.transform.setScale(torus.transform.scale * scaleRatio);
                             torus.transform.setTranslation(torus.transform.translation +
                                                            (torus.transform.translation - centerTransform.translation) * (scaleRatio - glm::vec3(1)));
                         },
@@ -298,9 +297,9 @@ namespace EntityListWorkspace {
 
         auto scale = static_cast<float *>(glm::value_ptr(transform.getScaleRef()));
         ImGui::Text("Scale:");
-        ImGui::DragScalar("x##scale", ImGuiDataType_Float, scale + 0, 0.001f);
-        ImGui::DragScalar("y##scale", ImGuiDataType_Float, scale + 1, 0.001f);
-        ImGui::DragScalar("z##scale", ImGuiDataType_Float, scale + 2, 0.001f);
+        ImGui::DragFloat("x##scale", scale + 0, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("y##scale", scale + 1, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("z##scale", scale + 2, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
     }
 
     template<typename T> requires has_name<T> && has_id<T>

@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_POINTMOVEDEVENT_H
 #define OPENGL_SANDBOX_POINTMOVEDEVENT_H
 
-#include "../geometry/Point.h"
+#include "../../geometry/Point.h"
 
 struct PointMovedEvent {
     Point &point;

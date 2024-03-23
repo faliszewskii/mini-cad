@@ -17,18 +17,22 @@
 #include "../concepts/has_id.h"
 #include "../concepts/has_selected.h"
 #include "../events/broadcaster/EventPublisher.h"
-#include "../events/CreateTorusEvent.h"
-#include "../events/CreatePointEvent.h"
-#include "../events/SelectEntityEvent.h"
+#include "../events/create/CreateTorusEvent.h"
+#include "../events/create/CreatePointEvent.h"
+#include "../events/selection/SelectEntityEvent.h"
 #include "EntityType.h"
 #include "../entities/camera/Camera.h"
 #include "../geometry/BezierC0.h"
-#include "../events/CreateBezierC0Event.h"
-#include "../events/PointMovedEvent.h"
-#include "../events/PointDeletedEvent.h"
-#include "../events/SelectionChangedEvent.h"
+#include "../events/create/CreateBezierC0Event.h"
+#include "../events/point/PointMovedEvent.h"
+#include "../events/point/PointDeletedEvent.h"
+#include "../events/selection/SelectionChangedEvent.h"
 #include "../geometry/BezierC2.h"
-#include "../events/CreateBezierC2Event.h"
+#include "../events/create/CreateBezierC2Event.h"
+#include "../events/input/MouseButtonEvent.h"
+#include "../events/input/MouseMovedEvent.h"
+#include "../events/input/MouseScrolledEvent.h"
+#include "../events/input/KeyEvent.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -67,7 +71,8 @@ struct AppState {
 
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
-        PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event> eventPublisher;
+        PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
+        MouseScrolledEvent, KeyEvent> eventPublisher;
 
     Logger logger;
     Camera camera;

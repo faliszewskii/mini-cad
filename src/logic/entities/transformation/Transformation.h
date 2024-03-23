@@ -34,6 +34,8 @@ public:
     [[nodiscard]] glm::vec3 getRotationAngles() const;
 
     void setRotation(glm::vec3 rotation);
+
+    glm::quat angleAxis(float const& angle, glm::vec3 const& v);
 };
 
 
