@@ -9,6 +9,7 @@
 
 struct PointMovedEvent {
     Point &point;
+    glm::vec3 delta;
 };
 
 #endif //OPENGL_SANDBOX_POINTMOVEDEVENT_H

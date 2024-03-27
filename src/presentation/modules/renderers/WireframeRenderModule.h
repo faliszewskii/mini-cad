@@ -43,16 +43,26 @@ public:
         shader.use();
         RenderHelpers::setUpCamera(appState.camera, shader);
         shader.setUniform("selected", false);
+        shader.setUniform("color", glm::vec4(0,0,0,1));
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
 
         pointShader.use();
         pointShader.setUniform("selected", false);
+        pointShader.setUniform("color", glm::vec4(0,0,0,1));
         RenderHelpers::setUpCamera(appState.camera, pointShader);
         for(auto &point : std::views::values(appState.pointSet))
             point->render(pointShader);
 
+        for(auto &bezier : std::views::values(appState.bezierC2Set)) {
+            if (bezier->drawBernstein) {
+                for (auto &point: bezier->bernsteinPoints)
+                    point->render(pointShader);
+            }
+        }
+
         bezierShader.use();
+        bezierShader.setUniform("color", glm::vec4(0,0,0,1));
         bezierShader.setUniform("selected", false);
         bezierShader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierShader.setUniform("windowHeight", int(io.DisplaySize.y));
@@ -62,6 +72,7 @@ public:
         }
 
         bezierC2Shader.use();
+        bezierC2Shader.setUniform("color", glm::vec4(0,0,0,1));
         bezierC2Shader.setUniform("selected", false);
         bezierC2Shader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierC2Shader.setUniform("windowHeight", int(io.DisplaySize.y));

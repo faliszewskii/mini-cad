@@ -23,6 +23,10 @@ namespace PointEventsHandler {
                 for(int i = 0; i < bezier.second->controlPoints.size(); i++)
                     if(bezier.second->controlPoints[i].first == event.point.id)
                         bezier.second->updatePoint(event.point, i);
+                if(bezier.second->drawBernstein)
+                    for(int i = 0; i < bezier.second->bernsteinPoints.size(); i++)
+                        if(bezier.second->bernsteinPoints[i]->id == event.point.id)
+                            bezier.second->updateBernstein(event.point, i, event.delta);
             }
         });
 

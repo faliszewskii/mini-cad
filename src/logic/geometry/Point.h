@@ -17,16 +17,21 @@ public:
     std::unique_ptr<Mesh<Vertex>> mesh;
     glm::vec3 position;
 
-    Point(glm::vec3 position = {}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
+    glm::vec4 color;
+    int size;
+
+    Point(glm::vec3 position = {}, int size = 10, glm::vec4 color = {0,0,0,1}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
                 {Vertex(glm::vec3(), glm::vec3(), glm::vec2())},
-                {},GL_POINTS))), id(IdCounter::nextId()), name("Point (" + std::to_string(id) + ")") {};
+                {},GL_POINTS))), id(IdCounter::nextId()), name("Point (" + std::to_string(id) + ")") ,
+                color(color), size(size) {};
 
     Point(Point &&p) : selected(p.selected), position(p.position), mesh(std::move(p.mesh)), name(p.name), id(p.id) {}
 
     void render(Shader &shader) const {
-        glPointSize(10);
+        glPointSize(size);
         shader.setUniform("selected", selected);
         shader.setUniform("position", position);
+        shader.setUniform("color", color);
         mesh->render();
         glPointSize(1);
     }

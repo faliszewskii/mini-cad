@@ -119,6 +119,8 @@ namespace EntityListWorkspace {
 
         ImGui::DragInt("Adaptation Multiplier", &bezier.adaptationMultiplier);
         ImGui::Checkbox("Draw Polyline", &bezier.drawPolyline);
+        ImGui::SameLine();
+        ImGui::Checkbox("Draw Bernstein", &bezier.drawBernstein);
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(auto &pPoint : bezier.controlPoints) {
@@ -198,24 +200,26 @@ namespace EntityListWorkspace {
                         [&](Point &point) {
                             if(moved.contains(point.id)) return;
                             moved.emplace(point.id);
+                            glm::vec3 prevPosition = point.position;
                             point.position += translationDiff;
                             point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
                             point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
                             point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
                             point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
-                            appState.eventPublisher.publish(PointMovedEvent{point});
+                            appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
                         },
                         [&](BezierC0 &bezier) {
                             for(auto &pPoint : bezier.controlPoints) {
                                 if(moved.contains(pPoint.first)) continue;
                                 moved.emplace(pPoint.first);
                                 Point &point = pPoint.second;
+                                glm::vec3 prevPosition = point.position;
                                 point.position += translationDiff;// TODO Move all three occurrences out from here. Maybe to point class
                                 point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
-                                appState.eventPublisher.publish(PointMovedEvent{point});
+                                appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
                             }
                         },
                         [&](BezierC2 &bezier) { // TODO Extreme duplication with above
@@ -223,12 +227,13 @@ namespace EntityListWorkspace {
                                 if(moved.contains(pPoint.first)) continue;
                                 moved.emplace(pPoint.first);
                                 Point &point = pPoint.second;
+                                glm::vec3 prevPosition = point.position;
                                 point.position += translationDiff;
                                 point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
                                 point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
-                                appState.eventPublisher.publish(PointMovedEvent{point});
+                                appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
                             }
                         }
                 }, el.second);
@@ -267,12 +272,13 @@ namespace EntityListWorkspace {
 
         ImGui::Text("Position:");
         bool pointMoved = false;
+        glm::vec3 prevPosition = point.position;
         pointMoved |= ImGui::DragFloat(("x##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 0, 0.01f);
         pointMoved |= ImGui::DragFloat(("y##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 1, 0.01f);
         pointMoved |= ImGui::DragFloat(("z##position"+std::to_string(point.id)).c_str(), static_cast<float *>(glm::value_ptr(point.position)) + 2, 0.01f);
 
         // TODO Maybe changes in point position also should be done through events?
-        if(pointMoved) appState.eventPublisher.publish(PointMovedEvent{point});
+        if(pointMoved) appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
     }
 
     inline void renderWorkspaceTransform(Transformation &transform) {

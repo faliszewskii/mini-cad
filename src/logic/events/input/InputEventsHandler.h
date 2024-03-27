@@ -9,6 +9,8 @@
 
 namespace InputEventsHandler {
 
+    void clickPoint(AppState &appState, double xpos, double ypos, const glm::mat4 &m, float epsilon, Point &point);
+
     void setup(AppState &appState) {
         auto &eventPublisher = appState.eventPublisher;
 
@@ -30,11 +32,14 @@ namespace InputEventsHandler {
                 if(event.button == GLFW_MOUSE_BUTTON_LEFT && event.action == GLFW_PRESS) {
                     glm::mat4 m = projection * view;
                     float epsilon = 0.01;
-                    for(auto &point : std::views::values(appState.pointSet)) { // TODO Maybe not on every click.
-                        glm::vec4 coords = m * glm::vec4(point->position, 1);
-                        coords /= coords.w;
-                        if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
-                            appState.eventPublisher.publish(SelectEntityEvent{*point});
+                    for(auto &point : std::views::values(appState.pointSet)) { // Normal points click
+                        clickPoint(appState, xpos, ypos, m, epsilon, *point);
+                    }
+                    for(auto &bezierC2 : std::views::values(appState.bezierC2Set)) {
+                        if(!bezierC2->drawBernstein) continue;
+                        for(auto &point : bezierC2->bernsteinPoints) {
+                            clickPoint(appState, xpos, ypos, m, epsilon, *point);
+                        }
                     }
                 }
                 if(event.button == GLFW_MOUSE_BUTTON_MIDDLE && event.action == GLFW_PRESS) {
@@ -101,6 +106,13 @@ namespace InputEventsHandler {
                     appState.keyboardCtrlMode = false;
             }
         });
+    }
+
+    void clickPoint(AppState &appState, double xpos, double ypos, const glm::mat4 &m, float epsilon, Point &point) {
+        glm::vec4 coords = m * glm::vec4(point.position, 1);
+        coords /= coords.w;
+        if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
+            appState.eventPublisher.publish(SelectEntityEvent{point});
     }
 }
 
