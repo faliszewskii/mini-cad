@@ -132,6 +132,19 @@ namespace EntityListWorkspace {
             }
             ImGui::EndListBox();
         }
+        if(bezier.drawBernstein) {
+            ImGui::SeparatorText("Bernstein Points");
+            if (ImGui::BeginListBox("Bernstein points#Workspace", ImVec2(-FLT_MIN, 0))) {
+                for(auto &pPoint : bezier.bernsteinPoints) {
+                    Point &point = *pPoint;
+                    auto &entities = appState.selectedEntities;
+                    if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                        appState.eventPublisher.publish(SelectEntityEvent{point});
+                    }
+                }
+                ImGui::EndListBox();
+            }
+        }
     }
 
     inline void renderWorkspaceMultiple(AppState &appState) {

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "Point.h"
 #include "../vertices/SplineVertex.h"
+#include "../events/point/PointMovedEvent.h"
 
 class BezierC2 {
     Mesh<PositionVertex> mesh;
@@ -17,21 +18,20 @@ public:
     std::string name;
     bool selected;
 
-    bool drawPolyline;
+    bool drawPolyline = true;
     int adaptationMultiplier=20;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
     bool drawBernstein = true;
     std::vector<std::unique_ptr<Point>> bernsteinPoints;
 
-    BezierC2() : id(IdCounter::nextId()), name("Bezier C2 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
-                 drawPolyline(false) {}
+    BezierC2() : id(IdCounter::nextId()), name("Bezier C2 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES) {}
 
     bool pointAlreadyAdded(Point &point) {
         return std::ranges::any_of(controlPoints, [&](auto &controlPoint){return controlPoint.first == point.id; });
     }
 
-    void recalculateBernsteinPoint() {
+    void recalculateBernsteinPoints() {
         if(controlPoints.size() >= 4) { // First point
             auto p0 = controlPoints[0].second.get().position;
             auto p1 = controlPoints[1].second.get().position;
@@ -73,50 +73,48 @@ public:
             bernsteinPoints.push_back(std::make_unique<Point>(glm::vec3(), bernsteinPointSize, bernsteinPointColor));
         }
         updateMesh();
-        recalculateBernsteinPoint();
+        recalculateBernsteinPoints();
     }
 
     void removePoint(int i) {
         controlPoints.erase(controlPoints.begin() + i);
-        // TODO REMOVE BERNSTEIN !!!
+
+        // Bernstein Points
+        for(int i = 0; i< 3; i++) bernsteinPoints.pop_back();
+        if(controlPoints.size() < 4) bernsteinPoints.pop_back();
+        recalculateBernsteinPoints();
+
         updateMesh();
-        recalculateBernsteinPoint();
     }
 
     void updatePoint(Point &point, int i) {
         mesh.update({point.position}, i);
-        recalculateBernsteinPoint();
+        recalculateBernsteinPoints();
     }
 
-    void updateBernstein(Point &point, int i, glm::vec3 delta) {
+    void updateBernstein(Point &point, int i, glm::vec3 delta, auto &eventPublisher) {
         // Get B-Spline index based on Bernstein index. 2,3,4 -> 2
         int bSplineId = (i + 4) / 3;
         Point &bSplinePoint = controlPoints[bSplineId].second;
+        Point &bSplineBeforePoint = controlPoints[bSplineId-1].second;
+        Point &bSplineNextPoint = controlPoints[bSplineId+1].second;
 
+        glm::vec3 farPoint;
         switch(i%3) {
-            case 0: // The middle point
-                // TODO TODO TODO
+            case 0:
+                farPoint = (bSplineBeforePoint.position + bSplineNextPoint.position) / 2.f;
                 break;
-            case 1: { // Need to reference next point
-                int bSplineNext = bSplineId + 1;
-                Point &bSplineNextPoint = controlPoints[bSplineNext].second;
-                float ratio = glm::length(bSplinePoint.position - bSplineNextPoint.position) / glm::length(point.position - delta - bSplineNextPoint.position);
-                glm::vec3 d = delta * ratio;
-                bSplinePoint.position += d;
+            case 1:
+                farPoint = bSplineNextPoint.position;
                 break;
-            }
-            case 2: { // Need to reference previous point
-                int bSplineBefore = bSplineId - 1;
-                Point &bSplineBeforePoint = controlPoints[bSplineBefore].second;
-                float ratio = glm::length(bSplinePoint.position - bSplineBeforePoint.position) / glm::length(point.position - delta - bSplineBeforePoint.position);
-                glm::vec3 d = delta * ratio;
-                bSplinePoint.position += d;
-                break;
-            }
+            case 2:
+                farPoint = bSplineBeforePoint.position;
         }
+        float ratio = glm::length(bSplinePoint.position - farPoint) / glm::length(point.position - delta - farPoint);
+        glm::vec3 d = delta * ratio;
+        bSplinePoint.position += d;
 
-        mesh.update({bSplinePoint.position}, bSplineId);
-        recalculateBernsteinPoint();
+        eventPublisher.publish(PointMovedEvent{bSplinePoint, d});
     }
 
     void updateMesh() {
