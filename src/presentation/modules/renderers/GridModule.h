@@ -36,11 +36,17 @@ public:
         auto &io = ImGui::GetIO();
         glViewport(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
         Camera &camera = appState.camera;
+        auto view = camera.getViewMatrix();
+        auto projection = camera.getProjectionMatrix();
+        render(camera, view, projection);
+    }
+
+    void render(Camera &camera, glm::mat4 &view, glm::mat4 &projection) const {
         shader.use();
         shader.setUniform("near", camera.nearPlane);
         shader.setUniform("far", camera.farPlane);
-        shader.setUniform("view", camera.getViewMatrix());
-        shader.setUniform("projection", camera.getProjectionMatrix());
+        shader.setUniform("view", view);
+        shader.setUniform("projection", projection);
         mesh->render();
     }
 };

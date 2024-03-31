@@ -44,7 +44,6 @@ void AppState::runModules() {
     verticalStripedLineModule->run(*this);
     cursorModule->run(*this);
     centerOfMassModule->run(*this);
-
     // Grid has to be at the end to maintain transparency.
     gridModule->run(*this);
 

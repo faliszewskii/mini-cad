@@ -34,6 +34,13 @@ namespace CameraWorkspace {
             camera.position += anchor - camera.anchor;
             camera.anchor = anchor;
         }
+
+        ImGui::NewLine();
+        ImGui::Checkbox("Stereoscopic vision", &camera.stereoscopicVision);
+        if(camera.stereoscopicVision) {
+            ImGui::SliderFloat("iod##Camera", &camera.stereoscopicIOD, 0, 1.f);
+            ImGui::DragFloat("distance to plane##Camera", &camera.stereoscopicDistance, 0.005f);
+        }
     }
 };
 

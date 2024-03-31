@@ -42,9 +42,18 @@ glm::mat4 myLookAt(glm::vec3 eye, glm::vec3 center, glm::vec3 up) {
     };
 }
 
-
 glm::mat4 Camera::getViewMatrix() const {
     return myLookAt(position, position + front, up);
+}
+
+glm::mat4 Camera::getViewMatrixStereo(bool left) const {
+
+    auto f(normalize(front));
+    auto s(normalize(cross(f, up)));
+    float side = left? 1: -1;
+    auto movedPosition = position + side * s * stereoscopicIOD / 2.f;
+
+    return myLookAt(movedPosition, movedPosition + front, up);
 }
 
 glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
@@ -58,12 +67,34 @@ glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
     };
 }
 
+glm::mat4 myProjectionStereo(float yFov, float aspectRatio, float zNear, float zFar, float iod, float distance, bool leftEye) {
+    double frustumshift = (iod/2)*zNear/distance;
+    float left_right_direction = leftEye? -1: 1;
+    float top = tan(yFov/2)*zNear;
+    float right = aspectRatio*top+frustumshift*left_right_direction;
+    float left =     -aspectRatio*top+frustumshift*left_right_direction;
+    float bottom = -top;
+    return glm::frustum(left, right, bottom, top, zNear, zFar); // TODO my own
+}
+
+glm::mat4 Camera::getProjectionMatrixStereo(bool left) const {
+    return myProjectionStereo(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane, stereoscopicIOD, stereoscopicDistance, left);
+}
+
 glm::mat4 Camera::getProjectionMatrix() const {
     return myProjection(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane);
 }
 
 glm::vec3 Camera::getViewPosition() const {
     return position;
+}
+
+glm::vec3 Camera::getViewPositionStereo(bool left) const {
+    auto f(normalize(front));
+    auto s(normalize(cross(f, up)));
+
+    float side = left? 1: -1;
+    return position + side * s * stereoscopicIOD / 2.f;
 }
 
 void Camera::processKeyboard(CameraMovement direction, float deltaTime) {

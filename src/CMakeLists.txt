@@ -55,7 +55,6 @@ set(INCL
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
         logic/algebra/Rect.h
-        presentation/modules/renderers/RenderHelpers.h
         presentation/modules/gui/WorkspaceModule.h
         presentation/modules/gui/MenuBarModule.h
         presentation/modules/gui/LogPanelModule.h

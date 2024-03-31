@@ -7,7 +7,6 @@
 
 #include "../../../logic/io/IOUtils.h"
 #include "imgui.h"
-#include "RenderHelpers.h"
 
 class WireframeRenderModule {
     const int workspaceWidth;
@@ -40,17 +39,43 @@ public:
         ImGuiIO &io = ImGui::GetIO();
         glViewport(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
 
+        Camera &camera = appState.camera;
+
+        if(camera.stereoscopicVision) {
+            glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+            auto viewLeft = camera.getViewMatrixStereo(true);
+            auto projectionLeft = camera.getProjectionMatrixStereo(true);
+            render(appState, io, viewLeft, projectionLeft);
+
+            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+            auto viewRight = camera.getViewMatrixStereo(false);
+            auto projectionRight = camera.getProjectionMatrixStereo(false);
+            render(appState, io, viewRight, projectionRight);
+
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        } else {
+            auto view = camera.getViewMatrix();
+            auto projection = camera.getProjectionMatrix();
+            render(appState, io, view, projection);
+        }
+
+
+    }
+
+    void render(const AppState &appState, const ImGuiIO &io, glm::mat4 &view, glm::mat4 &projection) {
         shader.use();
-        RenderHelpers::setUpCamera(appState.camera, shader);
+        shader.setUniform("projection", projection);
+        shader.setUniform("view", view);
         shader.setUniform("selected", false);
-        shader.setUniform("color", glm::vec4(0,0,0,1));
+        shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
 
         pointShader.use();
         pointShader.setUniform("selected", false);
-        pointShader.setUniform("color", glm::vec4(0,0,0,1));
-        RenderHelpers::setUpCamera(appState.camera, pointShader);
+        pointShader.setUniform("color", glm::vec4(0, 0, 0, 1));
+        pointShader.setUniform("projection", projection);
+        pointShader.setUniform("view", view);
         for(auto &point : std::views::values(appState.pointSet))
             point->render(pointShader);
 
@@ -62,21 +87,23 @@ public:
         }
 
         bezierShader.use();
-        bezierShader.setUniform("color", glm::vec4(0,0,0,1));
+        bezierShader.setUniform("color", glm::vec4(0, 0, 0, 1));
         bezierShader.setUniform("selected", false);
         bezierShader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierShader.setUniform("windowHeight", int(io.DisplaySize.y));
-        RenderHelpers::setUpCamera(appState.camera, bezierShader);
+        bezierShader.setUniform("projection", projection);
+        bezierShader.setUniform("view", view);
         for(auto &bezier : std::views::values(appState.bezierC0Set)) {
             bezier->render(bezierShader);
         }
 
         bezierC2Shader.use();
-        bezierC2Shader.setUniform("color", glm::vec4(0,0,0,1));
+        bezierC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         bezierC2Shader.setUniform("selected", false);
         bezierC2Shader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierC2Shader.setUniform("windowHeight", int(io.DisplaySize.y));
-        RenderHelpers::setUpCamera(appState.camera, bezierC2Shader);
+        bezierC2Shader.setUniform("projection", projection);
+        bezierC2Shader.setUniform("view", view);
         for(auto &bezier : std::views::values(appState.bezierC2Set)) {
             bezier->render(bezierC2Shader);
         }

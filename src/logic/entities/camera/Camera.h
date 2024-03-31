@@ -54,6 +54,10 @@ public:
     float farPlane;
     float fov;
 
+    bool stereoscopicVision = false;
+    float stereoscopicIOD = 0.068;
+    float stereoscopicDistance = 9;
+
     std::map<CameraMode, void (Camera::*)(float, float)> mouseHandlerMapping{
             {CameraMode::FREE,   &Camera::processMouseMovementFree},
             {CameraMode::ANCHOR, &Camera::processMouseMovementAnchor}
@@ -82,6 +86,13 @@ public:
 
     int screenWidth;
     int screenHeight;
+
+    glm::mat4 getViewMatrixStereo(bool left) const;
+
+    glm::vec3 getViewPositionStereo(bool left) const;
+
+    glm::mat4 getProjectionMatrixStereo(bool left) const;
+
 private:
 
     void processMouseMovementFree(float xoffset, float yoffset);
@@ -91,6 +102,7 @@ private:
     void processKeyboardAnchor(CameraMovement direction, float deltaTime);
 
     void updateDirections();
+
 };
 
 

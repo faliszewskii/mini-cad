@@ -11,7 +11,6 @@
 #include "../../../logic/entities/mesh/Mesh.h"
 #include "../../../logic/state/AppState.h"
 #include "imgui.h"
-#include "RenderHelpers.h"
 
 class VerticalStripedLineModule {
     const int workspaceWidth;
@@ -31,8 +30,30 @@ public:
         glViewport(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
 
         shader.use();
-        RenderHelpers::setUpCamera(appState.camera, shader);
+        Camera &camera = appState.camera;
+        if(camera.stereoscopicVision) {
+            glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+            auto viewLeft = camera.getViewMatrixStereo(true);
+            auto projectionLeft = camera.getProjectionMatrixStereo(true);
+            render(appState, viewLeft, projectionLeft);
 
+            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+            auto viewRight = camera.getViewMatrixStereo(false);
+            auto projectionRight = camera.getProjectionMatrixStereo(false);
+            render(appState, viewRight, projectionRight);
+
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        } else {
+            auto view = camera.getViewMatrix();
+            auto projection = camera.getProjectionMatrix();
+            render(appState, view, projection);
+        }
+
+    }
+
+    void render(AppState &appState, glm::mat4 &view, glm::mat4 &projection) const {
+        shader.setUniform("projection", projection);
+        shader.setUniform("view", view);
         /// Animated
         shader.setUniform("time", float(glfwGetTime()));
 
@@ -41,7 +62,7 @@ public:
 
         if(appState.selectedEntities.size() > 1)
             for(auto &el : appState.selectedEntities)
-                std::visit(overloaded{
+                visit(overloaded{
                         [&](Torus &torus){ renderStripedLine(appState.centerOfMassTransformation.translation, torus.transform.translation, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
                         [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
                         [&](BezierC0 &bezier){ /* ignore */ },
@@ -54,13 +75,13 @@ public:
             BezierC0 &bezier = *pBezier.second;
             if(bezier.drawPolyline && !bezier.controlPoints.empty())
                 for(int i=0; i<bezier.controlPoints.size()-1; i++)
-                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i+1].second.get().position);
+                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i + 1].second.get().position);
         }
         for(auto &pBezier : appState.bezierC2Set) { // TODO Code duplication
             BezierC2 &bezier = *pBezier.second;
             if(bezier.drawPolyline && !bezier.controlPoints.empty())
                 for(int i=0; i<bezier.controlPoints.size()-1; i++)
-                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i+1].second.get().position);
+                    renderStripedLine(bezier.controlPoints[i].second.get().position, bezier.controlPoints[i + 1].second.get().position);
         }
     }
 
