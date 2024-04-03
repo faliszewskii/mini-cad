@@ -17,9 +17,10 @@ public:
     std::string name;
     bool selected;
 
+    std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
     bool drawPolyline;
     int adaptationMultiplier=20;
-    std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
+    int instanceCount=10;
 
     BezierC0() : id(IdCounter::nextId()), name("Bezier C0 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
         drawPolyline(false) {}
@@ -62,13 +63,10 @@ public:
 
     void render(Shader &shader) {
         glLineWidth(2);
-        shader.setUniform("division", 10);
+        shader.setUniform("division", instanceCount);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        for(int i=0; i<10; i++) {
-            shader.setUniform("invocationNo",i);
-            mesh.render();
-        }
+        mesh.render(instanceCount);
         glLineWidth(1);
     }
 };

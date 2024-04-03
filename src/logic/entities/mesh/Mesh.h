@@ -21,13 +21,13 @@ public:
         setupMesh();
     }
 
-    void render() const {
+    void render(int instanceCount = 1) const {
         // draw mesh
         glBindVertexArray(VAO);
         if (indices)
-            glDrawElements(drawingMode, indices.value().size(), GL_UNSIGNED_INT, 0);
+            glDrawElementsInstanced(drawingMode, indices.value().size(), GL_UNSIGNED_INT, 0, instanceCount);
         else
-            glDrawArrays(drawingMode, 0, vertices.size());
+            glDrawArraysInstanced(drawingMode, 0, vertices.size(),instanceCount);
         glBindVertexArray(0);
     }
 

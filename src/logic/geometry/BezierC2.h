@@ -18,12 +18,12 @@ public:
     std::string name;
     bool selected;
 
+    std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
+    std::vector<std::unique_ptr<Point>> bernsteinPoints;
+    bool drawBernstein = true;
     bool drawPolyline = true;
     int adaptationMultiplier=20;
-    std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
-
-    bool drawBernstein = true;
-    std::vector<std::unique_ptr<Point>> bernsteinPoints;
+    int instanceCount=10;
 
     BezierC2() : id(IdCounter::nextId()), name("Bezier C2 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES) {}
 
@@ -136,9 +136,10 @@ public:
 
     void render(Shader &shader) {
         glLineWidth(2);
+        shader.setUniform("division", instanceCount);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        mesh.render();
+        mesh.render(instanceCount);
         glLineWidth(1);
     }
 };

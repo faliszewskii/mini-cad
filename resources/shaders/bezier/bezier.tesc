@@ -10,6 +10,9 @@ uniform mat4 view;
 
 patch out float patchColorek;
 
+in int instanceID_vert[32];
+patch out int instanceID;
+
 int calculateSegmentCount() {
     float l = 0;
     vec2 p[4];
@@ -38,5 +41,6 @@ void main()
 
     patchColorek = float(segments) / n;
 
+    instanceID = instanceID_vert[gl_InvocationID];
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }

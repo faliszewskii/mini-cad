@@ -11,8 +11,8 @@ uniform mat4 view;
 
 patch out float patchColorek;
 
-in float v_knot[];
-out float tc_knot[];
+in int instanceID_vert[32];
+patch out int instanceID;
 
 int calculateSegmentCount() {
     float l = 0;
@@ -42,6 +42,6 @@ void main()
 
     patchColorek = segments / 255.f;
 
+    instanceID = instanceID_vert[gl_InvocationID];
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-    tc_knot[gl_InvocationID] = v_knot[gl_InvocationID];
 }

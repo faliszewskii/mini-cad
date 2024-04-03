@@ -6,7 +6,7 @@ uniform mat4 projection;
 uniform mat4 view;
 
 uniform int division;
-uniform int invocationNo;
+patch in int instanceID;
 
 patch in float patchColorek;
 out float colorek;
@@ -24,7 +24,7 @@ vec3 deCasteljau(float t, vec3 coefficients[4]) {
 void
 main()
 {
-    float t = gl_TessCoord.x / division + float(invocationNo) / division;
+    float t = gl_TessCoord.x / division + float(instanceID) / division;
 
     vec3 coefficients[4] = vec3[](gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz, gl_in[3].gl_Position.xyz);
     vec4 pos = vec4( deCasteljau(t, coefficients), 1.f );
