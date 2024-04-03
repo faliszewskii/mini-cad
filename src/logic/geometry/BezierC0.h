@@ -58,11 +58,19 @@ public:
             indices.push_back(i-1);
             indices.push_back(i);
         }
+        int remainder = (int)(controlPoints.size()-1) % 3 + 1;
+        for(int i=0; i< remainder; i++)
+            indices.push_back(s - remainder + i);
+        for(int i=remainder; i<4; i++)
+            indices.push_back(s-1);
+
         mesh.update(std::move(vertices), std::move(indices));
     }
 
     void render(Shader &shader) {
         glLineWidth(2);
+        shader.setUniform("fullCurves", (int)(controlPoints.size() - 1)/3);
+        shader.setUniform("remainder", (int)((controlPoints.size()-1) % 3) + 1);
         shader.setUniform("division", instanceCount);
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
         glPatchParameteri(GL_PATCH_VERTICES, 4);
