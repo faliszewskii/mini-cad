@@ -62,7 +62,7 @@ public:
     }
 
     void addPoint(Point &newPoint) { // TODO Add reaction to the event of deleting a point from pointSet.
-        if(pointAlreadyAdded(newPoint)) return;
+//        if(pointAlreadyAdded(newPoint)) return;
         controlPoints.emplace_back(newPoint.id, newPoint);
         if(controlPoints.size() >= 4) {
             const static glm::vec4 bernsteinPointColor = glm::vec4(0.2f,0,0.4f, 1);

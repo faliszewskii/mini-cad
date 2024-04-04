@@ -30,7 +30,7 @@ public:
     }
 
     void addPoint(Point &newPoint) { // TODO Add reaction to the event of deleting a point from pointSet.
-        if(pointAlreadyAdded(newPoint)) return;
+//        if(pointAlreadyAdded(newPoint)) return;
         controlPoints.emplace_back(newPoint.id, newPoint);
         updateMesh();
     }

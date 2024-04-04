@@ -95,6 +95,7 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState) {
+        int idCounter = 0;
         ImGui::SeparatorText("Bezier C0");
         renderNameInput(bezier);
 
@@ -105,7 +106,7 @@ namespace EntityListWorkspace {
             for(auto &pPoint : bezier.controlPoints) {
                 Point &point = pPoint.second;
                 auto &entities = appState.selectedEntities;
-                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
                     appState.eventPublisher.publish(SelectEntityEvent{point});
                 }
             }
@@ -114,6 +115,7 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState) { // TODO Extreme code duplication from above
+        int idCounter=0;
         ImGui::SeparatorText("Bezier C2");
         renderNameInput(bezier);
 
@@ -126,7 +128,7 @@ namespace EntityListWorkspace {
             for(auto &pPoint : bezier.controlPoints) {
                 Point &point = pPoint.second;
                 auto &entities = appState.selectedEntities;
-                if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
                     appState.eventPublisher.publish(SelectEntityEvent{point});
                 }
             }
@@ -138,7 +140,7 @@ namespace EntityListWorkspace {
                 for(auto &pPoint : bezier.bernsteinPoints) {
                     Point &point = *pPoint;
                     auto &entities = appState.selectedEntities;
-                    if (ImGui::Selectable((point.name + "##" + std::to_string(point.id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                    if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
                         appState.eventPublisher.publish(SelectEntityEvent{point});
                     }
                 }
@@ -280,8 +282,26 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspacePoint(Point &point, AppState &appState) {
+        int idCounter = 0;
         ImGui::SeparatorText(point.name.c_str());
         renderNameInput(point);
+
+        // TODO If point należy do listy punktów BC0 lub BC2. Póść event remove point from bezier. Albo może teraz nawet
+        for(auto &bezier : appState.bezierC0Set) {
+            for(int i = 0; i < bezier.second->controlPoints.size(); i++)
+                if(bezier.second->controlPoints[i].first == point.id)
+                    if(ImGui::Button(("Remove point from " + bezier.second->name + "##" + std::to_string(idCounter++)).c_str())) {
+                        bezier.second->removePoint(i);
+                    }
+        }
+        for(auto &bezier : appState.bezierC2Set) {
+            for(int i = 0; i < bezier.second->controlPoints.size(); i++)
+                if(bezier.second->controlPoints[i].first == point.id)
+                    if(ImGui::Button(("Remove point from " + bezier.second->name + "##" + std::to_string(idCounter++)).c_str())) {
+                        bezier.second->removePoint(i);
+                    }
+        }
+        // TODO Refactor all above. It's stupid
 
         ImGui::Text("Position:");
         bool pointMoved = false;
@@ -323,9 +343,10 @@ namespace EntityListWorkspace {
 
     template<typename T> requires has_name<T> && has_id<T>
     inline void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState) {
+        int idCounter=0;
         auto &entities = appState.selectedEntities;
         for (auto &el: std::views::values(list)) {
-            if (ImGui::Selectable((el->name + "##" + std::to_string(el->id)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == el->id;}))) {
+            if (ImGui::Selectable((el->name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == el->id;}))) {
                 appState.eventPublisher.publish(SelectEntityEvent{*el});
             }
         }
