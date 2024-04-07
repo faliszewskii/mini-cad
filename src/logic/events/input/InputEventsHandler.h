@@ -112,7 +112,7 @@ namespace InputEventsHandler {
         glm::vec4 coords = m * glm::vec4(point.position, 1);
         coords /= coords.w;
         if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
-            appState.eventPublisher.publish(SelectEntityEvent{point});
+            appState.eventPublisher.publish(SelectEntityEvent{point, 0});
     }
 }
 

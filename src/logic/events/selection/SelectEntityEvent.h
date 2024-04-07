@@ -9,5 +9,6 @@
 
 struct SelectEntityEvent {
     EntityType selected;
+    int contextLevel;
 };
 #endif //OPENGL_SANDBOX_SELECTENTITYEVENT_H

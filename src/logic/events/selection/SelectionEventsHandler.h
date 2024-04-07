@@ -16,9 +16,13 @@ namespace SelectionEventsHandler {
         auto &eventPublisher = appState.eventPublisher;
         eventPublisher.subscribe([&](const SelectEntityEvent &event) {
             auto &set = appState.selectedEntities;
-            if (!appState.keyboardCtrlMode) {
+            if (!appState.keyboardCtrlMode) { // TODO what if object is already selected and I have ctrl
+                if(event.contextLevel > appState.selectionContext.size()) // Higher level context
+                    appState.selectionContext.emplace_back(appState.selectedEntities[0]);
+                while(event.contextLevel < appState.selectionContext.size())
+                    appState.selectionContext.pop_back();
                 resetSelection(set);
-            } // TODO what if object is already selected and I have ctrl
+            }
             if(!set.empty())
                 std::visit(overloaded{ // Check if selected element is a virtual point.
                     [&](auto &el) {
@@ -66,11 +70,6 @@ namespace SelectionEventsHandler {
                 center /= n;
                 appState.centerOfMassTransformation = Transformation{center};
             }
-        });
-
-        eventPublisher.subscribe([&](const SelectionChangedEvent &event) {
-            // Reset Bezier subselection
-            appState.selectedBezierPoints.clear();
         });
     }
 

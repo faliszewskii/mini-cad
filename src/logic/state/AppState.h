@@ -67,8 +67,7 @@ struct AppState {
     std::map<int, std::unique_ptr<BezierC2>> bezierC2Set;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
-    std::map<int, std::reference_wrapper<Point>> selectedBezierPoints;
-
+    std::vector<std::pair<int, EntityType>> selectionContext;
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
         PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,

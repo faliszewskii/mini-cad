@@ -11,6 +11,7 @@
 #include "../../../logic/events/create/CreateBezierC0Event.h"
 #include "../../../logic/events/point/PointMovedEvent.h"
 #include <glm/gtx/euler_angles.hpp>
+#include <variant>
 
 namespace EntityListWorkspace {
 
@@ -24,7 +25,7 @@ namespace EntityListWorkspace {
     template<typename T> requires has_name<T>
     void renderNameInput(T &el);
     template<typename T> requires has_name<T> && has_id<T>
-    void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState);
+    void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState, int contextLevel);
     void renderWorkspaceSelected(AppState &appState);
 
     void renderDeleteButton(AppState &appState);
@@ -45,10 +46,10 @@ namespace EntityListWorkspace {
 
         if(ImGui::CollapsingHeader("Scene objects", ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::BeginListBox("Objects#Workspace", ImVec2(-FLT_MIN, 0))) {
-                renderListing(appState.torusSet, appState);
-                renderListing(appState.pointSet, appState);
-                renderListing(appState.bezierC0Set, appState);
-                renderListing(appState.bezierC2Set, appState);
+                renderListing(appState.torusSet, appState, 0);
+                renderListing(appState.pointSet, appState, 0);
+                renderListing(appState.bezierC0Set, appState, 0);
+                renderListing(appState.bezierC2Set, appState, 0);
                 ImGui::EndListBox();
             }
         }
@@ -77,6 +78,14 @@ namespace EntityListWorkspace {
 
     inline void renderWorkspaceSelected(AppState &appState) {
         if(ImGui::BeginChild("##SelectedEntities")) {
+            for(auto &context : appState.selectionContext) {
+                std::visit(overloaded{
+                        [](Torus &torus) { renderWorkspaceTorus(torus); },
+                        [&](Point &point) { renderWorkspacePoint(point, appState); },
+                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
+                        [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); }
+                }, context.second);
+            }
             auto &selected = appState.selectedEntities;
             if (selected.empty())
                 ImGui::SeparatorText("Select entities");
@@ -107,7 +116,7 @@ namespace EntityListWorkspace {
                 Point &point = pPoint.second;
                 auto &entities = appState.selectedEntities;
                 if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
-                    appState.eventPublisher.publish(SelectEntityEvent{point});
+                    appState.eventPublisher.publish(SelectEntityEvent{point, 1});
                 }
             }
             ImGui::EndListBox();
@@ -129,7 +138,7 @@ namespace EntityListWorkspace {
                 Point &point = pPoint.second;
                 auto &entities = appState.selectedEntities;
                 if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
-                    appState.eventPublisher.publish(SelectEntityEvent{point});
+                    appState.eventPublisher.publish(SelectEntityEvent{point, 1});
                 }
             }
             ImGui::EndListBox();
@@ -141,7 +150,7 @@ namespace EntityListWorkspace {
                     Point &point = *pPoint;
                     auto &entities = appState.selectedEntities;
                     if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
-                        appState.eventPublisher.publish(SelectEntityEvent{point});
+                        appState.eventPublisher.publish(SelectEntityEvent{point, 1});
                     }
                 }
                 ImGui::EndListBox();
@@ -149,20 +158,17 @@ namespace EntityListWorkspace {
         }
     }
 
+    template<typename T>
+    void addPointToCurve(AppState &appState);
+
     inline void renderWorkspaceMultiple(AppState &appState) {
         ImGui::SeparatorText(("Selected " + std::to_string(appState.selectedEntities.size()) + " entities").c_str());
         bool modified = false;
         auto &centerTransform = appState.centerOfMassTransformation;
 
         // Because first element is Bézier curve we can add following points to it
-        if(std::holds_alternative<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second)) {
-            if(ImGui::Button("Add points to curve")) { // TODO Create Event Handler
-                BezierC0 &bezier = std::get<std::reference_wrapper<BezierC0>>(appState.selectedEntities.begin()->second);
-                for(auto &el : appState.selectedEntities)
-                    if(std::holds_alternative<std::reference_wrapper<Point>>(el.second))
-                        bezier.addPoint(std::get<std::reference_wrapper<Point>>(el.second));
-            }
-        }
+        addPointToCurve<BezierC0>(appState);
+        addPointToCurve<BezierC2>(appState);
 
         auto position = glm::vec3(centerTransform.getTranslationRef());
         ImGui::Text("Position:");
@@ -256,6 +262,18 @@ namespace EntityListWorkspace {
         }
     }
 
+    template<typename T>
+    void addPointToCurve(AppState &appState) {
+        if(std::holds_alternative<std::reference_wrapper<T>>(appState.selectedEntities.begin()->second)) {
+            if(ImGui::Button("Add points to curve")) { // TODO Create Event Handler
+                T &curve = std::get<std::reference_wrapper<T>>(appState.selectedEntities.begin()->second);
+                for(auto &el : appState.selectedEntities)
+                    if(std::holds_alternative<std::reference_wrapper<Point>>(el.second))
+                        curve.addPoint(std::get<std::reference_wrapper<Point>>(el.second));
+            }
+        }
+    }
+
     inline void renderWorkspaceTorus(Torus &torus) {
         ImGui::SeparatorText(torus.name.c_str());
         renderNameInput(torus);
@@ -342,12 +360,12 @@ namespace EntityListWorkspace {
     }
 
     template<typename T> requires has_name<T> && has_id<T>
-    inline void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState) {
+    inline void renderListing(std::map<int, std::unique_ptr<T>> &list, AppState &appState, int contextLevel) {
         int idCounter=0;
         auto &entities = appState.selectedEntities;
         for (auto &el: std::views::values(list)) {
             if (ImGui::Selectable((el->name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == el->id;}))) {
-                appState.eventPublisher.publish(SelectEntityEvent{*el});
+                appState.eventPublisher.publish(SelectEntityEvent{*el, contextLevel});
             }
         }
     }

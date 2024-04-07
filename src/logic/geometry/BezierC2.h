@@ -80,9 +80,11 @@ public:
         controlPoints.erase(controlPoints.begin() + i);
 
         // Bernstein Points
-        for(int i = 0; i< 3; i++) bernsteinPoints.pop_back();
-        if(controlPoints.size() < 4) bernsteinPoints.pop_back();
-        recalculateBernsteinPoints();
+        if(!bernsteinPoints.empty()) {
+            for(int i = 0; i< 3; i++) bernsteinPoints.pop_back();
+            if(controlPoints.size() < 4) bernsteinPoints.pop_back();
+            recalculateBernsteinPoints();
+        }
 
         updateMesh();
     }
