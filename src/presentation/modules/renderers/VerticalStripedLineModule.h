@@ -65,8 +65,9 @@ public:
                 visit(overloaded{
                         [&](Torus &torus){ renderStripedLine(appState.centerOfMassTransformation.translation, torus.transform.translation, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
                         [&](Point &point){ renderStripedLine(appState.centerOfMassTransformation.translation, point.position, glm::vec4(1.f, 0.8f, 0, 0.5f)); },
-                        [&](BezierC0 &bezier){ /* ignore */ },
-                        [&](BezierC2 &bezier){ /* ignore */ }
+                        [&](BezierC0 &_){ /* ignore */ },
+                        [&](BezierC2 &_){ /* ignore */ },
+                        [&](InterpolatedC2 &_){ /* ignore */ }
                 }, el.second);
 
         /// Un-animated

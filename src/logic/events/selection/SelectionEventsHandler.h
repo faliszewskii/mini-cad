@@ -63,8 +63,9 @@ namespace SelectionEventsHandler {
                     std::visit(overloaded{
                             [&](Torus &torus) { center += torus.transform.translation; n++; },
                             [&](Point &point) { center += point.position; n++; },
-                            [&](BezierC0 &bezier) { /* ignore */ },
-                            [&](BezierC2 &bezier) { /* ignore */ }
+                            [&](BezierC0 &_) { /* ignore */ },
+                            [&](BezierC2 &_) { /* ignore */ },
+                            [&](InterpolatedC2 &_) { /* ignore */ }
                     }, el.second);
                 }
                 center /= n;

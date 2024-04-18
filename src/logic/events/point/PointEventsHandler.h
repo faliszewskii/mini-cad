@@ -27,6 +27,11 @@ namespace PointEventsHandler {
                     if(bezier.second->bernsteinPoints[i]->id == event.point.id)
                         bezier.second->updateBernstein(event.point, i, event.delta, eventPublisher);
             }
+            for(auto &interpolated : appState.interpolatedC2Set) { // TODO This just asks to be extracted.
+                for (int i = 0; i < interpolated.second->controlPoints.size(); i++)
+                    if (interpolated.second->controlPoints[i].first == event.point.id)
+                        interpolated.second->updatePoint(event.point, i);
+            }
         });
 
         eventPublisher.subscribe([&](const PointDeletedEvent &event) {
@@ -40,6 +45,11 @@ namespace PointEventsHandler {
                 for(int i = 0; i < bezier.second->controlPoints.size(); i++)
                     if(bezier.second->controlPoints[i].first == event.id)
                         bezier.second->removePoint(i);
+            }
+            for(auto &interpolated : appState.interpolatedC2Set) {
+                for(int i = 0; i < interpolated.second->controlPoints.size(); i++)
+                    if(interpolated.second->controlPoints[i].first == event.id)
+                        interpolated.second->removePoint(i);
             }
         });
     }

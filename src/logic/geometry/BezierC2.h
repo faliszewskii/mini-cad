@@ -8,7 +8,6 @@
 #include <vector>
 #include <algorithm>
 #include "Point.h"
-#include "../vertices/SplineVertex.h"
 #include "../events/point/PointMovedEvent.h"
 
 class BezierC2 {

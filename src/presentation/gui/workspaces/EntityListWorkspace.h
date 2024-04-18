@@ -10,6 +10,7 @@
 #include "../../../logic/events/selection/SelectEntityEvent.h"
 #include "../../../logic/events/create/CreateBezierC0Event.h"
 #include "../../../logic/events/point/PointMovedEvent.h"
+#include "../../../logic/geometry/InterpolatedC2.h"
 #include <glm/gtx/euler_angles.hpp>
 #include <variant>
 
@@ -20,6 +21,7 @@ namespace EntityListWorkspace {
     void renderWorkspacePoint(Point &point, AppState &appState);
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
     void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState);
+    void renderWorkspaceInterpolatedC2(InterpolatedC2 &interpolated, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
 
     template<typename T> requires has_name<T>
@@ -41,6 +43,9 @@ namespace EntityListWorkspace {
             appState.eventPublisher.publish(CreateBezierC0Event{});
         if (ImGui::Button("Add Bezier C2"))
             appState.eventPublisher.publish(CreateBezierC2Event{});
+        ImGui::SameLine();
+        if (ImGui::Button("Add Interpolated C2"))
+            appState.eventPublisher.publish(CreateInterpolatedC2Event{});
 
         renderDeleteButton(appState);
 
@@ -50,6 +55,7 @@ namespace EntityListWorkspace {
                 renderListing(appState.pointSet, appState, 0);
                 renderListing(appState.bezierC0Set, appState, 0);
                 renderListing(appState.bezierC2Set, appState, 0);
+                renderListing(appState.interpolatedC2Set, appState, 0);
                 ImGui::EndListBox();
             }
         }
@@ -68,7 +74,8 @@ namespace EntityListWorkspace {
                            appState.eventPublisher.publish(PointDeletedEvent{id});
                        },
                        [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); },
-                       [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); }
+                       [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); },
+                       [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); }
                     }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
@@ -76,27 +83,30 @@ namespace EntityListWorkspace {
         ImGui::EndDisabled();
     }
 
+    inline void renderWorkspaces(AppState &appState, EntityType element) {
+        visit(overloaded{
+                [](Torus &torus) { renderWorkspaceTorus(torus); },
+                [&](Point &point) { renderWorkspacePoint(point, appState); },
+                [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
+                [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); },
+                [&](InterpolatedC2 &interpolated) { renderWorkspaceInterpolatedC2(interpolated, appState); }
+        }, element);
+    }
+
     inline void renderWorkspaceSelected(AppState &appState) {
         if(ImGui::BeginChild("##SelectedEntities")) {
-            for(auto &context : appState.selectionContext) {
-                std::visit(overloaded{
-                        [](Torus &torus) { renderWorkspaceTorus(torus); },
-                        [&](Point &point) { renderWorkspacePoint(point, appState); },
-                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
-                        [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); }
-                }, context.second);
-            }
+            // Render workspaces for context.
+            for(auto &context : appState.selectionContext)
+                renderWorkspaces(appState, context.second);
             auto &selected = appState.selectedEntities;
+            // Flavour text for empty selection.
             if (selected.empty())
                 ImGui::SeparatorText("Select entities");
             else if (selected.size() == 1) {
-                std::visit(overloaded{
-                        [](Torus &torus) { renderWorkspaceTorus(torus); },
-                        [&](Point &point) { renderWorkspacePoint(point, appState); },
-                        [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
-                        [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); }
-                }, selected.begin()->second);
+                // Render workspace for one object.
+                renderWorkspaces(appState, selected.begin()->second);
             } else {
+                // Render workspace for multiple selection/
                 renderWorkspaceMultiple(appState);
             }
             ImGui::EndChild();
@@ -155,6 +165,25 @@ namespace EntityListWorkspace {
                 }
                 ImGui::EndListBox();
             }
+        }
+    }
+
+    inline void renderWorkspaceInterpolatedC2(InterpolatedC2 &interpolated, AppState &appState) {
+        int idCounter = 0;
+        ImGui::SeparatorText("Interpolated C0");
+        renderNameInput(interpolated);
+
+        ImGui::DragInt("Adaptation Multiplier", &interpolated.adaptationMultiplier);
+        ImGui::SeparatorText("Control Points");
+        if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
+            for(auto &pPoint : interpolated.controlPoints) {
+                Point &point = pPoint.second;
+                auto &entities = appState.selectedEntities;
+                if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                    appState.eventPublisher.publish(SelectEntityEvent{point, 1});
+                }
+            }
+            ImGui::EndListBox();
         }
     }
 
@@ -229,34 +258,9 @@ namespace EntityListWorkspace {
                             point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
                             appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
                         },
-                        [&](BezierC0 &bezier) {
-                            for(auto &pPoint : bezier.controlPoints) {
-                                if(moved.contains(pPoint.first)) continue;
-                                moved.emplace(pPoint.first);
-                                Point &point = pPoint.second;
-                                glm::vec3 prevPosition = point.position;
-                                point.position += translationDiff;// TODO Move all three occurrences out from here. Maybe to point class
-                                point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
-                                appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
-                            }
-                        },
-                        [&](BezierC2 &bezier) { // TODO Extreme duplication with above
-                            for(auto &pPoint : bezier.controlPoints) {
-                                if(moved.contains(pPoint.first)) continue;
-                                moved.emplace(pPoint.first);
-                                Point &point = pPoint.second;
-                                glm::vec3 prevPosition = point.position;
-                                point.position += translationDiff;
-                                point.position += (point.position - centerTransform.translation) * (scaleRatio - glm::vec3(1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleX(angleDiff.x) * glm::vec4(point.position-centerTransform.translation, 1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleY(angleDiff.y) * glm::vec4(point.position-centerTransform.translation, 1));
-                                point.position = centerTransform.translation + glm::vec3(glm::eulerAngleZ(angleDiff.z) * glm::vec4(point.position-centerTransform.translation, 1));
-                                appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
-                            }
-                        }
+                        [&](BezierC0 &_) { /* ignore */ },
+                        [&](BezierC2 &_) { /* ignore */ },
+                        [&](InterpolatedC2 &_) { /* ignore */ }
                 }, el.second);
             }
         }
@@ -304,7 +308,6 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText(point.name.c_str());
         renderNameInput(point);
 
-        // TODO If point należy do listy punktów BC0 lub BC2. Póść event remove point from bezier. Albo może teraz nawet
         for(auto &bezier : appState.bezierC0Set) {
             for(int i = 0; i < bezier.second->controlPoints.size(); i++)
                 if(bezier.second->controlPoints[i].first == point.id)
@@ -317,6 +320,13 @@ namespace EntityListWorkspace {
                 if(bezier.second->controlPoints[i].first == point.id)
                     if(ImGui::Button(("Remove point from " + bezier.second->name + "##" + std::to_string(idCounter++)).c_str())) {
                         bezier.second->removePoint(i);
+                    }
+        }
+        for(auto &interpolated : appState.interpolatedC2Set) {
+            for(int i = 0; i < interpolated.second->controlPoints.size(); i++)
+                if(interpolated.second->controlPoints[i].first == point.id)
+                    if(ImGui::Button(("Remove point from " + interpolated.second->name + "##" + std::to_string(idCounter++)).c_str())) {
+                        interpolated.second->removePoint(i);
                     }
         }
         // TODO Refactor all above. It's stupid

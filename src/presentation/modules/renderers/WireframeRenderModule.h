@@ -96,6 +96,9 @@ public:
         for(auto &bezier : std::views::values(appState.bezierC0Set)) {
             bezier->render(bezierShader);
         }
+        for(auto &interpolated : std::views::values(appState.interpolatedC2Set)) {
+            interpolated->render(bezierShader);
+        }
 
         bezierC2Shader.use();
         bezierC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));

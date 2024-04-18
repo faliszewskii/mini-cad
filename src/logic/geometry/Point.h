@@ -20,7 +20,7 @@ public:
     glm::vec4 color;
     int size;
 
-    Point(glm::vec3 position = {}, int size = 10, glm::vec4 color = {0,0,0,1}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
+    Point(glm::vec3 position = {}, int size = 9, glm::vec4 color = {0,0,0,1}) : selected(false), position(position), mesh(std::make_unique<Mesh<Vertex>>(Mesh<Vertex>(
                 {Vertex(glm::vec3(), glm::vec3(), glm::vec2())},
                 {},GL_POINTS))), id(IdCounter::nextId()), name("Point (" + std::to_string(id) + ")") ,
                 color(color), size(size) {};

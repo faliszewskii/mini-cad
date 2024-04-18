@@ -33,6 +33,7 @@
 #include "../events/input/MouseMovedEvent.h"
 #include "../events/input/MouseScrolledEvent.h"
 #include "../events/input/KeyEvent.h"
+#include "../events/create/CreateInterpolatedC2Event.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -65,13 +66,14 @@ struct AppState {
     std::map<int, std::unique_ptr<Point>> pointSet;
     std::map<int, std::unique_ptr<BezierC0>> bezierC0Set;
     std::map<int, std::unique_ptr<BezierC2>> bezierC2Set;
+    std::map<int, std::unique_ptr<InterpolatedC2>> interpolatedC2Set;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
     std::vector<std::pair<int, EntityType>> selectionContext;
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
         PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
-        MouseScrolledEvent, KeyEvent> eventPublisher;
+        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event> eventPublisher;
 
     Logger logger;
     Camera camera;

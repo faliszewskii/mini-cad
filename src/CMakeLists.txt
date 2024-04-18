@@ -90,7 +90,6 @@ set(INCL
         presentation/modules/renderers/CursorModule.h
         logic/events/broadcaster/EventPublisher.h
         logic/events/create/CreateTorusEvent.h
-        logic/handlers/ObjectCreationHandler.h
         logic/events/create/CreatePointEvent.h
         logic/events/selection/SelectEntityEvent.h
         logic/state/EntityType.h
@@ -102,7 +101,6 @@ set(INCL
         logic/events/selection/SelectionChangedEvent.h
         logic/geometry/BezierC2.h
         logic/events/create/CreateBezierC2Event.h
-        logic/vertices/SplineVertex.h
         logic/events/create/CreateEventsHandler.h
         logic/events/selection/SelectionEventsHandler.h
         logic/events/point/PointEventsHandler.h
@@ -111,6 +109,8 @@ set(INCL
         logic/events/input/MouseMovedEvent.h
         logic/events/input/MouseScrolledEvent.h
         logic/events/input/KeyEvent.h
+        logic/geometry/InterpolatedC2.h
+        logic/events/create/CreateInterpolatedC2Event.h
 )
 
 add_executable(opengl-sandbox main.cpp
