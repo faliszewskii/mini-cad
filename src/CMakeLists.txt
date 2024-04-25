@@ -74,7 +74,6 @@ set(INCL
         presentation/modules/renderers/WireframeRenderModule.h
         presentation/gui/workspaces/WireframeRenderModuleWorkspace.h
         logic/geometry/Point.h
-        presentation/gui/workspaces/PointWorkspace.h
         presentation/modules/renderers/VerticalStripedLineModule.h
         logic/vertices/is_vertex.h
         logic/vertices/Vertex.h

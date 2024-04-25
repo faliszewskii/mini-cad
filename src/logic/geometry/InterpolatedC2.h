@@ -29,9 +29,7 @@ public:
     void recalculateBernsteinPoints() {
         bernsteinPoints.clear();
         int cpCount = controlPoints.size();
-        int n = cpCount - 1;
         int curveCount = cpCount - 1;
-        int eqCount = cpCount - 2;
 
         if(cpCount < 2) return;
         if(cpCount == 2) {
@@ -42,13 +40,23 @@ public:
             return;
         }
 
-        std::vector<float> diffs(cpCount - 1);
+        std::vector<glm::vec3> interpolationPoints;
+        interpolationPoints.push_back(controlPoints[0].second.get().position);
+        std::vector<float> diffs;
         for(int i=0; i< curveCount; i++) {
-            diffs[i] = glm::length(controlPoints[i+1].second.get().position - controlPoints[i].second.get().position);
-            diffs[i] = std::abs(diffs[i]) > 0.001f ? diffs[i] : 0.001f;
+            float f = glm::length(controlPoints[i+1].second.get().position - controlPoints[i].second.get().position);
+//            diffs[i] = std::abs(diffs[i]) > 0.001f ? diffs[i] : 0.001f;
+            if( std::abs(f) > 0.001f) {
+                interpolationPoints.push_back(controlPoints[i+1].second.get().position);
+                diffs.push_back(f);
+            }
         }
 //        diffs[curveCount] = 1.0f;
 
+        cpCount = diffs.size()+1;// controlPoints.size();
+        curveCount = cpCount - 1;
+        int n = cpCount - 1;
+        int eqCount = cpCount - 2;
 
         std::vector<float> a, b(eqCount, 2), c;
         std::vector<glm::vec3> d;
@@ -57,13 +65,13 @@ public:
         for(int i=1; i<=n-2;i++) // Betas for i=1,..., N-2
             c.push_back(diffs[i] / (diffs[i] + diffs[i-1]));
         for(int i=1; i<=n-1;i++) // Rs for i=1,..., N-1
-            d.push_back(3.f * ((controlPoints[i+1].second.get().position - controlPoints[i].second.get().position)/diffs[i] - (controlPoints[i].second.get().position - controlPoints[i-1].second.get().position)/diffs[i-1]) / (diffs[i]+diffs[i-1]));
+            d.push_back(3.f * ((interpolationPoints[i+1] - interpolationPoints[i])/diffs[i] - (interpolationPoints[i] - interpolationPoints[i-1])/diffs[i-1]) / (diffs[i]+diffs[i-1]));
 
         auto result = AlgebraUtils::solveTridiagonal(a, b, c, d);
 
         bernsteinPoints.resize(curveCount * 4);
         for(int i=0; i< curveCount; i++) {
-            bernsteinPoints[i*4 + 0] = controlPoints[i].second.get().position;
+            bernsteinPoints[i*4 + 0] = interpolationPoints[i];
         }
 
         bernsteinPoints[0*4 + 2] = glm::vec3(0);
@@ -79,7 +87,7 @@ public:
         for(int i=0; i< curveCount-1; i++) {
             bernsteinPoints[i*4 + 1] = (bernsteinPoints[(i+1)*4 + 0] - bernsteinPoints[i*4 + 0] - bernsteinPoints[i*4+2] * diffs[i] * diffs[i] - bernsteinPoints[i*4+3] * diffs[i] * diffs[i] * diffs[i] ) / diffs[i];
         }
-        bernsteinPoints[(curveCount-1)*4 + 1] = (controlPoints[curveCount].second.get().position - bernsteinPoints[(curveCount-1)*4 + 0] - bernsteinPoints[(curveCount-1)*4+2] * diffs[(curveCount-1)] * diffs[(curveCount-1)] - bernsteinPoints[(curveCount-1)*4+3] * diffs[(curveCount-1)] * diffs[(curveCount-1)] * diffs[(curveCount-1)] ) / diffs[(curveCount-1)];
+        bernsteinPoints[(curveCount-1)*4 + 1] = (interpolationPoints[curveCount] - bernsteinPoints[(curveCount-1)*4 + 0] - bernsteinPoints[(curveCount-1)*4+2] * diffs[(curveCount-1)] * diffs[(curveCount-1)] - bernsteinPoints[(curveCount-1)*4+3] * diffs[(curveCount-1)] * diffs[(curveCount-1)] * diffs[(curveCount-1)] ) / diffs[(curveCount-1)];
 
         for(int i=0; i<curveCount; i++) {
             float dist = diffs[i];

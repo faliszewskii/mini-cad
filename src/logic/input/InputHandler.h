@@ -16,12 +16,6 @@ public:
     explicit InputHandler(std::unique_ptr<AppState> &applicationState);
 
     void setupCallbacks(GLFWwindow *window);
-
-private:
-    void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) const;
-    void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
-    void mouseCallback(GLFWwindow *window, double xposIn, double yposIn);
-    void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 };
 
 
