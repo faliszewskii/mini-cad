@@ -48,7 +48,7 @@ int main() {
     inputHandler.setupCallbacks(openGlInstance.getWindow());
 
     {
-        GUI gui(openGlInstance.getWindow());
+        GUI gui(*appState, openGlInstance.getWindow());
         while (openGlInstance.isRunning()) {
             OpenGLInstance::pollEvents();
             gui.newFrame();

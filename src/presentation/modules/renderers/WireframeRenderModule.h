@@ -14,6 +14,7 @@ class WireframeRenderModule {
     Shader pointShader;
     Shader bezierShader;
     Shader bezierC2Shader;
+    Shader patchShader;
 
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
@@ -27,12 +28,17 @@ public:
                                 IOUtils::getResource("shaders/bezier/bezier.vert"),
                                 IOUtils::getResource("shaders/bezier/bezier.tesc"),
                                 IOUtils::getResource("shaders/bezier/bezier.tese"),
-                            IOUtils::getResource("shaders/bezier/bezier.frag"))), // TODO DEBUG change to selection.frag
+                            IOUtils::getResource("shaders/bezier/bezier.frag"))),
             bezierC2Shader(Shader(
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.vert"),
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.tesc"),
                                  IOUtils::getResource("shaders/bezierC2/bezierC2.tese"),
-                                 IOUtils::getResource("shaders/bezierC2/bezierC2.frag"))) // TODO DEBUG change to selection.frag
+                                 IOUtils::getResource("shaders/bezierC2/bezierC2.frag"))),
+            patchShader(Shader(
+                 IOUtils::getResource("shaders/patch/patch.vert"),
+                 IOUtils::getResource("shaders/patch/patch.tesc"),
+                 IOUtils::getResource("shaders/patch/patch.tese"),
+                 IOUtils::getResource("shaders/patch/patch.frag")))
                            {}
 
     void run(AppState &appState) {
@@ -62,7 +68,7 @@ public:
 
     }
 
-    void render(const AppState &appState, const ImGuiIO &io, glm::mat4 &view, glm::mat4 &projection) {
+    void render(AppState &appState, const ImGuiIO &io, glm::mat4 &view, glm::mat4 &projection) {
         shader.use();
         shader.setUniform("projection", projection);
         shader.setUniform("view", view);
@@ -70,6 +76,11 @@ public:
         shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
+        shader.setUniform("color", glm::vec4(0.2, 0.4, 0.5, 0.8));
+        for(auto &patch : std::views::values(appState.patchC0Set))
+            patch->renderBezierGrid(shader);
+        for(auto &patch : std::views::values(appState.patchC2Set))
+            patch->renderBezierGrid(shader);
 
         pointShader.use();
         pointShader.setUniform("selected", false);
@@ -85,6 +96,9 @@ public:
                     point->render(pointShader);
             }
         }
+
+        if(appState.bezierCreatorOpen)
+            appState.bezierPatchCreator.renderPoints(pointShader);
 
         bezierShader.use();
         bezierShader.setUniform("color", glm::vec4(0, 0, 0, 1));
@@ -110,6 +124,24 @@ public:
         for(auto &bezier : std::views::values(appState.bezierC2Set)) {
             bezier->render(bezierC2Shader);
         }
+
+        patchShader.use();
+        patchShader.setUniform("selected", false);
+        patchShader.setUniform("color", glm::vec4(0, 0, 0, 1));
+        patchShader.setUniform("projection", projection);
+        patchShader.setUniform("view", view);
+        patchShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
+        patchShader.setUniform("gridCountLength", appState.bezierPatchGridLength);
+
+        if(appState.bezierCreatorOpen)
+            appState.bezierPatchCreator.renderPreview(patchShader);
+        for(auto &patch : std::views::values(appState.patchC0Set)) {
+            patch->render(patchShader);
+        }
+        for(auto &patch : std::views::values(appState.patchC2Set)) {
+            patch->render(patchShader);
+        }
+
     };
 
     void hotReload() {

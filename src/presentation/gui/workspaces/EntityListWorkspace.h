@@ -22,6 +22,8 @@ namespace EntityListWorkspace {
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
     void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState);
     void renderWorkspaceInterpolatedC2(InterpolatedC2 &interpolated, AppState &appState);
+    void renderWorkspacePatchC0(PatchC0 &patch, AppState &appState);
+    void renderWorkspacePatchC2(PatchC2 &patch, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
 
     template<typename T> requires has_name<T>
@@ -45,7 +47,11 @@ namespace EntityListWorkspace {
             appState.eventPublisher.publish(CreateBezierC2Event{});
         ImGui::SameLine();
         if (ImGui::Button("Add Interpolated C2"))
-            appState.eventPublisher.publish(CreateInterpolatedC2Event{});
+            appState.eventPublisher.publish(CreateInterpolatedC2Event{});;
+        if (ImGui::Button("Create Patch")) {
+            appState.bezierCreatorOpen = true;
+            appState.bezierPatchCreator.reset();
+        }
 
         renderDeleteButton(appState);
 
@@ -56,6 +62,8 @@ namespace EntityListWorkspace {
                 renderListing(appState.bezierC0Set, appState, 0);
                 renderListing(appState.bezierC2Set, appState, 0);
                 renderListing(appState.interpolatedC2Set, appState, 0);
+                renderListing(appState.patchC0Set, appState, 0);
+                renderListing(appState.patchC2Set, appState, 0);
                 ImGui::EndListBox();
             }
         }
@@ -63,19 +71,52 @@ namespace EntityListWorkspace {
     }
 
     inline void renderDeleteButton(AppState &appState) {
-        ImGui::BeginDisabled(appState.selectedEntities.empty());
+        bool disabled = appState.selectedEntities.empty();
+        for(auto &el : appState.selectedEntities) {
+            std::visit(overloaded{
+                    [&](std::reference_wrapper<Point> &point) {
+                        for (auto &patch: appState.patchC2Set) {
+                            for (int i = 0; i < patch.second->controlPoints.size(); i++)
+                                if (patch.second->controlPoints[i].first == point.get().id)
+                                    disabled = true;
+                        }
+                        for (auto &patch: appState.patchC0Set) {
+                            for (int i = 0; i < patch.second->controlPoints.size(); i++)
+                                if (patch.second->controlPoints[i].first == point.get().id)
+                                    disabled = true;
+                        }
+                        },
+                        [&](auto &_) {}
+                    }, el.second);
+        }
+        ImGui::BeginDisabled(disabled);
         if (ImGui::Button("Delete")) {
             for(auto &el : appState.selectedEntities) {
                 std::visit(overloaded{
                        [&](Torus &torus) { appState.torusSet.erase(appState.torusSet.find(torus.id)); },
                        [&](Point &point) {
                            int id = point.id;
-                           appState.pointSet.erase(appState.pointSet.find(id)); // TODO Event Delete Point
+                           appState.pointSet.erase(appState.pointSet.find(id));
                            appState.eventPublisher.publish(PointDeletedEvent{id});
                        },
                        [&](BezierC0 &bezier) { appState.bezierC0Set.erase(appState.bezierC0Set.find(bezier.id)); },
                        [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); },
-                       [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); }
+                       [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); },
+                       [&](PatchC0 &patch) {
+                           for(auto &point : patch.controlPoints) {
+                               int id = point.second.get().id;
+                               appState.pointSet.erase(appState.pointSet.find(id));
+                               appState.eventPublisher.publish(PointDeletedEvent{id});
+                           }
+                           appState.patchC0Set.erase(appState.patchC0Set.find(patch.id));
+                           },
+                       [&](PatchC2 &patch) {
+                           for(auto &point : patch.controlPoints) {
+                               int id = point.second.get().id;
+                               appState.pointSet.erase(appState.pointSet.find(id));
+                               appState.eventPublisher.publish(PointDeletedEvent{id});
+                           }
+                           appState.patchC2Set.erase(appState.patchC2Set.find(patch.id)); }
                     }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
@@ -89,7 +130,9 @@ namespace EntityListWorkspace {
                 [&](Point &point) { renderWorkspacePoint(point, appState); },
                 [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
                 [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); },
-                [&](InterpolatedC2 &interpolated) { renderWorkspaceInterpolatedC2(interpolated, appState); }
+                [&](InterpolatedC2 &interpolated) { renderWorkspaceInterpolatedC2(interpolated, appState); },
+                [&](PatchC0 &patch) { renderWorkspacePatchC0(patch, appState); },
+                [&](PatchC2 &patch) { renderWorkspacePatchC2(patch, appState); }
         }, element);
     }
 
@@ -187,6 +230,53 @@ namespace EntityListWorkspace {
         }
     }
 
+    inline void renderWorkspacePatchC0(PatchC0 &patch, AppState &appState) {
+        int idCounter = 0;
+        ImGui::SeparatorText("Patch C0");
+        renderNameInput(patch);
+
+        ImGui::SeparatorText("Visualization");
+        ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
+        bool modified = false;
+        modified = ImGui::InputInt("Grid Count Width", &appState.bezierPatchGridWidth);
+        if(modified && appState.bezierPatchGridWidth < 1) appState.bezierPatchGridWidth = 1;
+        modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
+        if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
+
+        ImGui::SeparatorText("Control Points");
+        if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
+            for(auto &pPoint : patch.controlPoints) {
+                Point &point = pPoint.second;
+                auto &entities = appState.selectedEntities;
+                if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                    appState.eventPublisher.publish(SelectEntityEvent{point, 1});
+                }
+            }
+            ImGui::EndListBox();
+        }
+    }
+
+    inline void renderWorkspacePatchC2(PatchC2 &patch, AppState &appState) {
+        int idCounter = 0;
+        ImGui::SeparatorText("Patch C2");
+        renderNameInput(patch);
+
+        ImGui::SeparatorText("Visualization");
+//        ImGui::DragInt("")
+
+        ImGui::SeparatorText("Control Points");
+        if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
+            for(auto &pPoint : patch.controlPoints) {
+                Point &point = pPoint.second;
+                auto &entities = appState.selectedEntities;
+                if (ImGui::Selectable((point.name + "##" + std::to_string(idCounter++)).c_str(), entities.end() != std::find_if(entities.begin(), entities.end(), [&](auto &e){ return e.first == point.id;}))) {
+                    appState.eventPublisher.publish(SelectEntityEvent{point, 1});
+                }
+            }
+            ImGui::EndListBox();
+        }
+    }
+
     template<typename T>
     void addPointToCurve(AppState &appState);
 
@@ -260,7 +350,9 @@ namespace EntityListWorkspace {
                         },
                         [&](BezierC0 &_) { /* ignore */ },
                         [&](BezierC2 &_) { /* ignore */ },
-                        [&](InterpolatedC2 &_) { /* ignore */ }
+                        [&](InterpolatedC2 &_) { /* ignore */ },
+                        [&](PatchC0 &_) { /* ignore */ },
+                        [&](PatchC2 &_) { /* ignore */ }
                 }, el.second);
             }
         }

@@ -110,6 +110,14 @@ set(INCL
         logic/events/input/KeyEvent.h
         logic/geometry/InterpolatedC2.h
         logic/events/create/CreateInterpolatedC2Event.h
+        logic/creator/BeizerPatchCreator.cpp
+        logic/creator/BezierPatchCreator.h
+        presentation/gui/creator/BezierPatchCreatorUI.cpp
+        presentation/gui/creator/BezierPatchCreatorUI.h
+        logic/events/create/CreateBezierPatch.h
+        logic/creator/BezierPatchCreatorParams.h
+        logic/geometry/PatchC0.h
+        logic/geometry/PatchC2.h
 )
 
 add_executable(opengl-sandbox main.cpp

@@ -65,7 +65,9 @@ namespace SelectionEventsHandler {
                             [&](Point &point) { center += point.position; n++; },
                             [&](BezierC0 &_) { /* ignore */ },
                             [&](BezierC2 &_) { /* ignore */ },
-                            [&](InterpolatedC2 &_) { /* ignore */ }
+                            [&](InterpolatedC2 &_) { /* ignore */ },
+                            [&](PatchC0 &_) { /* ignore */ },
+                            [&](PatchC2 &_) { /* ignore */ }
                     }, el.second);
                 }
                 center /= n;

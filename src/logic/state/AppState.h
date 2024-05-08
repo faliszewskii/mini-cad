@@ -34,6 +34,8 @@
 #include "../events/input/MouseScrolledEvent.h"
 #include "../events/input/KeyEvent.h"
 #include "../events/create/CreateInterpolatedC2Event.h"
+#include "../creator/BezierPatchCreator.h"
+#include "../events/create/CreateBezierPatch.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -67,13 +69,19 @@ struct AppState {
     std::map<int, std::unique_ptr<BezierC0>> bezierC0Set;
     std::map<int, std::unique_ptr<BezierC2>> bezierC2Set;
     std::map<int, std::unique_ptr<InterpolatedC2>> interpolatedC2Set;
+    std::map<int, std::unique_ptr<PatchC0>> patchC0Set;
+    std::map<int, std::unique_ptr<PatchC2>> patchC2Set;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
     std::vector<std::pair<int, EntityType>> selectionContext;
 
+    int bezierPatchGridWidth;
+    int bezierPatchGridLength;
+    BezierPatchCreator bezierPatchCreator;
+
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
         PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
-        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event> eventPublisher;
+        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch> eventPublisher;
 
     Logger logger;
     Camera camera;
@@ -88,6 +96,7 @@ struct AppState {
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 
     bool keyboardCtrlMode;
+    bool bezierCreatorOpen;
 };
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

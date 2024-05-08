@@ -64,6 +64,35 @@ namespace CreateEventsHandler {
         eventPublisher.subscribe([&](const CreateInterpolatedC2Event &event) {
             createCurve(appState, appState.interpolatedC2Set);
         });
+
+        eventPublisher.subscribe([&](const CreateBezierPatch &event) {
+
+            std::variant<std::monostate, std::reference_wrapper<std::unique_ptr<PatchC0>>, std::reference_wrapper<std::unique_ptr<PatchC2>>> ref;
+            if(!event.C2) {
+                auto patch = std::make_unique<PatchC0>(event.patchVertices, event.patchIndices, event.gridIndices);
+                auto result = appState.patchC0Set.emplace(patch->id, std::move(patch));
+                ref = result.first->second;
+            } else {
+                auto patch = std::make_unique<PatchC2>(event.patchVertices, event.patchIndices, event.gridIndices);
+                auto result = appState.patchC2Set.emplace(patch->id, std::move(patch));
+                ref = result.first->second;
+            }
+
+            for(auto &point : event.controlPoints) {
+                auto pointTemp = std::make_unique<Point>(point.position);
+                auto result = appState.pointSet.emplace(pointTemp->id, std::move(pointTemp));
+                auto &newPoint = *result.first->second;
+                std::visit(overloaded{
+                    [&](std::unique_ptr<PatchC0> &patch) {
+                        patch->controlPoints.emplace_back(newPoint.id, newPoint);
+                    },
+                    [&](std::unique_ptr<PatchC2> &patch) {
+                        patch->controlPoints.emplace_back(newPoint.id, newPoint);
+                    },
+                    [&](std::monostate _){}
+                }, ref);
+            }
+        });
     }
 }
 

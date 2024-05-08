@@ -12,9 +12,11 @@
 #include "../geometry/BezierC0.h"
 #include "../geometry/BezierC2.h"
 #include "../geometry/InterpolatedC2.h"
+#include "../geometry/PatchC0.h"
+#include "../geometry/PatchC2.h"
 
 template<typename ...RefT> using ReferenceVariant = std::variant<std::reference_wrapper<RefT>...>;
 template<typename ...T> requires (has_id<T> && ...) && (has_selected<T> && ...) using EntityTypeTemp = ReferenceVariant<T...>;
-using EntityType = EntityTypeTemp<Torus, Point, BezierC0, BezierC2, InterpolatedC2>;
+using EntityType = EntityTypeTemp<Torus, Point, BezierC0, BezierC2, InterpolatedC2, PatchC0, PatchC2>;
 
 #endif //OPENGL_SANDBOX_ENTITYTYPE_H

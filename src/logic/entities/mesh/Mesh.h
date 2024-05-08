@@ -27,7 +27,7 @@ public:
         if (indices)
             glDrawElementsInstanced(drawingMode, indices.value().size(), GL_UNSIGNED_INT, 0, instanceCount);
         else
-            glDrawArraysInstanced(drawingMode, 0, vertices.size(),instanceCount);
+            glDrawArraysInstanced(drawingMode, 0, vertices.size(), instanceCount);
         glBindVertexArray(0);
     }
 
@@ -57,6 +57,9 @@ public:
 
         glBindVertexArray(0);
     }
+
+    std::vector<TVertex> getVertices() { return vertices; };
+    std::optional<std::vector<unsigned int>> getIndices() { return indices; };
 
 private:
     //  render data

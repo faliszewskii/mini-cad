@@ -32,6 +32,16 @@ namespace PointEventsHandler {
                     if (interpolated.second->controlPoints[i].first == event.point.id)
                         interpolated.second->updatePoint(event.point, i);
             }
+            for(auto &patch : appState.patchC0Set) {
+                for (int i = 0; i < patch.second->controlPoints.size(); i++)
+                    if (patch.second->controlPoints[i].first == event.point.id)
+                        patch.second->updatePoint(event.point, i);
+            }
+            for(auto &patch : appState.patchC2Set) {
+                for (int i = 0; i < patch.second->controlPoints.size(); i++)
+                    if (patch.second->controlPoints[i].first == event.point.id)
+                        patch.second->updatePoint(event.point, i);
+            }
         });
 
         eventPublisher.subscribe([&](const PointDeletedEvent &event) {

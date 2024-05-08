@@ -6,7 +6,7 @@
 #define OPENGL_SANDBOX_POSITIONVERTEX_H
 
 #include <glm/vec3.hpp>
-#include <GL/gl.h>
+#include "../glad_glfw.h"
 #include <vector>
 
 struct PositionVertex{

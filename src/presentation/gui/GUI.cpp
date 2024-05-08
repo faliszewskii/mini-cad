@@ -8,7 +8,8 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
-GUI::GUI(GLFWwindow *window) {
+GUI::GUI(AppState &appState, GLFWwindow *window) :
+appState(appState), bezierPatchCreatorUi(appState) {
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -22,6 +23,9 @@ void GUI::newFrame() {
 }
 
 void GUI::render() {
+    if(appState.bezierCreatorOpen)
+        bezierPatchCreatorUi.render();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
