@@ -103,20 +103,21 @@ namespace EntityListWorkspace {
                        [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); },
                        [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); },
                        [&](PatchC0 &patch) {
-                           for(auto &point : patch.controlPoints) {
-                               int id = point.second.get().id;
-                               appState.pointSet.erase(appState.pointSet.find(id));
-                               appState.eventPublisher.publish(PointDeletedEvent{id});
-                           }
+//                           for(auto &point : patch.controlPoints) {
+//                               int id = point.second.get().id;
+//                               appState.pointSet.erase(appState.pointSet.find(id));
+//                               appState.eventPublisher.publish(PointDeletedEvent{id});
+//                           }
                            appState.patchC0Set.erase(appState.patchC0Set.find(patch.id));
-                           },
+                       },
                        [&](PatchC2 &patch) {
-                           for(auto &point : patch.controlPoints) {
-                               int id = point.second.get().id;
-                               appState.pointSet.erase(appState.pointSet.find(id));
-                               appState.eventPublisher.publish(PointDeletedEvent{id});
-                           }
-                           appState.patchC2Set.erase(appState.patchC2Set.find(patch.id)); }
+//                           for(auto &point : patch.controlPoints) {
+//                               int id = point.second.get().id;
+//                               appState.pointSet.erase(appState.pointSet.find(id));
+//                               appState.eventPublisher.publish(PointDeletedEvent{id});
+//                           }
+                           appState.patchC2Set.erase(appState.patchC2Set.find(patch.id));
+                       }
                     }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
@@ -262,7 +263,12 @@ namespace EntityListWorkspace {
         renderNameInput(patch);
 
         ImGui::SeparatorText("Visualization");
-//        ImGui::DragInt("")
+        ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
+        bool modified = false;
+        modified = ImGui::InputInt("Grid Count Width", &appState.bezierPatchGridWidth);
+        if(modified && appState.bezierPatchGridWidth < 1) appState.bezierPatchGridWidth = 1;
+        modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
+        if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
 
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {

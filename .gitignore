@@ -1,5 +1,6 @@
 cmake-build-debug/
 /resources/models/
+/lib/
 
 ### C++ template
 # Compiled Object files

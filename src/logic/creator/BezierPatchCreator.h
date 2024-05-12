@@ -51,7 +51,7 @@ public:
     void addVertex(std::vector<PositionVertex> &vertices, glm::vec3 beginPos,
                    const std::function<glm::vec3(float, float)>& eq,
                    const std::function<glm::vec3(float, float)>& dance,
-                   int k, int l) const;
+                   int k, int l, float width, float length) const;
 
 
     std::vector<PositionVertex> getPatchVertices();

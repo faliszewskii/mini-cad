@@ -18,6 +18,7 @@ public:
     std::string name;
     bool selected;
 
+    bool drawBezierGrid = false;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
     PatchC2(const std::vector<PositionVertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<unsigned int> &gridIndices) :
@@ -39,6 +40,7 @@ public:
     }
 
     void renderBezierGrid(Shader &shader) {
+        if(!drawBezierGrid) return;
         shader.setUniform("selected", false);
         shader.setUniform("model", glm::mat4(1.0f));
         meshGrid.render();

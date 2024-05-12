@@ -15,6 +15,7 @@ class WireframeRenderModule {
     Shader bezierShader;
     Shader bezierC2Shader;
     Shader patchShader;
+    Shader patchC2Shader;
 
 public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
@@ -38,6 +39,11 @@ public:
                  IOUtils::getResource("shaders/patch/patch.vert"),
                  IOUtils::getResource("shaders/patch/patch.tesc"),
                  IOUtils::getResource("shaders/patch/patch.tese"),
+                 IOUtils::getResource("shaders/patch/patch.frag"))),
+            patchC2Shader(Shader(
+                 IOUtils::getResource("shaders/patch/patch.vert"),
+                 IOUtils::getResource("shaders/patch/patch.tesc"),
+                 IOUtils::getResource("shaders/patch/patchC2.tese"),
                  IOUtils::getResource("shaders/patch/patch.frag")))
                            {}
 
@@ -133,13 +139,26 @@ public:
         patchShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
         patchShader.setUniform("gridCountLength", appState.bezierPatchGridLength);
 
-        if(appState.bezierCreatorOpen)
+        if(appState.bezierCreatorOpen && !appState.bezierPatchCreator.getParams().C2)
             appState.bezierPatchCreator.renderPreview(patchShader);
+
         for(auto &patch : std::views::values(appState.patchC0Set)) {
             patch->render(patchShader);
         }
+
+        patchC2Shader.use();
+        patchC2Shader.setUniform("selected", false);
+        patchC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));
+        patchC2Shader.setUniform("projection", projection);
+        patchC2Shader.setUniform("view", view);
+        patchC2Shader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
+        patchC2Shader.setUniform("gridCountLength", appState.bezierPatchGridLength);
+
+        if(appState.bezierCreatorOpen && appState.bezierPatchCreator.getParams().C2)
+            appState.bezierPatchCreator.renderPreview(patchC2Shader);
+
         for(auto &patch : std::views::values(appState.patchC2Set)) {
-            patch->render(patchShader);
+            patch->render(patchC2Shader);
         }
 
     };

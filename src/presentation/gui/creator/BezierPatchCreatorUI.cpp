@@ -25,6 +25,7 @@ void BezierPatchCreatorUI::render() {
         }
 
         modified |= ImGui::Checkbox("C2", &params.C2);
+
         modified |= ImGui::Checkbox("dance", &params.dance);
 
         if(ImGui::Button("Create")) {
@@ -41,6 +42,7 @@ void BezierPatchCreatorUI::render() {
     ImGui::End();
 
     if(modified) {
+        if(params.C2 && params.patchCountWidth < 3) params.patchCountWidth = 3;
         if(params.cylinderHeight <= 0) params.cylinderHeight = 0.01f;
         if(params.cylinderRadius <= 0) params.cylinderRadius = 0.01f;
         if(params.planeLength <= 0) params.planeLength = 0.01f;

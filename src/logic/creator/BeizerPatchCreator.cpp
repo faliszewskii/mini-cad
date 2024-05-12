@@ -11,6 +11,11 @@ void BezierPatchCreator::reset() {
 
 void BezierPatchCreator::updatePreview() {
 
+    int vert_n = params.C2 ? params.patchCountWidth + 3 : 3 * params.patchCountWidth + 1;
+    int wrappedOverlap = params.C2 ? 3 : 1;
+    vert_n -= params.wrapped ? wrappedOverlap : 0;
+    int vert_m = params.C2 ? params.patchCountLength + 3 : 3 * params.patchCountLength + 1;
+
     glm::vec3 beginPos;
     std::function<glm::vec3(float, float)> eq;
     std::function<glm::vec3(float, float)> dance;
@@ -35,32 +40,29 @@ void BezierPatchCreator::updatePreview() {
     }
     if(!params.dance) dance = [](float x, float y){return glm::vec3();};
 
-
     std::vector<PositionVertex> vertices;
-    addVertex(vertices, beginPos, eq, dance, 0, 0); // Corner
-    for(int k = 0; k < 3 * params.patchCountWidth - params.wrapped?1:0; k++)
-        addVertex(vertices, beginPos, eq, dance, 1 + k, 0);
-    for(int l = 0; l < 3 * params.patchCountLength; l++) {
-        for(int k = 0; k < 3 * params.patchCountWidth + 1 - params.wrapped?1:0; k++) {
-            addVertex(vertices, beginPos, eq, dance, k, 1 + l);
+    addVertex(vertices, beginPos, eq, dance, 0, 0, vert_n, vert_m); // Corner
+    for(int k = 0; k < vert_n - 1; k++)
+        addVertex(vertices, beginPos, eq, dance, 1 + k, 0, vert_n, vert_m);
+    for(int l = 0; l < vert_m - 1; l++) {
+        for(int k = 0; k < vert_n; k++) {
+            addVertex(vertices, beginPos, eq, dance, k, 1 + l, vert_n, vert_m);
         }
     }
 
+    int step = params.C2 ? 1 : 3;
     std::vector<unsigned int> indices;
     for(int n = 0; n < params.patchCountWidth; n++) {
         for(int m = 0; m < params.patchCountLength; m++) {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
-                    int k = i + 3 * n;
-                    int l = j + 3 * m;
-                    if(params.wrapped) {
-                        if(n == params.patchCountWidth-1 && i == 3) {
-                            indices.push_back(l * (3*params.patchCountWidth));
-                        } else {
-                            indices.push_back(k + l * (3*params.patchCountWidth));
-                        }
+                    int k = i + step * n;
+                    int l = j + step * m;
+                    int t = n - params.patchCountWidth + wrappedOverlap - 3 + i;
+                    if(params.wrapped && t >= 0 ) {
+                        indices.push_back(t + l * vert_n);
                     } else {
-                        indices.push_back(k + l * (3*params.patchCountWidth+1));
+                        indices.push_back(k + l * vert_n);
                     }
                 }
             }
@@ -75,11 +77,12 @@ void BezierPatchCreator::updatePreview() {
 void BezierPatchCreator::addVertex(std::vector<PositionVertex> &vertices, glm::vec3 beginPos,
                                    const std::function<glm::vec3(float, float)>& eq,
                                    const std::function<glm::vec3(float, float)>& dance,
-                                   int k, int l) const {
+                                   int k, int l, float width, float length) const {
+    int w = params.wrapped ? 0 : 1;
     float time = glfwGetTime();
     auto pos = beginPos;
-    pos += eq(k / 3.f / params.patchCountWidth, l / 3.f / params.patchCountLength);
-    pos += dance(k / 3.f / params.patchCountWidth + time * 2.f, l / 3.f / params.patchCountWidth + time * 2.f);
+    pos += eq(k / (width-w), l / (length-w));
+    pos += dance(k / (width-w) + time * 2.f, l / (width-w) + time * 2.f);
     vertices.emplace_back(pos);
 }
 
@@ -127,8 +130,9 @@ std::vector<PositionVertex> BezierPatchCreator::getPointVertices() {
 
 std::vector<unsigned int> BezierPatchCreator::getGridIndices() const {
     std::vector<unsigned int> indices;
-    int n = params.patchCountWidth * 3 + (params.wrapped?0:1);
-    int m = params.patchCountLength * 3 + 1;
+    int n = params.C2 ? params.patchCountWidth + 3 : 3 * params.patchCountWidth + 1;
+    n -= params.wrapped?1:0;
+    int m = params.C2 ? params.patchCountLength + 3 : 3 * params.patchCountLength + 1;
     for(int k = 0; k < n; k++) {
         for(int l = 0; l < m; l++) {
             if(k != n - 1) {

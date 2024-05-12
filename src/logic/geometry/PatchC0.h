@@ -32,7 +32,7 @@ public:
     }
 
     void render(Shader &shader) {
-        glLineWidth(3);
+        glLineWidth(2);
         shader.setUniform("selected", selected);
         glPatchParameteri(GL_PATCH_VERTICES, 16);
         mesh.render(2);
@@ -41,11 +41,9 @@ public:
 
     void renderBezierGrid(Shader &shader) {
         if(!drawBezierGrid) return;
-        glLineWidth(2);
         shader.setUniform("selected", false);
         shader.setUniform("model", glm::mat4(1.0f));
         meshGrid.render();
-        glLineWidth(1);
     }
 };
 
