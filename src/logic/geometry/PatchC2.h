@@ -11,7 +11,6 @@
 #include "../entities/mesh/Mesh.h"
 
 class PatchC2 {
-    Mesh<PositionVertex> mesh;
     Mesh<PositionVertex> meshGrid;
 public:
     int id;
@@ -45,6 +44,8 @@ public:
         shader.setUniform("model", glm::mat4(1.0f));
         meshGrid.render();
     }
+
+    Mesh<PositionVertex> mesh;
 };
 
 #endif //OPENGL_SANDBOX_PATCHC2_H

@@ -21,6 +21,7 @@ namespace CreateEventsHandler {
     inline void createCurve(AppState &appState, std::map<int, std::unique_ptr<T>> &map) {
         auto &selectedEntities = appState.selectedEntities;
         auto curve = std::make_unique<T>();
+        appState.lastIdCreated = curve->id;
         auto result = map.emplace(curve->id, std::move(curve));
 
         // Add all currently selected points;
@@ -38,6 +39,7 @@ namespace CreateEventsHandler {
 
         eventPublisher.subscribe([&](const CreateTorusEvent &event){
             auto torus = std::make_unique<Torus>(event.position);
+            appState.lastIdCreated = torus->id;
             appState.torusSet.emplace(torus->id, std::move(torus));
         });
 
@@ -51,6 +53,7 @@ namespace CreateEventsHandler {
                 addPointToCurve<BezierC2>(point, last);
                 addPointToCurve<InterpolatedC2>(point, last);
             }
+            appState.lastIdCreated = point.id;
         });
 
         eventPublisher.subscribe([&](const CreateBezierC0Event &event) {
@@ -67,27 +70,31 @@ namespace CreateEventsHandler {
 
         eventPublisher.subscribe([&](const CreateBezierPatch &event) {
 
+            std::vector<PositionVertex> vertices;
+            for(auto &pointId : event.controlPoints) {
+                auto &point = *appState.pointSet[pointId];
+                vertices.push_back({point.position});
+            }
+
             std::variant<std::monostate, std::reference_wrapper<std::unique_ptr<PatchC0>>, std::reference_wrapper<std::unique_ptr<PatchC2>>> ref;
             if(!event.C2) {
-                auto patch = std::make_unique<PatchC0>(event.patchVertices, event.patchIndices, event.gridIndices);
+                auto patch = std::make_unique<PatchC0>(vertices, event.patchIndices, event.gridIndices);
                 auto result = appState.patchC0Set.emplace(patch->id, std::move(patch));
                 ref = result.first->second;
             } else {
-                auto patch = std::make_unique<PatchC2>(event.patchVertices, event.patchIndices, event.gridIndices);
+                auto patch = std::make_unique<PatchC2>(vertices, event.patchIndices, event.gridIndices);
                 auto result = appState.patchC2Set.emplace(patch->id, std::move(patch));
                 ref = result.first->second;
             }
 
-            for(auto &point : event.controlPoints) {
-                auto pointTemp = std::make_unique<Point>(point.position);
-                auto result = appState.pointSet.emplace(pointTemp->id, std::move(pointTemp));
-                auto &newPoint = *result.first->second;
+            for(auto &pointId : event.controlPoints) {
+                auto &point = *appState.pointSet[pointId];
                 std::visit(overloaded{
                     [&](std::unique_ptr<PatchC0> &patch) {
-                        patch->controlPoints.emplace_back(newPoint.id, newPoint);
+                        patch->controlPoints.emplace_back(point.id, point);
                     },
                     [&](std::unique_ptr<PatchC2> &patch) {
-                        patch->controlPoints.emplace_back(newPoint.id, newPoint);
+                        patch->controlPoints.emplace_back(point.id, point);
                     },
                     [&](std::monostate _){}
                 }, ref);

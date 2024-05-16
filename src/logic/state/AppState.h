@@ -47,6 +47,7 @@ class GridModule;
 class VerticalStripedLineModule;
 class CursorModule;
 class CenterOfMassModule;
+class Serializer;
 
 struct AppState {
     explicit AppState(Rect<int> viewport, int guiPanelLeftWidth);
@@ -71,6 +72,7 @@ struct AppState {
     std::map<int, std::unique_ptr<InterpolatedC2>> interpolatedC2Set;
     std::map<int, std::unique_ptr<PatchC0>> patchC0Set;
     std::map<int, std::unique_ptr<PatchC2>> patchC2Set;
+    int lastIdCreated = -1;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
     std::vector<std::pair<int, EntityType>> selectionContext;
@@ -78,6 +80,8 @@ struct AppState {
     int bezierPatchGridWidth;
     int bezierPatchGridLength;
     BezierPatchCreator bezierPatchCreator;
+
+    std::unique_ptr<Serializer> serializer;
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
         PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,

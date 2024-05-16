@@ -33,7 +33,8 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         gridModule(new GridModule(guiPanelLeftWidth)),
         verticalStripedLineModule(std::make_unique<VerticalStripedLineModule>(guiPanelLeftWidth)),
         cursorModule(std::make_unique<CursorModule>(guiPanelLeftWidth)),
-        centerOfMassModule(std::make_unique<CenterOfMassModule>(guiPanelLeftWidth)) {
+        centerOfMassModule(std::make_unique<CenterOfMassModule>(guiPanelLeftWidth)),
+        serializer(std::make_unique<Serializer>()){
         glfwSwapInterval(vSync);
 
         CreateEventsHandler::setup(*this);

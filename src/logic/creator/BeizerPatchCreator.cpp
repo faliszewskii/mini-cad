@@ -50,24 +50,7 @@ void BezierPatchCreator::updatePreview() {
         }
     }
 
-    int step = params.C2 ? 1 : 3;
-    std::vector<unsigned int> indices;
-    for(int n = 0; n < params.patchCountWidth; n++) {
-        for(int m = 0; m < params.patchCountLength; m++) {
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    int k = i + step * n;
-                    int l = j + step * m;
-                    int t = n - params.patchCountWidth + wrappedOverlap - 3 + i;
-                    if(params.wrapped && t >= 0 ) {
-                        indices.push_back(t + l * vert_n);
-                    } else {
-                        indices.push_back(k + l * vert_n);
-                    }
-                }
-            }
-        }
-    }
+    std::vector<unsigned int> indices = getPatchIndices();
 
     auto points = vertices;
     previewMesh.update(std::move(vertices), std::move(indices));
@@ -119,7 +102,29 @@ std::vector<PositionVertex> BezierPatchCreator::getPatchVertices() {
 }
 
 std::vector<unsigned int> BezierPatchCreator::getPatchIndices() {
-    return previewMesh.getIndices().value();
+    int vert_n = params.C2 ? params.patchCountWidth + 3 : 3 * params.patchCountWidth + 1;
+    int wrappedOverlap = params.C2 ? 3 : 1;
+    vert_n -= params.wrapped ? wrappedOverlap : 0;
+
+    int step = params.C2 ? 1 : 3;
+    std::vector<unsigned int> indices;
+    for(int n = 0; n < params.patchCountWidth; n++) {
+        for(int m = 0; m < params.patchCountLength; m++) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    int k = i + step * n;
+                    int l = j + step * m;
+                    int t = n - params.patchCountWidth + wrappedOverlap - 3 + i;
+                    if(params.wrapped && t >= 0 ) {
+                        indices.push_back(t + l * vert_n);
+                    } else {
+                        indices.push_back(k + l * vert_n);
+                    }
+                }
+            }
+        }
+    }
+    return indices;
 }
 
 std::vector<PositionVertex> BezierPatchCreator::getPointVertices() {

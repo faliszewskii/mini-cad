@@ -8,10 +8,9 @@
 #include "../../creator/BezierPatchCreatorParams.h"
 
 struct CreateBezierPatch {
-    std::vector<PositionVertex> patchVertices;
     std::vector<unsigned int> patchIndices;
     std::vector<unsigned int> gridIndices;
-    std::vector<PositionVertex> controlPoints;
+    std::vector<int> controlPoints;
     bool C2;
 };
 

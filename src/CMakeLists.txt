@@ -118,6 +118,8 @@ set(INCL
         logic/creator/BezierPatchCreatorParams.h
         logic/geometry/PatchC0.h
         logic/geometry/PatchC2.h
+        logic/serializer/Serializer.cpp
+        logic/serializer/Serializer.h
 )
 
 add_executable(opengl-sandbox main.cpp

@@ -29,11 +29,15 @@ void BezierPatchCreatorUI::render() {
         modified |= ImGui::Checkbox("dance", &params.dance);
 
         if(ImGui::Button("Create")) {
+            std::vector<int> points;
+            for(auto &point : appState.bezierPatchCreator.getPointVertices()) {
+                appState.eventPublisher.publish(CreatePointEvent{point.position});
+                points.push_back(appState.lastIdCreated);
+            }
             appState.eventPublisher.publish(CreateBezierPatch{
-                appState.bezierPatchCreator.getPatchVertices(),
                 appState.bezierPatchCreator.getPatchIndices(),
                 appState.bezierPatchCreator.getGridIndices(),
-                appState.bezierPatchCreator.getPointVertices(),
+                points,
                 appState.bezierPatchCreator.getParams().C2
             });
             appState.bezierCreatorOpen = false;
