@@ -73,6 +73,8 @@ public:
                     appState.interpolatedC2Set.clear();
                     appState.patchC0Set.clear();
                     appState.patchC2Set.clear();
+                    appState.selectedEntities.clear();
+                    appState.selectionContext.clear();
                 }
                 if (ImGui::MenuItem("Import", "", false, true)) {
                     openNfd([&](const std::string &path) {

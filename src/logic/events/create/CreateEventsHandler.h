@@ -80,10 +80,16 @@ namespace CreateEventsHandler {
             if(!event.C2) {
                 auto patch = std::make_unique<PatchC0>(vertices, event.patchIndices, event.gridIndices);
                 auto result = appState.patchC0Set.emplace(patch->id, std::move(patch));
+                result.first->second->patchCountX = event.patchCountX;
+                result.first->second->patchCountY = event.patchCountY;
+                result.first->second->wrapped = event.wrapped;
                 ref = result.first->second;
             } else {
                 auto patch = std::make_unique<PatchC2>(vertices, event.patchIndices, event.gridIndices);
                 auto result = appState.patchC2Set.emplace(patch->id, std::move(patch));
+                result.first->second->patchCountX = event.patchCountX;
+                result.first->second->patchCountY = event.patchCountY;
+                result.first->second->wrapped = event.wrapped;
                 ref = result.first->second;
             }
 

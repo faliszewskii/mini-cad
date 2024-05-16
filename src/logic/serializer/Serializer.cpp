@@ -83,13 +83,20 @@ void Serializer::exportScene(AppState &appState, const std::string &path) {
     for(auto &patch : appState.patchC0Set) {
         MG1::BezierSurfaceC0 surface;
         surface.name = patch.second->name;
+        surface.size.x = patch.second->patchCountX;
+        surface.size.y = patch.second->patchCountY;
+        surface.uWrapped = patch.second->wrapped;
+        surface.vWrapped = false;
         auto indices = patch.second->mesh.getIndices().value();
         int n = indices.size() / 16;
         for(int i=0; i< n; i++) {
             MG1::BezierPatchC0 patchData;
             patchData.SetId(id++);
-            for(auto &point : patch.second->controlPoints) {
-                patchData.controlPoints.emplace_back(idMap[point.first]);
+            patchData.samples.x = 4;
+            patchData.samples.y = 4;
+            for(int k=0; k<16; k++) {
+                auto &point = indices[16*i + k];
+                patchData.controlPoints.emplace_back(idMap[patch.second->controlPoints[point].first]);
             }
             surface.patches.push_back(patchData);
         }
@@ -99,13 +106,19 @@ void Serializer::exportScene(AppState &appState, const std::string &path) {
     for(auto &patch : appState.patchC2Set) {
         MG1::BezierSurfaceC2 surface;
         surface.name = patch.second->name;
+        surface.size.x = patch.second->patchCountX;
+        surface.size.y = patch.second->patchCountY;
+        surface.uWrapped = patch.second->wrapped;
+        surface.vWrapped = false;
         auto indices = patch.second->mesh.getIndices().value();
         int n = indices.size() / 16;
         for(int i=0; i< n; i++) {
             MG1::BezierPatchC2 patchData;
-            patchData.SetId(id++);
-            for(auto &point : patch.second->controlPoints) {
-                patchData.controlPoints.emplace_back(idMap[point.first]);
+            patchData.samples.x = 4;
+            patchData.samples.y = 4;
+            for(int k=0; k<16; k++) {
+                auto &point = indices[16*i + k];
+                patchData.controlPoints.emplace_back(idMap[patch.second->controlPoints[point].first]);
             }
             surface.patches.push_back(patchData);
         }
@@ -192,6 +205,9 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 points.push_back(id);
             }
             appState.eventPublisher.publish(CreateBezierPatch{
+                    appState.bezierPatchCreator.getParams().patchCountWidth,
+                    appState.bezierPatchCreator.getParams().patchCountLength,
+                    appState.bezierPatchCreator.getParams().wrapped,
                     appState.bezierPatchCreator.getPatchIndices(),
                     appState.bezierPatchCreator.getGridIndices(),
                     points,
@@ -219,6 +235,9 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 points.push_back(id);
             }
             appState.eventPublisher.publish(CreateBezierPatch{
+                    appState.bezierPatchCreator.getParams().patchCountWidth,
+                    appState.bezierPatchCreator.getParams().patchCountLength,
+                    appState.bezierPatchCreator.getParams().wrapped,
                     appState.bezierPatchCreator.getPatchIndices(),
                     appState.bezierPatchCreator.getGridIndices(),
                     points,

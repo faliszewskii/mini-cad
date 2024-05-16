@@ -35,6 +35,9 @@ void BezierPatchCreatorUI::render() {
                 points.push_back(appState.lastIdCreated);
             }
             appState.eventPublisher.publish(CreateBezierPatch{
+                appState.bezierPatchCreator.getParams().patchCountWidth,
+                appState.bezierPatchCreator.getParams().patchCountLength,
+                appState.bezierPatchCreator.getParams().wrapped,
                 appState.bezierPatchCreator.getPatchIndices(),
                 appState.bezierPatchCreator.getGridIndices(),
                 points,

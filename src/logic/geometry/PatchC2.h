@@ -17,6 +17,9 @@ public:
     std::string name;
     bool selected;
 
+    int patchCountX;
+    int patchCountY;
+    bool wrapped;
     bool drawBezierGrid = false;
     std::vector<std::pair<int, std::reference_wrapper<Point>>> controlPoints;
 
