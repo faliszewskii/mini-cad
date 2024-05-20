@@ -67,17 +67,29 @@ glm::mat4 myProjection(float yFov, float aspectRatio, float zNear, float zFar) {
     };
 }
 
-glm::mat4 myProjectionStereo(float yFov, float aspectRatio, float zNear, float zFar, float iod, float distance, bool leftEye) {
+glm::mat4 Camera::myFrustrum(float left, float right, float bottom, float top, float zNear, float zFar) {
+    glm::mat4 Result(0);
+    Result[0][0] = (2.f * zNear) / (right - left);
+    Result[1][1] = (2.f * zNear) / (top - bottom);
+    Result[2][0] = (right + left) / (right - left);
+    Result[2][1] = (top + bottom) / (top - bottom);
+    Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+    Result[2][3] = -1.f;
+    Result[3][2] = - (2.f * zFar * zNear) / (zFar - zNear);
+    return Result;
+}
+
+glm::mat4 Camera::myProjectionStereo(float yFov, float aspectRatio, float zNear, float zFar, float iod, float distance, bool leftEye) {
     double frustumshift = (iod/2)*zNear/distance;
     float left_right_direction = leftEye? -1: 1;
     float top = tan(yFov/2)*zNear;
     float right = aspectRatio*top+frustumshift*left_right_direction;
     float left =     -aspectRatio*top+frustumshift*left_right_direction;
     float bottom = -top;
-    return glm::frustum(left, right, bottom, top, zNear, zFar); // TODO my own
+    return myFrustrum(left, right, bottom, top, zNear, zFar);
 }
 
-glm::mat4 Camera::getProjectionMatrixStereo(bool left) const {
+glm::mat4 Camera::getProjectionMatrixStereo(bool left) {
     return myProjectionStereo(glm::radians(fov), (float) screenWidth / (float) screenHeight, nearPlane, farPlane, stereoscopicIOD, stereoscopicDistance, left);
 }
 

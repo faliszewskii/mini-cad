@@ -37,6 +37,7 @@ public:
             render(camera, viewLeft, viewPosLeft, projectionLeft, appState.cursorPosition);
 
             glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+            glDepthFunc(GL_LEQUAL);
             auto viewRight = camera.getViewMatrixStereo(false);
             auto projectionRight = camera.getProjectionMatrixStereo(false);
             auto viewPosRight = camera.getViewPositionStereo(false);

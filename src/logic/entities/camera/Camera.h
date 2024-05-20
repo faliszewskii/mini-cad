@@ -91,7 +91,7 @@ public:
 
     glm::vec3 getViewPositionStereo(bool left) const;
 
-    glm::mat4 getProjectionMatrixStereo(bool left) const;
+    glm::mat4 getProjectionMatrixStereo(bool left);
 
 private:
 
@@ -103,6 +103,8 @@ private:
 
     void updateDirections();
 
+    static glm::mat4 myFrustrum(float left, float right, float bottom, float top, float zNear, float zFar);
+    glm::mat4 myProjectionStereo(float yFov, float aspectRatio, float zNear, float zFar, float iod, float distance, bool leftEye);
 };
 
 
