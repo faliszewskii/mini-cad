@@ -36,6 +36,7 @@
 #include "../events/create/CreateInterpolatedC2Event.h"
 #include "../creator/BezierPatchCreator.h"
 #include "../events/create/CreateBezierPatch.h"
+#include "../events/selection/ResetSelectionEvent.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -84,7 +85,7 @@ struct AppState {
     std::unique_ptr<Serializer> serializer;
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
-        PointDeletedEvent, SelectionChangedEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
+        PointDeletedEvent, SelectionChangedEvent, ResetSelectionEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
         MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch> eventPublisher;
 
     Logger logger;
@@ -101,6 +102,10 @@ struct AppState {
 
     bool keyboardCtrlMode;
     bool bezierCreatorOpen;
+
+    bool draggingMouse;
+    glm::vec2 draggingStartPos;
+    glm::vec2 draggingEndPos;
 };
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

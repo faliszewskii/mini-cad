@@ -15,6 +15,7 @@
 class CursorModule {
     const int workspaceWidth;
     Shader shader;
+    Shader quadShader;
     Mesh<EmptyVertex> mesh;
 
 public:
@@ -22,7 +23,10 @@ public:
         shader(Shader(
                       IOUtils::getResource("shaders/basic/empty.vert"),
                       IOUtils::getResource("shaders/cursor/cursor.geom"),
-                      IOUtils::getResource("shaders/cursor/cursor.frag"))) {}
+                      IOUtils::getResource("shaders/cursor/cursor.frag"))),
+        quadShader(IOUtils::getResource("shaders/basic/position.vert"),
+                   IOUtils::getResource("shaders/basic/albedo.frag"))
+                      {}
 
     void run(AppState &appState) {
         ImGuiIO &io = ImGui::GetIO();
@@ -37,7 +41,6 @@ public:
             render(camera, viewLeft, viewPosLeft, projectionLeft, appState.cursorPosition);
 
             glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
-            glDepthFunc(GL_LEQUAL);
             auto viewRight = camera.getViewMatrixStereo(false);
             auto projectionRight = camera.getProjectionMatrixStereo(false);
             auto viewPosRight = camera.getViewPositionStereo(false);

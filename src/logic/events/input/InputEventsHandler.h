@@ -10,6 +10,7 @@
 namespace InputEventsHandler {
 
     void clickPoint(AppState &appState, double xpos, double ypos, const glm::mat4 &m, float epsilon, Point &point);
+    void clickPoints(AppState &appState, double xposMin, double yposMin, double xposMax, double yposMax, const glm::mat4 &m, float epsilon, Point &point);
 
     void setup(AppState &appState) {
         auto &eventPublisher = appState.eventPublisher;
@@ -29,9 +30,38 @@ namespace InputEventsHandler {
                 ypos = -2 * ypos + 1;
                 glm::mat4 view = appState.camera.getViewMatrix();
                 glm::mat4 projection = appState.camera.getProjectionMatrix();
+                glm::mat4 m = projection * view;
+                float epsilon = 0.01;
+
+                if(event.button == GLFW_MOUSE_BUTTON_LEFT && event.action == GLFW_RELEASE) {
+                    if(appState.draggingMouse) {
+                        if(!appState.keyboardCtrlMode)
+                            appState.eventPublisher.publish(ResetSelectionEvent{});
+                        auto temp = appState.keyboardCtrlMode;
+                        appState.keyboardCtrlMode = true;
+                        appState.draggingMouse = false;
+                        for(auto &point : std::views::values(appState.pointSet)) {
+                            float xposMin = std::min(appState.draggingStartPos.x, appState.draggingEndPos.x);
+                            float xposMax = std::max(appState.draggingStartPos.x, appState.draggingEndPos.x);
+                            float yposMin = std::min(appState.draggingStartPos.y, appState.draggingEndPos.y);
+                            float yposMax = std::max(appState.draggingStartPos.y, appState.draggingEndPos.y);
+                            clickPoints(appState, xposMin, yposMin, xposMax, yposMax, m, epsilon, *point);
+                        }
+                        appState.keyboardCtrlMode = temp;
+                    }
+                }
                 if(event.button == GLFW_MOUSE_BUTTON_LEFT && event.action == GLFW_PRESS) {
-                    glm::mat4 m = projection * view;
-                    float epsilon = 0.01;
+                    // Drag rect
+                    static float lastLeftMousePress = glfwGetTime();
+                    float timeS = glfwGetTime();
+                    if(timeS - lastLeftMousePress <  .5) { // Double Click
+                        appState.draggingMouse = true;
+                        appState.draggingStartPos = glm::vec2(xpos, ypos);
+                        appState.draggingEndPos = glm::vec2(xpos, ypos);
+                        lastLeftMousePress = timeS;
+                    }
+                    lastLeftMousePress = timeS;
+
                     for(auto &point : std::views::values(appState.pointSet)) { // Normal points click
                         clickPoint(appState, xpos, ypos, m, epsilon, *point);
                     }
@@ -70,6 +100,15 @@ namespace InputEventsHandler {
 
             lastX = xpos;
             lastY = ypos;
+
+            auto &io = ImGui::GetIO();
+            xpos = (xpos - appState.guiPanelLeftWidth) / (io.DisplaySize.x - appState.guiPanelLeftWidth);
+            xpos = xpos * 2 - 1;
+            ypos = ypos / io.DisplaySize.y;
+            ypos = -2 * ypos + 1;
+
+            if(appState.draggingMouse)
+                appState.draggingEndPos = glm::vec2(xpos, ypos);
 
             if (!appState.guiFocus) {
                 appState.camera.processMouseMovement(xoffset, yoffset);
@@ -113,6 +152,14 @@ namespace InputEventsHandler {
         coords /= coords.w;
         if(std::abs(coords.x - xpos) < epsilon && std::abs(coords.y - ypos) < epsilon)
             appState.eventPublisher.publish(SelectEntityEvent{point, 0});
+    }
+
+    void clickPoints(AppState &appState, double xposMin, double yposMin, double xposMax, double yposMax, const glm::mat4 &m, float epsilon, Point &point) {
+        glm::vec4 coords = m * glm::vec4(point.position, 1);
+        coords /= coords.w;
+        if(coords.x <= xposMax && coords.x >= xposMin && coords.y <= yposMax && coords.y >= yposMin) {
+            appState.eventPublisher.publish(SelectEntityEvent{point, 0});
+        }
     }
 }
 

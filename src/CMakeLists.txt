@@ -120,6 +120,7 @@ set(INCL
         logic/geometry/PatchC2.h
         logic/serializer/Serializer.cpp
         logic/serializer/Serializer.h
+        logic/events/selection/ResetSelectionEvent.h
 )
 
 add_executable(opengl-sandbox main.cpp

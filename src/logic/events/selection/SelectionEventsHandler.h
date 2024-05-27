@@ -74,6 +74,10 @@ namespace SelectionEventsHandler {
                 appState.centerOfMassTransformation = Transformation{center};
             }
         });
+
+        eventPublisher.subscribe([&](const ResetSelectionEvent &event) {
+            resetSelection(appState.selectedEntities);
+        });
     }
 
     void resetSelection(std::vector<std::pair<int, EntityType>> &set) {

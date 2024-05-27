@@ -60,8 +60,8 @@ public:
             auto projectionLeft = camera.getProjectionMatrixStereo(true);
             render(appState, io, viewLeft, projectionLeft);
 
+            glClear(GL_DEPTH_BUFFER_BIT);
             glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
-            glDepthFunc(GL_LEQUAL);
             auto viewRight = camera.getViewMatrixStereo(false);
             auto projectionRight = camera.getProjectionMatrixStereo(false);
             render(appState, io, viewRight, projectionRight);

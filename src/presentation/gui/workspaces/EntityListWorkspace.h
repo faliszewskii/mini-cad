@@ -244,6 +244,15 @@ namespace EntityListWorkspace {
         modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
         if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
 
+        if(ImGui::Button("Select All Control Points#C0")) {
+            auto temp = appState.keyboardCtrlMode;
+            appState.keyboardCtrlMode = true;
+            for(auto &pPoint : patch.controlPoints) {
+                appState.eventPublisher.publish(SelectEntityEvent{pPoint.second, 1});
+            }
+            appState.keyboardCtrlMode = temp;
+        }
+
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(auto &pPoint : patch.controlPoints) {

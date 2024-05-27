@@ -36,9 +36,23 @@ public:
         auto &io = ImGui::GetIO();
         glViewport(workspaceWidth, 0, io.DisplaySize.x - workspaceWidth, io.DisplaySize.y);
         Camera &camera = appState.camera;
-        auto view = camera.getViewMatrix();
-        auto projection = camera.getProjectionMatrix();
-        render(camera, view, projection);
+        if(camera.stereoscopicVision) {
+            glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+            auto viewLeft = camera.getViewMatrixStereo(true);
+            auto projectionLeft = camera.getProjectionMatrixStereo(true);
+            render(camera, viewLeft, projectionLeft);
+
+            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            auto viewRight = camera.getViewMatrixStereo(false);
+            auto projectionRight = camera.getProjectionMatrixStereo(false);
+            render(camera, viewRight, projectionRight);
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        } else {
+            auto view = camera.getViewMatrix();
+            auto projection = camera.getProjectionMatrix();
+            render(camera, view, projection);
+        }
     }
 
     void render(Camera &camera, glm::mat4 &view, glm::mat4 &projection) const {
