@@ -25,6 +25,9 @@ namespace EntityListWorkspace {
     void renderWorkspacePatchC0(PatchC0 &patch, AppState &appState);
     void renderWorkspacePatchC2(PatchC2 &patch, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
+    void collapsePoint(AppState &appState);
+    template<typename T>
+    void swapPoint(Point &oldPoint, Point &newPoint, std::map<int, std::unique_ptr<T>> &map);
 
     template<typename T> requires has_name<T>
     void renderNameInput(T &el);
@@ -244,15 +247,6 @@ namespace EntityListWorkspace {
         modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
         if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
 
-        if(ImGui::Button("Select All Control Points#C0")) {
-            auto temp = appState.keyboardCtrlMode;
-            appState.keyboardCtrlMode = true;
-            for(auto &pPoint : patch.controlPoints) {
-                appState.eventPublisher.publish(SelectEntityEvent{pPoint.second, 1});
-            }
-            appState.keyboardCtrlMode = temp;
-        }
-
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(auto &pPoint : patch.controlPoints) {
@@ -300,6 +294,7 @@ namespace EntityListWorkspace {
         bool modified = false;
         auto &centerTransform = appState.centerOfMassTransformation;
 
+        collapsePoint(appState);
         // Because first element is Bézier curve we can add following points to it
         addPointToCurve<BezierC0>(appState);
         addPointToCurve<BezierC2>(appState);
@@ -382,6 +377,44 @@ namespace EntityListWorkspace {
                     if(std::holds_alternative<std::reference_wrapper<Point>>(el.second))
                         curve.addPoint(std::get<std::reference_wrapper<Point>>(el.second));
             }
+        }
+    }
+
+    inline void collapsePoint(AppState &appState) {
+        bool allPoint = std::all_of(appState.selectedEntities.begin(), appState.selectedEntities.end(),[](auto &el) {
+            return std::holds_alternative<std::reference_wrapper<Point>>(el.second);
+        });
+        if(allPoint){
+            if(ImGui::Button("Collapse points")) {
+                appState.eventPublisher.publish(CreatePointEvent{appState.centerOfMassTransformation.translation});
+                auto &point = *appState.pointSet[appState.lastIdCreated];
+
+                for(auto &pOld : appState.selectedEntities) {
+                    auto &old = std::get<std::reference_wrapper<Point>>(pOld.second).get();
+
+                    swapPoint<BezierC0>(old, point, appState.bezierC0Set);
+                    swapPoint<BezierC2>(old, point, appState.bezierC2Set);
+                    swapPoint<InterpolatedC2>(old, point, appState.interpolatedC2Set);
+                    swapPoint<PatchC0>(old, point, appState.patchC0Set);
+                    swapPoint<PatchC2>(old, point, appState.patchC2Set);
+
+                    appState.pointSet.erase(appState.pointSet.find(old.id));
+                    appState.eventPublisher.publish(PointDeletedEvent{old.id});
+                }
+
+                appState.selectedEntities.clear();
+                appState.eventPublisher.publish(PointMovedEvent{point, {}});
+            }
+        }
+    }
+
+    template<typename T>
+    inline void swapPoint(Point &oldPoint, Point &newPoint, std::map<int, std::unique_ptr<T>> &map) {
+        for(auto &el : map) {
+            for(int i = 0; i < el.second->controlPoints.size(); i++)
+                if(el.second->controlPoints[i].first == oldPoint.id) {
+                    el.second->controlPoints[i] = {newPoint.id, newPoint};
+                }
         }
     }
 
