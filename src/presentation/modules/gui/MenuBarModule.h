@@ -75,6 +75,7 @@ public:
                     appState.patchC2Set.clear();
                     appState.selectedEntities.clear();
                     appState.selectionContext.clear();
+                    appState.gregoryPatchCreator.reset();
                 }
                 if (ImGui::MenuItem("Import", "", false, true)) {
                     openNfd([&](const std::string &path) {
@@ -89,12 +90,10 @@ public:
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("Undo", "CTRL+Z", false, false)) {}
-                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-                ImGui::Separator();
-                if (ImGui::MenuItem("Cut", "CTRL+X", false, false)) {}
-                if (ImGui::MenuItem("Copy", "CTRL+C", false, false)) {}
-                if (ImGui::MenuItem("Paste", "CTRL+V", false, false)) {}
+                if(ImGui::MenuItem("Generate Gregory Patches", "", appState.gregoryCreatorOpen, true)) {
+                    appState.gregoryCreatorOpen = true;
+                    appState.gregoryPatchCreator.reset();
+                }
                 ImGui::Separator();
                 ImGui::EndMenu();
             }

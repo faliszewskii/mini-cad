@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../../../logic/state/AppState.h"
 #include "imgui.h"
-#include "../../../logic/algebra/Rect.h"
+#include "../../../logic/math/algebra/Rect.h"
 #include "../../gui/workspaces/LogPanelModuleWorkspace.h"
 #include "../../gui/workspaces/DebugOverlayModuleWorkspace.h"
 #include "../../gui/workspaces/GizmoModuleWorkspace.h"

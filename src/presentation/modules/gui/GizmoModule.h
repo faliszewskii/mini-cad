@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "imgui.h"
 #include "../../../../lib/imguizmo/ImGuizmo.h"
-#include "../../../logic/algebra/Rect.h"
+#include "../../../logic/math/algebra/Rect.h"
 #include <glm/gtx/matrix_decompose.hpp>
 
 class GizmoModule {

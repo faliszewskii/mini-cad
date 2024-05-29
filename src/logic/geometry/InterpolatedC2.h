@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "Point.h"
 #include "../vertices/PositionVertex.h"
-#include "../algebra/AlgebraUtils.h"
+#include "../math/algebra/AlgebraUtils.h"
 
 class InterpolatedC2 {
     Mesh<PositionVertex> mesh;

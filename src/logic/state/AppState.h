@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 #include <set>
-#include "../algebra/Rect.h"
+#include "../math/algebra/Rect.h"
 #include "imgui.h"
 #include "../../../lib/imguizmo/ImGuizmo.h"
 #include "../logger/Logger.h"
@@ -37,6 +37,7 @@
 #include "../creator/BezierPatchCreator.h"
 #include "../events/create/CreateBezierPatch.h"
 #include "../events/selection/ResetSelectionEvent.h"
+#include "../creator/GregoryPatchCreator.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -81,6 +82,7 @@ struct AppState {
     int bezierPatchGridWidth;
     int bezierPatchGridLength;
     BezierPatchCreator bezierPatchCreator;
+    GregoryPatchCreator gregoryPatchCreator;
 
     std::unique_ptr<Serializer> serializer;
 
@@ -102,10 +104,13 @@ struct AppState {
 
     bool keyboardCtrlMode;
     bool bezierCreatorOpen;
+    bool gregoryCreatorOpen;
 
     bool draggingMouse;
     glm::vec2 draggingStartPos;
     glm::vec2 draggingEndPos;
+
+
 };
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

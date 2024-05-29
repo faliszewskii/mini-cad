@@ -39,8 +39,8 @@ set(INCL
         logic/opengl/OpenGLInstance.h
         logic/io/IOUtils.cpp
         logic/io/IOUtils.h
-        logic/algebra/AlgebraUtils.cpp
-        logic/algebra/AlgebraUtils.h
+        logic/math/algebra/AlgebraUtils.cpp
+        logic/math/algebra/AlgebraUtils.h
         presentation/gui/GUI.cpp
         presentation/gui/GUI.h
         logic/state/AppState.h
@@ -54,7 +54,7 @@ set(INCL
         logic/entities/camera/Camera.h
         logic/input/InputHandler.cpp
         logic/input/InputHandler.h
-        logic/algebra/Rect.h
+        logic/math/algebra/Rect.h
         presentation/modules/gui/WorkspaceModule.h
         presentation/modules/gui/MenuBarModule.h
         presentation/modules/gui/LogPanelModule.h
@@ -121,6 +121,12 @@ set(INCL
         logic/serializer/Serializer.cpp
         logic/serializer/Serializer.h
         logic/events/selection/ResetSelectionEvent.h
+        logic/creator/GregoryPatchCreator.cpp
+        logic/creator/GregoryPatchCreator.h
+        presentation/gui/creator/GregoryPatchCreatorUI.cpp
+        presentation/gui/creator/GregoryPatchCreatorUI.h
+        logic/math/graph/Graph.h
+        logic/math/graph/GregoryPatchGraphVertex.h
 )
 
 add_executable(opengl-sandbox main.cpp

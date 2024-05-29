@@ -2,7 +2,7 @@
 // Created by faliszewskii on 07.01.24.
 //
 #include "Transformation.h"
-#include "../../algebra/AlgebraUtils.h"
+#include "../../math/algebra/AlgebraUtils.h"
 
 #include <utility>
 

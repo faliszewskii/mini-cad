@@ -3,7 +3,7 @@
 //
 
 #include "Camera.h"
-#include "../../algebra/AlgebraUtils.h"
+#include "../../math/algebra/AlgebraUtils.h"
 #include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/detail/type_quat.hpp>
