@@ -16,6 +16,7 @@ class WireframeRenderModule {
     Shader bezierC2Shader;
     Shader patchShader;
     Shader patchC2Shader;
+    Shader gregoryShader;
 
 
 public:
@@ -45,6 +46,11 @@ public:
                  IOUtils::getResource("shaders/patch/patch.vert"),
                  IOUtils::getResource("shaders/patch/patch.tesc"),
                  IOUtils::getResource("shaders/patch/patchC2.tese"),
+                 IOUtils::getResource("shaders/patch/patch.frag"))),
+            gregoryShader(Shader(
+                 IOUtils::getResource("shaders/patch/patch.vert"),
+                 IOUtils::getResource("shaders/patch/gregory.tesc"),
+                 IOUtils::getResource("shaders/patch/gregory.tese"),
                  IOUtils::getResource("shaders/patch/patch.frag")))
                            {}
 
@@ -161,6 +167,18 @@ public:
 
         for(auto &patch : std::views::values(appState.patchC2Set)) {
             patch->render(patchC2Shader);
+        }
+
+        gregoryShader.use();
+        gregoryShader.setUniform("selected", false);
+        gregoryShader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        gregoryShader.setUniform("projection", projection);
+        gregoryShader.setUniform("view", view);
+        gregoryShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth); // TODO
+        gregoryShader.setUniform("gridCountLength", appState.bezierPatchGridLength);
+
+        for(auto &patch : std::views::values(appState.gregoryPatchSet)) {
+            patch->render(gregoryShader);
         }
 
     };

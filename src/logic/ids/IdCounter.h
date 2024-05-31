@@ -12,6 +12,8 @@ public:
         static IdCounter idCounter;
         return idCounter.counter++;
     };
+
+    static void reset() {}
 };
 
 #endif //OPENGL_SANDBOX_IDCOUNTER_H

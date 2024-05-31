@@ -38,6 +38,8 @@
 #include "../events/create/CreateBezierPatch.h"
 #include "../events/selection/ResetSelectionEvent.h"
 #include "../creator/GregoryPatchCreator.h"
+#include "../geometry/GregoryPatch.h"
+#include "../events/create/CreateGregoryPatchEvent.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -74,6 +76,7 @@ struct AppState {
     std::map<int, std::unique_ptr<InterpolatedC2>> interpolatedC2Set;
     std::map<int, std::unique_ptr<PatchC0>> patchC0Set;
     std::map<int, std::unique_ptr<PatchC2>> patchC2Set;
+    std::map<int, std::unique_ptr<GregoryPatch>> gregoryPatchSet;
     int lastIdCreated = -1;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
@@ -88,7 +91,7 @@ struct AppState {
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
         PointDeletedEvent, SelectionChangedEvent, ResetSelectionEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
-        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch> eventPublisher;
+        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch, CreateGregoryPatchEvent> eventPublisher;
 
     Logger logger;
     Camera camera;

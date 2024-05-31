@@ -6,6 +6,7 @@
 #define OPENGL_SANDBOX_CREATEEVENTSHANDLER_H
 
 #include "../../state/AppState.h"
+#include "CreateGregoryPatchEvent.h"
 
 namespace CreateEventsHandler {
 
@@ -105,6 +106,22 @@ namespace CreateEventsHandler {
                     [&](std::monostate _){}
                 }, ref);
             }
+        });
+
+        eventPublisher.subscribe([&](const CreateGregoryPatchEvent &event) {
+            auto gregory = std::make_unique<GregoryPatch>(
+                    appState,
+                    appState.gregoryPatchCreator.patchSides,
+                    appState.gregoryPatchCreator.p3is,
+                    appState.gregoryPatchCreator.p2is,
+                    appState.gregoryPatchCreator.p1is,
+                    appState.gregoryPatchCreator.p0,
+                    appState.gregoryPatchCreator.fiSide,
+                    appState.gregoryPatchCreator.fiMiddle,
+                    appState.gregoryPatchCreator.fiLast
+                    );
+            appState.lastIdCreated = gregory->id;
+            appState.gregoryPatchSet.emplace(gregory->id, std::move(gregory));
         });
     }
 }

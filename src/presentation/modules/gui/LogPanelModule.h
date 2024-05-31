@@ -12,9 +12,10 @@ public:
 
     void run(AppState &appState) {
         ImGuiWindowFlags window_flags =
-                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
                 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
+        static bool setup = true;
         const float PAD = 10.0f;
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
@@ -24,10 +25,10 @@ public:
         window_pos.y = work_pos.y + work_size.y - PAD;
         window_pos_pivot.x = 1.0f;
         window_pos_pivot.y = 1.0f;
-        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-        window_flags |= ImGuiWindowFlags_NoMove;
+        if(setup) ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+//        window_flags |= ImGuiWindowFlags_NoMove;
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-        ImGui::SetNextWindowSize(ImVec2(600, 50));
+        if(setup) ImGui::SetNextWindowSize(ImVec2(600, 50));
         if (ImGui::Begin("Log Overlay", nullptr, window_flags)) {
             auto &logs = appState.logger.getLogs();
             for(auto &log : std::views::reverse(logs)) {
@@ -37,6 +38,7 @@ public:
                 ImGui::PopStyleColor();
             }
         }
+        setup = false;
         ImGui::End();
     }
 };

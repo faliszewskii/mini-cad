@@ -127,6 +127,8 @@ set(INCL
         presentation/gui/creator/GregoryPatchCreatorUI.h
         logic/math/graph/Graph.h
         logic/math/graph/GregoryPatchGraphVertex.h
+        logic/geometry/GregoryPatch.h
+        logic/events/create/CreateGregoryPatchEvent.h
 )
 
 add_executable(opengl-sandbox main.cpp
