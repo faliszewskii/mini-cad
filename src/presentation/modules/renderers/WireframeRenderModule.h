@@ -87,7 +87,7 @@ public:
         shader.setUniform("projection", projection);
         shader.setUniform("view", view);
         shader.setUniform("selected", false);
-        shader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
         shader.setUniform("color", glm::vec4(0.2, 0.4, 0.5, 0.8));
@@ -95,10 +95,13 @@ public:
             patch->renderBezierGrid(shader);
         for(auto &patch : std::views::values(appState.patchC2Set))
             patch->renderBezierGrid(shader);
+        for(auto &patch : std::views::values(appState.gregoryPatchSet))
+            patch->renderVectors(shader);
+
 
         pointShader.use();
         pointShader.setUniform("selected", false);
-        pointShader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        pointShader.setUniform("color", glm::vec4(0, 0, 0, 1));
         pointShader.setUniform("projection", projection);
         pointShader.setUniform("view", view);
         for(auto &point : std::views::values(appState.pointSet))
@@ -115,7 +118,7 @@ public:
             appState.bezierPatchCreator.renderPoints(pointShader);
 
         bezierShader.use();
-        bezierShader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        bezierShader.setUniform("color", glm::vec4(0, 0, 0, 1));
         bezierShader.setUniform("selected", false);
         bezierShader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierShader.setUniform("windowHeight", int(io.DisplaySize.y));
@@ -129,7 +132,7 @@ public:
         }
 
         bezierC2Shader.use();
-        bezierC2Shader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        bezierC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         bezierC2Shader.setUniform("selected", false);
         bezierC2Shader.setUniform("windowWidth", int(io.DisplaySize.x));
         bezierC2Shader.setUniform("windowHeight", int(io.DisplaySize.y));
@@ -141,7 +144,7 @@ public:
 
         patchShader.use();
         patchShader.setUniform("selected", false);
-        patchShader.setUniform("color", glm::vec4(1, 1, 1,  1));
+        patchShader.setUniform("color", glm::vec4(0, 0, 0,  1));
         patchShader.setUniform("projection", projection);
         patchShader.setUniform("view", view);
         patchShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
@@ -156,7 +159,7 @@ public:
 
         patchC2Shader.use();
         patchC2Shader.setUniform("selected", false);
-        patchC2Shader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        patchC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         patchC2Shader.setUniform("projection", projection);
         patchC2Shader.setUniform("view", view);
         patchC2Shader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
@@ -171,11 +174,9 @@ public:
 
         gregoryShader.use();
         gregoryShader.setUniform("selected", false);
-        gregoryShader.setUniform("color", glm::vec4(1, 1, 1, 1));
+        gregoryShader.setUniform("color", glm::vec4(0, 0, 0, 1));
         gregoryShader.setUniform("projection", projection);
         gregoryShader.setUniform("view", view);
-        gregoryShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth); // TODO
-        gregoryShader.setUniform("gridCountLength", appState.bezierPatchGridLength);
 
         for(auto &patch : std::views::values(appState.gregoryPatchSet)) {
             patch->render(gregoryShader);

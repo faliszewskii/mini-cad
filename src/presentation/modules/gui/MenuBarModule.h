@@ -76,6 +76,7 @@ public:
                     appState.selectedEntities.clear();
                     appState.selectionContext.clear();
                     appState.gregoryPatchCreator.reset();
+                    appState.gregoryPatchSet.clear();
                 }
                 if (ImGui::MenuItem("Import", "", false, true)) {
                     openNfd([&](const std::string &path) {

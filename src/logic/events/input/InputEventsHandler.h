@@ -54,7 +54,7 @@ namespace InputEventsHandler {
                     // Drag rect
                     static float lastLeftMousePress = glfwGetTime();
                     float timeS = glfwGetTime();
-                    if(timeS - lastLeftMousePress <  .5) { // Double Click
+                    if(timeS - lastLeftMousePress <  .2) { // Double Click
                         appState.draggingMouse = true;
                         appState.draggingStartPos = glm::vec2(xpos, ypos);
                         appState.draggingEndPos = glm::vec2(xpos, ypos);

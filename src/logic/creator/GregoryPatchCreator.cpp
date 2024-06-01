@@ -3,12 +3,9 @@
 //
 
 #include "GregoryPatchCreator.h"
-#include "../math/graph/Graph.h"
-#include "../math/graph/GregoryPatchGraphVertex.h"
 #include "../state/AppState.h"
-#include <CXXGraph/CXXGraph.hpp>
 
-void  GregoryPatchCreator::findHoles(AppState &appState, const std::vector<int>& bezierPatchIds) {
+void  GregoryPatchCreator::findHoles(AppState &appState, const std::vector<int>& bezierPatchIds, int size) {
     holePoints.clear();
     holes.clear();
     vId = 0;
@@ -18,52 +15,47 @@ void  GregoryPatchCreator::findHoles(AppState &appState, const std::vector<int>&
     for(auto &id : bezierPatchIds) {
         auto &patch = *appState.patchC0Set[id];
 
+        auto getId = [](int i, int j){return 3 * i + j;};
+        int fullRow = 3 * patch.patchCountX + (patch.wrapped ? 0 : 1);
         // TOP PATCH ROW
         addPatchToGraph(appState, graph, cornerVerticesMap, patch, patch.patchCountX,
-                        [&](int i, int j){return patch.wrapped? (i==patch.patchCountX-1 && j == 3 ? 0 : 4 * i + j) : 4 * i + j;},
-                        [&](int i){return 4 * i + 0;},
-                        [&](int i){return patch.wrapped? (i==patch.patchCountX-1 ? 0 : 4 * i + 3) : 4 * i + 3;},
-                        [&](int i, int j){ return 4 * i + j + (4*patch.patchCountX); }
+                        [&](int i, int j){return patch.wrapped? (i==patch.patchCountX-1 && j == 3 ? 0 : getId(i,j)) : getId(i,j);},
+                        [&](int i){return getId(i,0);},
+                        [&](int i){return patch.wrapped? (i==patch.patchCountX-1 ? 0 : getId(i,3)) : getId(i,3);},
+                        [&](int i, int j){ return (patch.wrapped && i==patch.patchCountX-1 && j == 3) ? (fullRow) : getId(i,j) + (fullRow); }
         );
 
         // BOTTOM PATCH ROW
+        int offset = patch.controlPoints.size() - (fullRow);
         addPatchToGraph(appState, graph, cornerVerticesMap, patch, patch.patchCountX,
-                        [&](int i, int j){return patch.wrapped? (i==0 && j == 0 ? patch.controlPoints.size() - 8 : patch.controlPoints.size() - 1) : patch.controlPoints.size() - 1 - (4 * i + j);},
-                        [&](int i){return patch.wrapped? (i==0? patch.controlPoints.size() - 8 : patch.controlPoints.size() - 1 - (4 * i + 0)) : patch.controlPoints.size() - 1 - (4 * i + 0);},
-                        [&](int i){return patch.controlPoints.size() - 1 - (4 * i + 3);},
-                        [&](int i, int j){ return patch.controlPoints.size() - 1 - (4 * i + j) - (4*patch.patchCountX); }
+                        [&](int i, int j){return (patch.wrapped && i==patch.patchCountX-1 && j == 3) ? offset + 0 : offset + getId(i,j);},
+                        [&](int i){return offset + getId(i,0);},
+                        [&](int i){return (patch.wrapped && i==patch.patchCountX-1) ? offset + 0 : offset + getId(i,3);},
+                        [&](int i, int j){ return (patch.wrapped && i==patch.patchCountX-1 && j == 3) ? offset - (fullRow) : offset + getId(i,j) - (fullRow); }
         );
 
        if(!patch.wrapped) { // Only bottoms when a cylinder.
            int xSize = patch.patchCountX * 4;
            // LEFT PATCH COLUMN
            addPatchToGraph(appState, graph, cornerVerticesMap, patch, patch.patchCountY,
-                           [&](int i, int j){return xSize * (4 * i + j);},
-                           [&](int i){return xSize * (4 * i + 0);},
-                           [&](int i){return xSize * (4 * i + 3);},
-                           [&](int i, int j){return xSize * (4 * i + j) + 1;}
+                           [&](int i, int j){return xSize * getId(i,j);},
+                           [&](int i){return xSize * (getId(i,0));},
+                           [&](int i){return xSize * (getId(i,3));},
+                           [&](int i, int j){return xSize * getId(i,j) + 1;}
            );
 
            // RIGHT PATCH COLUMN
            addPatchToGraph(appState, graph, cornerVerticesMap, patch, patch.patchCountY,
-                           [&](int i, int j){return xSize * (4 * i + j) + (xSize-1);},
-                           [&](int i){return xSize * (4 * i + 0) + (xSize-1);},
-                           [&](int i){return xSize * (4 * i + 3) + (xSize-1);},
-                           [&](int i, int j){return xSize * (4 * i + j) + (xSize-1) - 1;}
+                           [&](int i, int j){return xSize * getId(i,j) + (xSize-1);},
+                           [&](int i){return xSize * (getId(i,0)) + (xSize-1);},
+                           [&](int i){return xSize * (getId(i,3)) + (xSize-1);},
+                           [&](int i, int j){return xSize * getId(i,j) + (xSize-1) - 1;}
            );
        }
 
     }
-    if(graph.vertices.empty()) {
-        appState.logger.logDebug("Why empty?");
-    }
-    printCycle(appState, graph.dfs(), "DFS");
 
-    // TODO Now cycles of length 12 + 3 corners = 15.
-    holes = graph.findCycles(15);
-
-    for(int i = 0; i < holes.size(); i++)
-        printCycle(appState, holes[i], "hole " + std::to_string(i));
+    holes = graph.findCycles(size * 5);
 
     std::transform(holes.begin(), holes.end(), std::back_inserter(holePoints), [](auto &el){
         std::vector<GregoryPatchGraphVertex> v1;
@@ -79,15 +71,6 @@ void  GregoryPatchCreator::findHoles(AppState &appState, const std::vector<int>&
 
         return v;
     });
-
-    std::stringstream ss;
-    ss<<"Holes:";
-    for(auto &i : holePoints) {
-        for(auto &i1 :i)
-            ss << i1 << ", ";
-        ss << std::endl;
-    }
-    appState.logger.logDebug(ss.str());
 }
 
 void GregoryPatchCreator::addPatchToGraph(AppState &appState, Graph<GregoryPatchGraphVertex> &graph,
@@ -143,23 +126,13 @@ void GregoryPatchCreator::printCycle(AppState &state, std::vector<GregoryPatchGr
     state.logger.logDebug(ss.str());
 }
 
-void GregoryPatchCreator::fillHole(AppState &appState, int holeId) {
+void GregoryPatchCreator::prepareHole(int holeId) {
     patchSides.clear();
-    p1is.clear();
-    p2is.clear();
-    p3is.clear();
-    fiSide.clear();
-    fiMiddle.clear();
-    fiLast.clear();
     std::vector<GregoryPatchGraphVertex> hole = holes[holeId];
-    printCycle(appState, hole, "Filling hole");
-
-    // Getting sides for deCastaljau
 
     std::vector<std::vector<GregoryPatchGraphVertex>> sides;
     auto start = hole.begin();
     while(!start->isCornerVertex) {
-        appState.logger.logDebug("Skipping...");
         start++;
     }
     auto it = start;
@@ -172,16 +145,6 @@ void GregoryPatchCreator::fillHole(AppState &appState, int holeId) {
         }
     } while(it != hole.end() && it != start);
 
-    for(int i=0 ; i<sides.size(); i++) {
-        std::stringstream ss;
-        ss << "side "<< i <<": ";
-        for(auto &el : sides[i])
-            ss << el.pointId << "(" << el.isCornerVertex << "), ";
-        appState.logger.logDebug(ss.str());
-    }
-
-    // Here we have the sides. Time to do deCasteljau
-
     for(auto &side : sides) {
         patchSides.emplace_back();
         patchSides.back()[0] = side[0];
@@ -189,20 +152,28 @@ void GregoryPatchCreator::fillHole(AppState &appState, int holeId) {
         patchSides.back()[2] = side[2];
         patchSides.back()[3] = side[3];
     }
+}
 
-    std::stringstream ss;
-    ss << "Generating patch points:\n";
-    int counter = 0;
+void GregoryPatchCreator::setHole(std::vector<std::array<GregoryPatchGraphVertex, 4>> hole) {
+    patchSides = hole;
+}
+
+void GregoryPatchCreator::fillHole(AppState &appState) {
+    p1is.clear();
+    p2is.clear();
+    p3is.clear();
+    fiSide.clear();
+    fiMiddle.clear();
+    fiLast.clear();
 
     std::vector<glm::vec3> Q;
-    for(auto &side : sides) {
-        ss << "Side No." << counter++ << "\n";
+    for(auto &side : patchSides) {
         assert(side.size() == 4);
         std::array<glm::vec3, 4> ctrlPoints{
-            appState.pointSet[side[0].pointId]->position,
-            appState.pointSet[side[1].pointId]->position,
-            appState.pointSet[side[2].pointId]->position,
-            appState.pointSet[side[3].pointId]->position
+                appState.pointSet[side[0].pointId]->position,
+                appState.pointSet[side[1].pointId]->position,
+                appState.pointSet[side[2].pointId]->position,
+                appState.pointSet[side[3].pointId]->position
         };
         auto divided = divideDeCasteljau(ctrlPoints, 0.5);
 
@@ -214,33 +185,6 @@ void GregoryPatchCreator::fillHole(AppState &appState, int holeId) {
         p3is.back()[4] = divided.second[1];
         p3is.back()[5] = divided.second[2];
         p3is.back()[6] = divided.second[3];
-
-        ss << "P3s:\n";/*
-        appState.eventPublisher.publish(CreatePointEvent{divided.first[0]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.first[1]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.first[2]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.first[3]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.second[0]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.second[1]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.second[2]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << ", ";
-        appState.eventPublisher.publish(CreatePointEvent{divided.second[3]});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0,0.5,1);
-        ss << appState.lastIdCreated << "\n";*/
-
 
         std::array<glm::vec3, 4> ctrlPoints1{
                 appState.pointSet[side[0].outgoingBernstein[0]]->position,
@@ -267,45 +211,32 @@ void GregoryPatchCreator::fillHole(AppState &appState, int holeId) {
         Q.push_back(qi);
 
         p2is.push_back(p2i);
-
-        /*appState.eventPublisher.publish(CreatePointEvent{p2i});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(0,0.5,0.5,1);
-        ss << "P2: " << appState.lastIdCreated << "\n";*/
     }
 
     // Calculate middle point.
     p0 = glm::vec3(0);
     for(auto q : Q)
         p0 += q;
-    p0 /= 3.f;
+    p0 /= Q.size();
 
-    /*appState.eventPublisher.publish(CreatePointEvent{p0});
-    appState.pointSet[appState.lastIdCreated]->color = glm::vec4(1,0.5,0.0,1);
-    ss << "Global P0: " << appState.lastIdCreated << "\n";*/
-
-    for(int i = 0; i < sides.size(); i++) {
+    for(int i = 0; i < patchSides.size(); i++) {
         auto q = Q[i];
-        auto &side = sides[i];
+        auto &side = patchSides[i];
 
         auto p1i = (2.f * q + p0) / 3.f;
 
         p1is.push_back(p1i);
-
-        /*appState.eventPublisher.publish(CreatePointEvent{p1i});
-        appState.pointSet[appState.lastIdCreated]->color = glm::vec4(0.5,0,1,1);
-        ss << "P1i:" << appState.lastIdCreated << "\n";*/
     }
 
-    for(int i = 0; i < sides.size(); i++) {
+    for(int i = 0; i < patchSides.size(); i++) {
         int side = i;
         int sideNext = (i+1)%patchSides.size();
         int sidePrev = i==0? patchSides.size()-1 : i-1;
 
         fiLast.emplace_back();
-        fiLast.back()[0] = p1is[side] + (p1is[sidePrev] - p0);
-        fiLast.back()[1] = p1is[side] + (p1is[sideNext] - p0);
+        fiLast.back()[0] = p1is[side] + (fiMiddle[side][0] - p2is[side]);
+        fiLast.back()[1] = p1is[side] + (fiMiddle[side][1] - p2is[side]);
     }
-//    appState.logger.logDebug(ss.str());
 }
 
 std::pair<std::array<glm::vec3, 4>, std::array<glm::vec3, 4>>

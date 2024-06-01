@@ -73,10 +73,10 @@ void main()
     vec3 f19 = gl_in[19].gl_Position.xyz;
 
     // TODO Make sure you get the order of equations right
-    vec3 F_12_19 = (u * f12 + v * f19) / (u + v);
-    vec3 F_13_14 = ((1-u) * f13 + v * f14) / (1 - u + v);
-    vec3 F_15_16 = (u * f16 + (1-v) * f15) / (1 + u - v);
-    vec3 F_17_18 = ((1-u) * f17 + (1-v) * f18) / (2 - u - v);
+    vec3 F_12_19 = (v * f12 + u * f19) / (u + v + 0.000001);
+    vec3 F_13_14 = ((1-v) * f13 + u * f14) / (1 + u - v + 0.000001);
+    vec3 F_15_16 = (v * f16 + (1-u) * f15) / (1 - u + v + 0.000001);
+    vec3 F_17_18 = ((1-v) * f17 + (1-u) * f18) / (2 - u - v + 0.000001);
 
     vec3[4][4] coefficients = {
     vec3[4](gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz, gl_in[3].gl_Position.xyz),

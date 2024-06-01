@@ -24,6 +24,7 @@ namespace EntityListWorkspace {
     void renderWorkspaceInterpolatedC2(InterpolatedC2 &interpolated, AppState &appState);
     void renderWorkspacePatchC0(PatchC0 &patch, AppState &appState);
     void renderWorkspacePatchC2(PatchC2 &patch, AppState &appState);
+    void renderWorkspaceGregory(GregoryPatch &patch, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
     void collapsePoint(AppState &appState);
     template<typename T>
@@ -67,6 +68,7 @@ namespace EntityListWorkspace {
                 renderListing(appState.interpolatedC2Set, appState, 0);
                 renderListing(appState.patchC0Set, appState, 0);
                 renderListing(appState.patchC2Set, appState, 0);
+                renderListing(appState.gregoryPatchSet, appState, 0);
                 ImGui::EndListBox();
             }
         }
@@ -106,20 +108,23 @@ namespace EntityListWorkspace {
                        [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); },
                        [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); },
                        [&](PatchC0 &patch) {
-//                           for(auto &point : patch.controlPoints) {
-//                               int id = point.second.get().id;
-//                               appState.pointSet.erase(appState.pointSet.find(id));
-//                               appState.eventPublisher.publish(PointDeletedEvent{id});
-//                           }
+                           for(auto &point : patch.controlPoints) {
+                               int id = point.second.get().id;
+                               appState.pointSet.erase(appState.pointSet.find(id));
+                               appState.eventPublisher.publish(PointDeletedEvent{id});
+                           }
                            appState.patchC0Set.erase(appState.patchC0Set.find(patch.id));
                        },
                        [&](PatchC2 &patch) {
-//                           for(auto &point : patch.controlPoints) {
-//                               int id = point.second.get().id;
-//                               appState.pointSet.erase(appState.pointSet.find(id));
-//                               appState.eventPublisher.publish(PointDeletedEvent{id});
-//                           }
+                           for(auto &point : patch.controlPoints) {
+                               int id = point.second.get().id;
+                               appState.pointSet.erase(appState.pointSet.find(id));
+                               appState.eventPublisher.publish(PointDeletedEvent{id});
+                           }
                            appState.patchC2Set.erase(appState.patchC2Set.find(patch.id));
+                       },
+                       [&](GregoryPatch &patch) {
+                           appState.gregoryPatchSet.erase(appState.gregoryPatchSet.find(patch.id));
                        }
                     }, el.second);
             }
@@ -136,7 +141,8 @@ namespace EntityListWorkspace {
                 [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); },
                 [&](InterpolatedC2 &interpolated) { renderWorkspaceInterpolatedC2(interpolated, appState); },
                 [&](PatchC0 &patch) { renderWorkspacePatchC0(patch, appState); },
-                [&](PatchC2 &patch) { renderWorkspacePatchC2(patch, appState); }
+                [&](PatchC2 &patch) { renderWorkspacePatchC2(patch, appState); },
+                [&](GregoryPatch &patch) { renderWorkspaceGregory(patch, appState); }
         }, element);
     }
 
@@ -286,6 +292,18 @@ namespace EntityListWorkspace {
         }
     }
 
+    inline void renderWorkspaceGregory(GregoryPatch &patch, AppState &appState) {
+        ImGui::SeparatorText("Patch C2");
+        renderNameInput(patch);
+
+        ImGui::InputInt("Grid Count Width", &patch.patchGridWidth);
+        if(patch.patchGridWidth < 1) patch.patchGridWidth = 1;
+        ImGui::InputInt("Grid Count Length", &patch.patchGridLength);
+        if(patch.patchGridLength < 1) patch.patchGridLength = 1;
+
+        ImGui::Checkbox("Draw Vectors", &patch.drawVectors);
+    }
+
     template<typename T>
     void addPointToCurve(AppState &appState);
 
@@ -362,7 +380,8 @@ namespace EntityListWorkspace {
                         [&](BezierC2 &_) { /* ignore */ },
                         [&](InterpolatedC2 &_) { /* ignore */ },
                         [&](PatchC0 &_) { /* ignore */ },
-                        [&](PatchC2 &_) { /* ignore */ }
+                        [&](PatchC2 &_) { /* ignore */ },
+                        [&](GregoryPatch &_) { /* ignore */}
                 }, el.second);
             }
         }

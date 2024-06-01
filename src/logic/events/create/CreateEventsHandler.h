@@ -111,14 +111,14 @@ namespace CreateEventsHandler {
         eventPublisher.subscribe([&](const CreateGregoryPatchEvent &event) {
             auto gregory = std::make_unique<GregoryPatch>(
                     appState,
-                    appState.gregoryPatchCreator.patchSides,
-                    appState.gregoryPatchCreator.p3is,
-                    appState.gregoryPatchCreator.p2is,
-                    appState.gregoryPatchCreator.p1is,
-                    appState.gregoryPatchCreator.p0,
-                    appState.gregoryPatchCreator.fiSide,
-                    appState.gregoryPatchCreator.fiMiddle,
-                    appState.gregoryPatchCreator.fiLast
+                    event.creator.patchSides,
+                    event.creator.p3is,
+                    event.creator.p2is,
+                    event.creator.p1is,
+                    event.creator.p0,
+                    event.creator.fiSide,
+                    event.creator.fiMiddle,
+                    event.creator.fiLast
                     );
             appState.lastIdCreated = gregory->id;
             appState.gregoryPatchSet.emplace(gregory->id, std::move(gregory));

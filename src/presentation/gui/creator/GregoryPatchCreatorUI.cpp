@@ -10,6 +10,7 @@ void GregoryPatchCreatorUI::render() {
             ImGuiWindowFlags_AlwaysAutoResize;
 
     bool modified = false;
+    static int holeSize = 3;
 
     if (ImGui::Begin("Gregory Patch Creator", &appState.gregoryCreatorOpen, window_flags)) {
         // Find Holes
@@ -32,9 +33,11 @@ void GregoryPatchCreatorUI::render() {
                 for(auto &i : patchIds) ss << std::to_string(i) << " ";
                 appState.logger.logDebug(ss.str());
 
-                appState.gregoryPatchCreator.findHoles(appState, patchIds);
+                appState.gregoryPatchCreator.findHoles(appState, patchIds, holeSize);
             }
         }
+        if(ImGui:: InputInt("Hole Size", &holeSize) && holeSize < 2)
+            holeSize = 2;
 
 
         // Hole list
@@ -56,7 +59,8 @@ void GregoryPatchCreatorUI::render() {
 
         ImGui::BeginDisabled(selectedHole < 0);
         if(ImGui::Button("Fill hole")) {
-            appState.gregoryPatchCreator.fillHole(appState, selectedHole);
+            appState.gregoryPatchCreator.prepareHole(selectedHole);
+            appState.gregoryPatchCreator.fillHole(appState);
 
             // TODO handle appState adding of Gregory patches and all ui stuff
             appState.eventPublisher.publish(CreateGregoryPatchEvent{appState.gregoryPatchCreator});

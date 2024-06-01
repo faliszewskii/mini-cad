@@ -91,7 +91,14 @@ std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int length) {
 template<typename TVertex>
 std::vector<TVertex> Graph<TVertex>::dfs() {
     std::vector<bool> visited(vertices.size());
-    return dfs(visited, 0);
+    std::vector<TVertex> result;
+    for(int i = 0; i < visited.size(); i++) {
+        if(!visited[i]) {
+            auto v = dfs(visited, i);
+            result.insert(result.end(), v.begin(), v.end());
+        }
+    }
+    return result;
 }
 
 template<typename TVertex>

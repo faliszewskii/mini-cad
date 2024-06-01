@@ -42,6 +42,13 @@ namespace PointEventsHandler {
                     if (patch.second->controlPoints[i].first == event.point.id)
                         patch.second->updatePoint(event.point, i);
             }
+
+            for(auto &gregory : appState.gregoryPatchSet)
+                for(auto &sidePoints : gregory.second->patchSides)
+                    for(auto &point : sidePoints)
+                        if(point.pointId == event.point.id || point.outgoingBernstein[0] == event.point.id)
+                            gregory.second->recalculate(appState.gregoryPatchCreator);
+
         });
 
         eventPublisher.subscribe([&](const PointDeletedEvent &event) {
