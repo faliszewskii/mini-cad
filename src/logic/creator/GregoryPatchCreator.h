@@ -36,23 +36,20 @@ public:
 
     void findHoles(AppState &appState, const std::vector<int>& bezierPatchIds, int size);
 
-    void addPatchToGraph(AppState &appState, Graph<GregoryPatchGraphVertex> &graph,
-                    std::map<int, int> &cornerVerticesMap,
-                    const PatchC0 &patch, int size, const std::function<int(int,int)>& small,
-                    const std::function<int(int)>& first, const std::function<int(int)> &last,
-                    const std::function<int(int,int)>& helper);
-
-    void printCycle(AppState &state, std::vector<GregoryPatchGraphVertex> vector, std::string name);
-
     void fillHole(AppState &state);
 
     void prepareHole(int holeId);
     void setHole(std::vector<std::array<GregoryPatchGraphVertex, 4>> hole);
 
 private:
+    void addPatchToGraph(AppState &appState, Graph<GregoryPatchGraphVertex> &graph,
+                         std::map<int, int> &cornerVerticesMap,
+                         const PatchC0 &patch, int size, const std::function<int(int,int)>& small,
+                         const std::function<int(int,int)>& helper);
 
-    std::pair<std::array<glm::vec3, 4>, std::array<glm::vec3, 4>> divideDeCasteljau(std::array<glm::vec3, 4> ctrlPoints, float t);
+    static std::pair<std::array<glm::vec3, 4>, std::array<glm::vec3, 4>> divideDeCasteljau(std::array<glm::vec3, 4> ctrlPoints, float t);
 
+    glm::vec3 deCasteljau2(std::array<glm::vec3, 3> ctrlPoints, float t);
 };
 
 

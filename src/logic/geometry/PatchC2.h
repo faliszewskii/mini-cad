@@ -17,6 +17,8 @@ public:
     std::string name;
     bool selected;
 
+    int bezierPatchGridWidth = 3;
+    int bezierPatchGridLength = 3;
     int patchCountX;
     int patchCountY;
     bool wrapped;
@@ -35,6 +37,8 @@ public:
 
     void render(Shader &shader) {
         glLineWidth(2);
+        shader.setUniform("gridCountWidth", bezierPatchGridWidth);
+        shader.setUniform("gridCountLength", bezierPatchGridLength);
         shader.setUniform("selected", selected);
         glPatchParameteri(GL_PATCH_VERTICES, 16);
         mesh.render(2);

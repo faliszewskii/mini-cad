@@ -147,8 +147,8 @@ public:
         patchShader.setUniform("color", glm::vec4(0, 0, 0,  1));
         patchShader.setUniform("projection", projection);
         patchShader.setUniform("view", view);
-        patchShader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
-        patchShader.setUniform("gridCountLength", appState.bezierPatchGridLength);
+        patchShader.setUniform("gridCountWidth", 3);
+        patchShader.setUniform("gridCountLength", 3);
 
         if(appState.bezierCreatorOpen && !appState.bezierPatchCreator.getParams().C2)
             appState.bezierPatchCreator.renderPreview(patchShader);
@@ -162,8 +162,8 @@ public:
         patchC2Shader.setUniform("color", glm::vec4(0, 0, 0, 1));
         patchC2Shader.setUniform("projection", projection);
         patchC2Shader.setUniform("view", view);
-        patchC2Shader.setUniform("gridCountWidth", appState.bezierPatchGridWidth);
-        patchC2Shader.setUniform("gridCountLength", appState.bezierPatchGridLength);
+        patchC2Shader.setUniform("gridCountWidth", 3);
+        patchC2Shader.setUniform("gridCountLength", 3);
 
         if(appState.bezierCreatorOpen && appState.bezierPatchCreator.getParams().C2)
             appState.bezierPatchCreator.renderPreview(patchC2Shader);

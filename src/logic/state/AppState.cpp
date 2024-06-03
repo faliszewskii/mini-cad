@@ -21,8 +21,6 @@ AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
         vSync(true),
         keyboardCtrlMode(false),
         bezierCreatorOpen(false),
-        bezierPatchGridWidth(3),
-        bezierPatchGridLength(3),
         guiPanelLeftWidth(guiPanelLeftWidth),
         menuBarModule(std::make_unique<MenuBarModule>()),
         logPanelModule(std::make_unique<LogPanelModule>()),

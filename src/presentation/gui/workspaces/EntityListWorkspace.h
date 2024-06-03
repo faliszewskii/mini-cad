@@ -108,19 +108,37 @@ namespace EntityListWorkspace {
                        [&](BezierC2 &bezier) { appState.bezierC2Set.erase(appState.bezierC2Set.find(bezier.id)); },
                        [&](InterpolatedC2 &interpolated) { appState.interpolatedC2Set.erase(appState.interpolatedC2Set.find(interpolated.id)); },
                        [&](PatchC0 &patch) {
-                           for(auto &point : patch.controlPoints) {
-                               int id = point.second.get().id;
-                               appState.pointSet.erase(appState.pointSet.find(id));
-                               appState.eventPublisher.publish(PointDeletedEvent{id});
+//                           std::unordered_set<int> pointToDelete;
+//                           for(auto &point : patch.controlPoints) {
+//                               pointToDelete.insert(point.second.get().id);
+//                           }
+//                           for(auto &id: pointToDelete) {
+//                               appState.pointSet.erase(appState.pointSet.find(id));
+//                               appState.eventPublisher.publish(PointDeletedEvent{id});
+//                           }
+
+                           std::vector<int> gregories;
+                           for(auto &gregory : appState.gregoryPatchSet) {
+                               bool toDelete = false;
+                               for(auto &side : gregory.second->patchSides)
+                                   for(auto &v : side)
+                                       toDelete |= v.patchId == patch.id;
+                               if(toDelete) {
+                                   gregories.emplace_back(gregory.first);
+                               }
+                           }
+                           for(auto &g : gregories) {
+                               appState.gregoryPatchSet.erase(appState.gregoryPatchSet.find(g));
+                               appState.gregoryPatchCreator.reset();
                            }
                            appState.patchC0Set.erase(appState.patchC0Set.find(patch.id));
                        },
                        [&](PatchC2 &patch) {
-                           for(auto &point : patch.controlPoints) {
-                               int id = point.second.get().id;
-                               appState.pointSet.erase(appState.pointSet.find(id));
-                               appState.eventPublisher.publish(PointDeletedEvent{id});
-                           }
+//                           for(auto &point : patch.controlPoints) {
+//                               int id = point.second.get().id;
+//                               appState.pointSet.erase(appState.pointSet.find(id));
+//                               appState.eventPublisher.publish(PointDeletedEvent{id});
+//                           }
                            appState.patchC2Set.erase(appState.patchC2Set.find(patch.id));
                        },
                        [&](GregoryPatch &patch) {
@@ -248,10 +266,10 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText("Visualization");
         ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
         bool modified = false;
-        modified = ImGui::InputInt("Grid Count Width", &appState.bezierPatchGridWidth);
-        if(modified && appState.bezierPatchGridWidth < 1) appState.bezierPatchGridWidth = 1;
-        modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
-        if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
+        modified = ImGui::InputInt("Grid Count Width", &patch.bezierPatchGridWidth);
+        if(modified && patch.bezierPatchGridWidth < 1) patch.bezierPatchGridWidth = 1;
+        modified = ImGui::InputInt("Grid Count Length", &patch.bezierPatchGridLength);
+        if(modified && patch.bezierPatchGridLength < 1) patch.bezierPatchGridLength = 1;
 
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
@@ -274,10 +292,10 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText("Visualization");
         ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
         bool modified = false;
-        modified = ImGui::InputInt("Grid Count Width", &appState.bezierPatchGridWidth);
-        if(modified && appState.bezierPatchGridWidth < 1) appState.bezierPatchGridWidth = 1;
-        modified = ImGui::InputInt("Grid Count Length", &appState.bezierPatchGridLength);
-        if(modified && appState.bezierPatchGridLength < 1) appState.bezierPatchGridLength = 1;
+        modified = ImGui::InputInt("Grid Count Width", &patch.bezierPatchGridWidth);
+        if(modified && patch.bezierPatchGridWidth < 1) patch.bezierPatchGridWidth = 1;
+        modified = ImGui::InputInt("Grid Count Length", &patch.bezierPatchGridLength);
+        if(modified && patch.bezierPatchGridLength < 1) patch.bezierPatchGridLength = 1;
 
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
@@ -405,8 +423,26 @@ namespace EntityListWorkspace {
         });
         if(allPoint){
             if(ImGui::Button("Collapse points")) {
+                appState.gregoryPatchCreator.reset();
                 appState.eventPublisher.publish(CreatePointEvent{appState.centerOfMassTransformation.translation});
                 auto &point = *appState.pointSet[appState.lastIdCreated];
+
+                std::vector<int> toDelete;
+                for(auto &gregory : appState.gregoryPatchSet) {
+                    bool present = false;
+                    for(auto &pOld : appState.selectedEntities) {
+                        auto &old = std::get<std::reference_wrapper<Point>>(pOld.second).get();
+                        for(auto &side : gregory.second->patchSides)
+                            for(auto &v : side)
+                                present |= v.pointId == old.id || v.outgoingBernstein[0] == old.id;
+                    }
+                    if(present)
+                        toDelete.emplace_back(gregory.first);
+                }
+                for(auto &g : toDelete) {
+                    appState.gregoryPatchCreator.reset();
+                    appState.gregoryPatchSet.erase(appState.gregoryPatchSet.find(g));
+                }
 
                 for(auto &pOld : appState.selectedEntities) {
                     auto &old = std::get<std::reference_wrapper<Point>>(pOld.second).get();

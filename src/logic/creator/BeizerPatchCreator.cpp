@@ -108,15 +108,15 @@ std::vector<unsigned int> BezierPatchCreator::getPatchIndices() {
 
     int step = params.C2 ? 1 : 3;
     std::vector<unsigned int> indices;
+    for(int m = 0; m < params.patchCountLength; m++) {
     for(int n = 0; n < params.patchCountWidth; n++) {
-        for(int m = 0; m < params.patchCountLength; m++) {
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 4; i++) {
                     int k = i + step * n;
                     int l = j + step * m;
-                    int t = n - params.patchCountWidth + wrappedOverlap - 3 + i;
-                    if(params.wrapped && t >= 0 ) {
-                        indices.push_back(t + l * vert_n);
+//                    int t = n - params.patchCountWidth + wrappedOverlap - 3 + i;
+                    if(params.wrapped && k >= vert_n) {
+                        indices.push_back(l * vert_n + (k - vert_n));
                     } else {
                         indices.push_back(k + l * vert_n);
                     }

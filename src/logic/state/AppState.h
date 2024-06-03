@@ -82,8 +82,6 @@ struct AppState {
     std::vector<std::pair<int, EntityType>> selectedEntities;
     std::vector<std::pair<int, EntityType>> selectionContext;
 
-    int bezierPatchGridWidth;
-    int bezierPatchGridLength;
     BezierPatchCreator bezierPatchCreator;
     GregoryPatchCreator gregoryPatchCreator;
 
