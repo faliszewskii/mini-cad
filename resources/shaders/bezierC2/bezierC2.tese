@@ -25,6 +25,15 @@ vec3 deBoor(float x, vec3 c[4]) {
     return vec3(c[p]);
 }
 
+vec3 seilerInterpolation(float t, vec3 coefficients[4]) {
+    vec3 s1 = 3 * coefficients[1] - coefficients[0] - coefficients[3];
+    vec3 s2 = 3 * coefficients[2] - coefficients[3] - coefficients[0];
+    vec3 b03 = coefficients[0] * (1-t) + coefficients[3] * t;
+    vec3 s12 = s1 * (1-t) + s2 * t;
+    float d = t*(1-t);
+    return b03 * (1-d) + s12 * d;
+}
+
 void
 main()
 {

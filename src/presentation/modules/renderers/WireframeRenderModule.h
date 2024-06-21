@@ -97,6 +97,8 @@ public:
             patch->renderBezierGrid(shader);
         for(auto &patch : std::views::values(appState.gregoryPatchSet))
             patch->renderVectors(shader);
+        for(auto &bezier : std::views::values(appState.bezierC0Set))
+            bezier->renderSeiler(shader);
 
 
         pointShader.use();

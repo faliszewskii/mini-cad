@@ -12,6 +12,7 @@
 
 class BezierC0 {
     Mesh<PositionVertex> mesh;
+    Mesh<PositionVertex> seilerMesh;
 public:
     int id;
     std::string name;
@@ -23,7 +24,7 @@ public:
     int instanceCount=10;
 
     BezierC0() : id(IdCounter::nextId()), name("Bezier C0 ("+std::to_string(id)+")"), selected(false), mesh({},{},GL_PATCHES),
-        drawPolyline(false) {}
+                 seilerMesh({},{},GL_LINES), drawPolyline(false) {}
 
     bool pointAlreadyAdded(Point &point) {
         return std::ranges::any_of(controlPoints, [&](auto &controlPoint){return controlPoint.first == point.id; });
@@ -41,11 +42,13 @@ public:
     }
 
     void updatePoint(Point &point, int i) {
-        mesh.update({point.position}, i);
+        updateMesh();
+//        mesh.update({point.position}, i);
     }
 
     void updateMesh() {
         std::vector<PositionVertex> vertices;
+        std::vector<PositionVertex> seilerPoints;
         vertices.reserve(controlPoints.size());
         for(auto &point : controlPoints) {
             vertices.emplace_back(point.second.get().position);
@@ -57,6 +60,14 @@ public:
             indices.push_back(i-2);
             indices.push_back(i-1);
             indices.push_back(i);
+            seilerPoints.push_back({controlPoints[i - 3].second.get().position});
+            seilerPoints.push_back(
+                    {3.f * controlPoints[i - 2].second.get().position - controlPoints[i - 3].second.get().position -
+                     controlPoints[i].second.get().position});
+            seilerPoints.push_back({controlPoints[i].second.get().position});
+            seilerPoints.push_back(
+                    {3.f * controlPoints[i - 1].second.get().position - controlPoints[i].second.get().position -
+                     controlPoints[i - 3].second.get().position});
         }
         int remainder = (int)(controlPoints.size()-1) % 3 + 1;
         for(int i=0; i< remainder; i++)
@@ -65,6 +76,7 @@ public:
             indices.push_back(s-1);
 
         mesh.update(std::move(vertices), std::move(indices));
+        seilerMesh.update(std::move(seilerPoints), {});
     }
 
     void render(Shader &shader) {
@@ -75,6 +87,15 @@ public:
         shader.setUniform("adaptationMultiplier", adaptationMultiplier);
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         mesh.render(instanceCount);
+        glLineWidth(1);
+    }
+
+    void renderSeiler(Shader &shader) {
+        if(!drawPolyline) return;
+        glLineWidth(2);
+        shader.setUniform("color", glm::vec4(0, 0.5, 0.5, 1));
+        shader.setUniform("model", glm::mat4(1.0f));
+        seilerMesh.render();
         glLineWidth(1);
     }
 };

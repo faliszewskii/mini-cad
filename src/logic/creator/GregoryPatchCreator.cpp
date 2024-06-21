@@ -47,12 +47,6 @@ void  GregoryPatchCreator::findHoles(AppState &appState, const std::vector<int>&
            );
        }
     }
-    std::stringstream ss;
-    ss << "DFS: ";
-    for(auto &v : graph.dfs()) {
-        ss << v.pointId << "(" << (v.isCornerVertex? "C":"N") << ")" << ", ";
-    }
-    appState.logger.logDebug(ss.str());
 
     holes = graph.findCycles(size * 5);
 
@@ -222,16 +216,22 @@ void GregoryPatchCreator::fillHole(AppState &appState) {
 
         glm::vec3 a = p0 - p1is[sidePrev];
         glm::vec3 b = p1is[sideNext] - p0;
-        glm::vec3 g2Right = (a + b) / 2.f;
+
+        glm::vec3 c0 = p1is[side] - p1is[sideNext];
+        glm::vec3 c1 = glm::cross(p3is[sideNext][3] - p3is[side][3], p3is[side][6] - p3is[side][3]);
+
+
+        glm::vec3 g2Right = (patchSides.size()==2) ? glm::cross(c0, c1) : ((a + b) / 2.f);
+
         glm::vec3 g2Left = -g2Right;
 
         glm::vec3 g1Right = (g0Right + g2Right) / 2.f;
         glm::vec3 g1Left = (g0Left + g2Left) / 2.f;
 
-        glm::vec3 g01Right = deCasteljau2({g0Right, g1Right, g2Right}, 1/3.f);
-        glm::vec3 g12Right = deCasteljau2({g0Right, g1Right, g2Right}, 2/3.f);
-        glm::vec3 g01Left = deCasteljau2({g0Left, g1Left, g2Left}, 1/3.f);
-        glm::vec3 g12Left = deCasteljau2({g0Left, g1Left, g2Left}, 2/3.f);
+        glm::vec3 g01Right = deCasteljau2({g2Right, g1Right, g0Right}, 1/3.f);
+        glm::vec3 g12Right = deCasteljau2({g2Right, g1Right, g0Right}, 2/3.f);
+        glm::vec3 g01Left = deCasteljau2({g2Left, g1Left, g0Left}, 1/3.f);
+        glm::vec3 g12Left = deCasteljau2({g2Left, g1Left, g0Left}, 2/3.f);
 
         fiMiddle.emplace_back();
         fiMiddle.back()[0] = p2is[side] + g01Left;

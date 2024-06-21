@@ -87,10 +87,10 @@ public:
             vertices.emplace_back(fiSide[side][3]);
             vertices.emplace_back(fiSide[sideNext][0]);
             vertices.emplace_back(fiSide[sideNext][1]);
-            vertices.emplace_back(fiMiddle[sideNext][0]); // The same as previous // TODO Maybe bad
-            vertices.emplace_back(fiLast[sideNext][0]); // TODO BAD FOR SURE
-            vertices.emplace_back(fiLast[side][1]);  // TODO BAD FOR SURE
-            vertices.emplace_back(fiMiddle[side][1]); // Same as next // TODO Maybe bad
+            vertices.emplace_back(fiMiddle[sideNext][0]);
+            vertices.emplace_back(fiLast[sideNext][0]);
+            vertices.emplace_back(fiLast[side][1]);
+            vertices.emplace_back(fiMiddle[side][1]);
 
             // Vectors
 

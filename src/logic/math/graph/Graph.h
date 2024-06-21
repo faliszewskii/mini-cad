@@ -29,13 +29,13 @@ private:
 
     std::vector<std::vector<TVertex>> findCycles(int start, int v, int length, std::vector<bool> visited);
 
-    bool cyclesEqual(std::vector<TVertex> &c1, std::vector<TVertex> &c2) {
+    bool cyclesEqual(std::vector<TVertex> &c1, std::vector<TVertex> &c2) { // TODO czy JEDEN I DRUGY CYKL ZAWIERAJĄ TE SAME WIERZCHOŁKI POMIMO KOLEJNOŚCI INNEJ
         for(auto &el : c1) {
             bool exists = false;
-            for(auto &o : c2) {
+            for(auto &o : c2) { // o znajduje się w cyklu c1. gdzieś
                 exists |= el == o;
             }
-            if(!exists) return false;
+            if(!exists) return false;// Nie istnieje, czyli nie te same cykle
         }
         return true;
     }
@@ -44,12 +44,12 @@ private:
 template<typename TVertex>
 std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int start, int v, int length, std::vector<bool> visited) {
     visited[v] = true;
-    if(length <= 1) {
+    if(length <= 1) { // todo END REKURSJI
         for(auto &neighbour : neighbourList[v]) {
             if (neighbour == start)
-                return {{vertices[v]}};
+                return {{vertices[v]}}; // todo ZNALEZIONO "START" DODAJEMY OBECNY VERT JAKO NOWY CYKL
         }
-        return {};
+        return {}; // todo NIE ZNALEZIONO CYKLU W TEJ GAŁĘZI. NIC NIE DODAJEMY DO LISTY CYKLI
     }
     std::vector<std::vector<TVertex>> cycles;
     for(auto &neighbour : neighbourList[v]) {
@@ -65,26 +65,23 @@ std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int start, int v, i
 
 template<typename TVertex>
 std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int start, int length) {
-    std::vector<bool> visited(vertices.size(), false);
+    std::vector<bool> visited(vertices.size(), false); // todo UTILITY FUNC
     return findCycles(start, start, length, visited);
 }
 
 template<typename TVertex>
-std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int length) {
+std::vector<std::vector<TVertex>> Graph<TVertex>::findCycles(int length) { // TODO START
     std::vector<std::vector<TVertex>> cycles;
-
-    for(int i = 0; i < vertices.size(); i++) {
+    for(int i = 0; i < vertices.size(); i++) { // TODO SZUKANIE CYKLI
         auto cycleFromI = findCycles(i, length);
         cycles.insert(cycles.end(), cycleFromI.begin(), cycleFromI.end());
     }
-
-    std::vector<std::vector<TVertex>> uniqueCycles;
+    std::vector<std::vector<TVertex>> uniqueCycles; // todo USUWANIA NADMIAROWYCH I POWTÓRZEŃ
     for(auto &cycle : cycles) {
         if(std::any_of(uniqueCycles.begin(), uniqueCycles.end(), [&](auto &o){return cyclesEqual(cycle, o);}))
             continue;
         uniqueCycles.push_back(cycle);
     }
-
     return uniqueCycles;
 }
 
@@ -92,7 +89,7 @@ template<typename TVertex>
 std::vector<TVertex> Graph<TVertex>::dfs() {
     std::vector<bool> visited(vertices.size());
     std::vector<TVertex> result;
-    for(int i = 0; i < visited.size(); i++) {
+    for(int i = 0; i < visited.size(); i++) { // TUTAJ WSZYSTKIE PODGRAFY OGARNIAM. ŻEBY NIE BYŁO POZOSTAŁOŚCI
         if(!visited[i]) {
             auto v = dfs(visited, i);
             result.insert(result.end(), v.begin(), v.end());
@@ -108,7 +105,7 @@ std::vector<TVertex> Graph<TVertex>::dfs(std::vector<bool> &visited, int v) {
     list.push_back(vertices[v]);
     visited[v] = true;
 
-    for(int i = 0; i < neighbourList[v].size(); i++) {
+    for(int i = 0; i < neighbourList[v].size(); i++) { // TUTAJ ZEJŚCIA REKURENCYJNE DO KAŻDEGO SĄSIADA
         int neighbour = neighbourList[v][i];
         if(!visited[neighbour]) {
             auto childList = dfs(visited, neighbour);

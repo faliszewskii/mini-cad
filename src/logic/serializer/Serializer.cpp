@@ -204,7 +204,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
         int patchRow = surfaceData.size.x;
         int pointRow = 4;
         for(int j = 0; j < 3 * surfaceData.size.y + 1; j++) {
-            for(int i = 0; i < 3 * surfaceData.size.x+1/* + (surfaceData.uWrapped || surfaceData.vWrapped ? 0 : 1)*/; i++) {
+            for(int i = 0; i < 3 * surfaceData.size.x+1; i++) {
                 int patch = (i==0?0 : (i-1)/3) + (j==0?0 : ((j-1)/3) * patchRow);
                 int point = (i==0?0 : (i-1)%3+1) + (j==0?0 : ((j-1)%3+1) * pointRow);
                 int id = idMap[surfaceData.patches[patch].controlPoints[point].GetId()];
@@ -219,7 +219,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 appState.bezierPatchCreator.getGridIndices(),
                 points,
                 appState.bezierPatchCreator.getParams().C2});
-        appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.x - 1;
+        appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
     }
 
@@ -256,7 +256,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 appState.bezierPatchCreator.getGridIndices(),
                 points,
                 appState.bezierPatchCreator.getParams().C2});
-        appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.x - 1;
+        appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
     }
 
