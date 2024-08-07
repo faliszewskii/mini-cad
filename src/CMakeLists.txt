@@ -129,6 +129,9 @@ set(INCL
         logic/math/graph/GregoryPatchGraphVertex.h
         logic/geometry/GregoryPatch.h
         logic/events/create/CreateGregoryPatchEvent.h
+        logic/intersections/SurfaceIntersection.cpp
+        logic/intersections/SurfaceIntersection.h
+        logic/intersections/ParametricSurface.h
 )
 
 add_executable(opengl-sandbox main.cpp

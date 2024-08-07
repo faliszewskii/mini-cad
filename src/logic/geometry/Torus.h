@@ -50,10 +50,7 @@ public:
                 float x = (radius + thickness * std::cos(v)) * std::cos(u);
                 float y = thickness * std::sin(v);
                 float z = (radius + thickness * std::cos(v)) * std::sin(u);
-                float xn = std::cos(v) * std::cos(u);
-                float yn = std::sin(v);
-                float zn = std::cos(v) * std::sin(u);
-                vertices.push_back(Vertex(glm::vec3(x, y, z), glm::normalize(glm::vec3(xn, yn, zn))));
+                vertices.push_back(Vertex(glm::vec3{x, y, z}, getNormal(u, v)));
             }
         }
 
@@ -74,6 +71,40 @@ public:
         }
 
         mesh.update(std::move(vertices), std::move(indices));
+    }
+
+    [[nodiscard]] glm::vec3 evaluate(float u, float v) const {
+        u *= M_PI * 2.0f;
+        v *= M_PI * 2.0f;
+        float x = (radius + thickness * std::cos(v)) * std::cos(u);
+        float y = thickness * std::sin(v);
+        float z = (radius + thickness * std::cos(v)) * std::sin(u);
+        return transform.getTransformation() * glm::vec4{x, y, z, 1};
+    }
+
+    [[nodiscard]] glm::vec3 getNormal(float u, float v) const {
+        float xn = std::cos(v) * std::cos(u);
+        float yn = std::sin(v);
+        float zn = std::cos(v) * std::sin(u);
+        return glm::normalize(glm::vec3(xn, yn, zn));
+    }
+
+    [[nodiscard]] glm::vec3 evaluateDU(float u, float v) const {
+        u *= M_PI * 2.0f;
+        v *= M_PI * 2.0f;
+        float x = (radius + thickness * std::cos(v)) * -std::sin(u);
+        float y = 0;
+        float z = (radius + thickness * std::cos(v)) * std::cos(u);
+        return glm::inverse(glm::transpose(transform.getTransformation())) * glm::vec4{x, y, z, 0};
+    }
+
+    [[nodiscard]] glm::vec3 evaluateDV(float u, float v) const {
+        u *= M_PI * 2.0f;
+        v *= M_PI * 2.0f;
+        float x = thickness * -std::sin(v) * std::cos(u);
+        float y = thickness * std::cos(v);
+        float z = thickness * -std::sin(v) * std::sin(u);
+        return glm::inverse(glm::transpose(transform.getTransformation())) * glm::vec4{x, y, z, 0};
     }
 };
 

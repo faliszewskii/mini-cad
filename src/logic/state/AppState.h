@@ -40,6 +40,7 @@
 #include "../creator/GregoryPatchCreator.h"
 #include "../geometry/GregoryPatch.h"
 #include "../events/create/CreateGregoryPatchEvent.h"
+#include "../intersections/SurfaceIntersection.h"
 
 class DebugOverlayModule;
 class MenuBarModule;
@@ -84,6 +85,7 @@ struct AppState {
 
     BezierPatchCreator bezierPatchCreator;
     GregoryPatchCreator gregoryPatchCreator;
+    SurfaceIntersection surfaceIntersection;
 
     std::unique_ptr<Serializer> serializer;
 

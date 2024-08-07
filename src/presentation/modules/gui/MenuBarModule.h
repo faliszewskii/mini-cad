@@ -9,6 +9,7 @@
 #include "../../../logic/serializer/Serializer.h"
 #include "imgui.h"
 #include "nfd.h"
+#include "../../../logic/intersections/SurfaceIntersection.h"
 
 class MenuBarModule {
 public:
@@ -62,6 +63,29 @@ public:
         NFD_Quit();
     }
 
+    static bool isIntersectionEnabled(const std::vector<std::pair<int, EntityType>>& selected) {
+        if( selected.empty() || selected.size() > 2)
+            return false;
+        if(!std::visit([](auto& a) {
+            return ParametricSurface<decltype(a.get())>;
+        }, selected[0].second))
+            return false;
+        if(selected.size() == 2 && !std::visit([](auto& b) {
+            return ParametricSurface<decltype(b.get())>;
+        }, selected[1].second))
+            return false;
+        return true;
+    }
+
+    static std::optional<ParametricSurfaceType> getIfParametricSurface(EntityType entity) {
+        return std::visit([](auto& a) -> std::optional<ParametricSurfaceType> {
+            using T = std::decay_t<decltype(a.get())>;
+            if constexpr (ParametricSurface<T>)
+                return a;
+            return {};
+        }, entity);
+    }
+
     void run(AppState &appState) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -96,6 +120,25 @@ public:
                     appState.gregoryPatchCreator.reset();
                 }
                 ImGui::Separator();
+                bool intersectionEnabled = isIntersectionEnabled(appState.selectedEntities);
+                if(ImGui::MenuItem("Find Any Intersection", "", false, intersectionEnabled)) {
+                    auto& [idA, entityA] = appState.selectedEntities[0];
+                    auto& [idB, entityB] = appState.selectedEntities[1 % appState.selectedEntities.size()];
+                    auto sA = getIfParametricSurface(entityA).value();
+                    auto sB = getIfParametricSurface(entityB).value();
+                    std::visit([&](auto& a, auto& b) {
+                        auto points = appState.surfaceIntersection.findIntersection(a.get(), b.get(), idA == idB, appState.cursorPosition);
+                        for(int i = 0; i < points.size(); i+=2) {
+                            appState.eventPublisher.publish(CreatePointEvent{points[i]});
+                            appState.pointSet[appState.lastIdCreated]->color = {(float)i/points.size(), 1, 0, 1};
+                            appState.eventPublisher.publish(CreatePointEvent{points[i+1]});
+                            appState.pointSet[appState.lastIdCreated]->color = {(float)i/points.size(), 0, 1, 1};
+                        }
+                    }, sA, sB);
+                }
+                if(ImGui::MenuItem("Find Intersection Near Cursor", "", false, intersectionEnabled)) {
+                   // TODO
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
