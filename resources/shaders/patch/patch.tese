@@ -7,8 +7,13 @@ uniform mat4 view;
 
 uniform int gridCountWidth;
 uniform int gridCountLength;
+uniform int patchCountWidth;
+uniform int patchCountLength;
 
 patch in int instanceID;
+
+out float outU;
+out float outV;
 
 vec4 descendingAlgorithm(float t, int n)
 {
@@ -72,4 +77,10 @@ void main()
 
     vec4 pos = vec4(deCasteljau2D(coefficients, u, v), 1.f);
     gl_Position = projection * view * pos;
+    int uPatch = gl_PrimitiveID / patchCountWidth;
+    int vPatch = gl_PrimitiveID % patchCountWidth;
+    outU = (u + uPatch) / patchCountLength;
+    outV = (v + vPatch) / patchCountWidth;
+    //    outU = float(gl_PrimitiveID) / (gridCountLength * gridCountWidth);
+    //    outV = 0;
 }

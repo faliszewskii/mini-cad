@@ -4,7 +4,6 @@
 
 #include "Camera.h"
 #include "../../math/algebra/AlgebraUtils.h"
-#include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/detail/type_quat.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -168,15 +167,23 @@ void Camera::processKeyboardFree(CameraMovement direction, float deltaTime) {
 }
 
 void Camera::processKeyboardAnchor(CameraMovement direction, float deltaTime) {
-    float velocity = movementSpeed * deltaTime;
-    if (direction == FORWARD)
-        anchor += front * velocity;
-    if (direction == BACKWARD)
-        anchor -= front * velocity;
-    if (direction == LEFT)
-        anchor -= right * velocity;
-    if (direction == RIGHT)
-        anchor += right * velocity;
+    float velocity = movementSpeed ;//* deltaTime;
+    if (direction == RIGHT) {
+        anchor += glm::vec3{1.0,0,0} * velocity;
+        position +=  glm::vec3{1.0,0,0} * velocity;
+    }
+    if (direction == LEFT) {
+        anchor +=  glm::vec3{-1.0,0,0}  * velocity;
+        position +=  glm::vec3{-1.0,0,0}  * velocity;
+    }
+    if (direction == BACKWARD) {
+        anchor +=  glm::vec3{0,0,1.0} * velocity;
+        position += glm::vec3{0,0,1.0} * velocity;
+    }
+    if (direction == FORWARD) {
+        anchor += glm::vec3{0,0,-1.0} * velocity;
+        position += glm::vec3{0,0,-1.0} * velocity;
+    }
 
     //TODO move orientation
     updateDirections();

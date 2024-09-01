@@ -30,7 +30,7 @@ enum CameraMovement {
 };
 
 // Default camera values
-const float SPEED = 2.5f;
+const float SPEED = 1.f;
 const float SENSITIVITY = 0.01f;
 const float ZOOM_SENSITIVITY = 0.1f;
 

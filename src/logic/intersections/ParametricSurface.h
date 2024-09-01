@@ -17,9 +17,10 @@ concept ParametricSurface = requires(T surface, float u, float v) {
     { surface.evaluate(u, v) } -> std::convertible_to<glm::vec3>;
     { surface.evaluateDU(u, v) } -> std::convertible_to<glm::vec3>;
     { surface.evaluateDV(u, v) } -> std::convertible_to<glm::vec3>;
+    { surface.rangeU() } -> std::convertible_to<float>;
+    { surface.rangeV() } -> std::convertible_to<float>;
+    { surface.wrapU() } -> std::convertible_to<bool>;
+    { surface.wrapV() } -> std::convertible_to<bool>;
 };
-
-template<typename ...T> requires (ParametricSurface<T> && ...) using ParametricSurfaceTypeTemp = ReferenceVariant<T...>;
-using ParametricSurfaceType = ParametricSurfaceTypeTemp<Torus>;
 
 #endif //OPENGL_SANDBOX_PARAMETRICSURFACE_H

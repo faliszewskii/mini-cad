@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "nfd.h"
 #include "../../../logic/intersections/SurfaceIntersection.h"
+#include "../../../logic/intersections/IntersectableSurface.h"
 
 class MenuBarModule {
 public:
@@ -18,9 +19,13 @@ public:
     void saveNfd(const std::function<void(const std::string &)> &func) {
         NFD_Init();
 
-        nfdchar_t *outPath;
-        nfdfilteritem_t filterItem[1] = { { "Scene file json", "json" } };
-        nfdresult_t result = NFD_SaveDialogN(&outPath, filterItem, 1, NULL, "scene.json");
+        nfdu8char_t *outPath;
+        nfdu8filteritem_t filters[1] = { { "Scene file json", "json" } };
+        nfdsavedialogu8args_t args = {0};
+        args.filterList = filters;
+        args.filterCount = 1;
+        args.defaultName = "scene.json";
+        nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args);
         if (result == NFD_OKAY)
         {
             std::string s(outPath);
@@ -42,9 +47,12 @@ public:
     void openNfd(const std::function<void(const std::string &)> &func) {
         NFD_Init();
 
-        nfdchar_t *outPath;
-        nfdfilteritem_t filterItem[1] = { { "Scene file json", "json" } };
-        nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
+        nfdu8char_t *outPath;
+        nfdu8filteritem_t filters[1] = { { "Scene file json", "json" }};
+        nfdopendialogu8args_t args = {0};
+        args.filterList = filters;
+        args.filterCount = 1;
+        nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
         if (result == NFD_OKAY)
         {
             std::string s(outPath);
@@ -67,20 +75,20 @@ public:
         if( selected.empty() || selected.size() > 2)
             return false;
         if(!std::visit([](auto& a) {
-            return ParametricSurface<decltype(a.get())>;
+            return ParametricSurface<decltype(a.get())> && Intersectable<decltype(a.get())>;
         }, selected[0].second))
             return false;
         if(selected.size() == 2 && !std::visit([](auto& b) {
-            return ParametricSurface<decltype(b.get())>;
+            return ParametricSurface<decltype(b.get())> && Intersectable<decltype(b.get())>;
         }, selected[1].second))
             return false;
         return true;
     }
 
-    static std::optional<ParametricSurfaceType> getIfParametricSurface(EntityType entity) {
-        return std::visit([](auto& a) -> std::optional<ParametricSurfaceType> {
+    static std::optional<IntersectableSurface> getIfIntersectableSurface(EntityType entity) {
+        return std::visit([](auto& a) -> std::optional<IntersectableSurface> {
             using T = std::decay_t<decltype(a.get())>;
-            if constexpr (ParametricSurface<T>)
+            if constexpr (ParametricSurface<T> && Intersectable<T>)
                 return a;
             return {};
         }, entity);
@@ -101,6 +109,7 @@ public:
                     appState.selectionContext.clear();
                     appState.gregoryPatchCreator.reset();
                     appState.gregoryPatchSet.clear();
+                    appState.intersectionSet.clear();
                 }
                 if (ImGui::MenuItem("Import", "", false, true)) {
                     openNfd([&](const std::string &path) {
@@ -124,16 +133,23 @@ public:
                 if(ImGui::MenuItem("Find Any Intersection", "", false, intersectionEnabled)) {
                     auto& [idA, entityA] = appState.selectedEntities[0];
                     auto& [idB, entityB] = appState.selectedEntities[1 % appState.selectedEntities.size()];
-                    auto sA = getIfParametricSurface(entityA).value();
-                    auto sB = getIfParametricSurface(entityB).value();
+                    auto sA = getIfIntersectableSurface(entityA).value();
+                    auto sB = getIfIntersectableSurface(entityB).value();
                     std::visit([&](auto& a, auto& b) {
-                        auto points = appState.surfaceIntersection.findIntersection(a.get(), b.get(), idA == idB, appState.cursorPosition);
-                        for(int i = 0; i < points.size(); i+=2) {
-                            appState.eventPublisher.publish(CreatePointEvent{points[i]});
-                            appState.pointSet[appState.lastIdCreated]->color = {(float)i/points.size(), 1, 0, 1};
-                            appState.eventPublisher.publish(CreatePointEvent{points[i+1]});
-                            appState.pointSet[appState.lastIdCreated]->color = {(float)i/points.size(), 0, 1, 1};
+                        auto result = appState.surfaceIntersection.findIntersection(a.get(), b.get(), idA == idB, appState.cursorPosition);
+                        if(!result.has_value()) {
+                            appState.logger.logError(result.error());
+                            return;
                         }
+                        auto points = result->intersectionPoints;
+                        appState.eventPublisher.publish(CreateIntersectionEvent(
+                            result->intersectionPoints,
+                            result->surfaces,
+                            result->wrapped
+                            ));
+                        // TODO DEBUG
+                        appState.surfaceIntersection.addToMask(sA, *appState.intersectionSet[appState.lastIdCreated], 0);
+                        appState.surfaceIntersection.addToMask(sB, *appState.intersectionSet[appState.lastIdCreated], 1);
                     }, sA, sB);
                 }
                 if(ImGui::MenuItem("Find Intersection Near Cursor", "", false, intersectionEnabled)) {

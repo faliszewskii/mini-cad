@@ -3,6 +3,7 @@
 layout(location = 0) in vec3 aPos;
 
 out int instanceID_vert;
+out int vertexID_vert;
 
 void main(void)
 {

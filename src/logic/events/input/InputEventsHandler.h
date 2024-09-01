@@ -124,8 +124,9 @@ namespace InputEventsHandler {
 
         /// Key Events
         eventPublisher.subscribe([&](const KeyEvent &event){
-            static auto deltaTime = static_cast<float>(glfwGetTime());
-            deltaTime = static_cast<float>(glfwGetTime()) - deltaTime;
+            static auto prevTime = static_cast<float>(glfwGetTime());
+            auto deltaTime = static_cast<float>(glfwGetTime()) - prevTime;
+            prevTime = static_cast<float>(glfwGetTime());
 
             if (ImGui::GetIO().WantCaptureKeyboard) return;
             if (event.key == GLFW_KEY_ESCAPE && event.action == GLFW_PRESS)

@@ -40,6 +40,7 @@
 #include "../creator/GregoryPatchCreator.h"
 #include "../geometry/GregoryPatch.h"
 #include "../events/create/CreateGregoryPatchEvent.h"
+#include "../events/create/CreateIntersectionEvent.h"
 #include "../intersections/SurfaceIntersection.h"
 
 class DebugOverlayModule;
@@ -78,6 +79,7 @@ struct AppState {
     std::map<int, std::unique_ptr<PatchC0>> patchC0Set;
     std::map<int, std::unique_ptr<PatchC2>> patchC2Set;
     std::map<int, std::unique_ptr<GregoryPatch>> gregoryPatchSet;
+    std::map<int, std::unique_ptr<Intersection>> intersectionSet;
     int lastIdCreated = -1;
 
     std::vector<std::pair<int, EntityType>> selectedEntities;
@@ -90,8 +92,9 @@ struct AppState {
     std::unique_ptr<Serializer> serializer;
 
     EventPublisher<CreateTorusEvent, CreatePointEvent, CreateBezierC0Event, SelectEntityEvent, PointMovedEvent,
-        PointDeletedEvent, SelectionChangedEvent, ResetSelectionEvent, CreateBezierC2Event, MouseButtonEvent, MouseMovedEvent,
-        MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch, CreateGregoryPatchEvent> eventPublisher;
+        PointDeletedEvent, SelectionChangedEvent, ResetSelectionEvent, CreateBezierC2Event, MouseButtonEvent,
+        MouseMovedEvent, MouseScrolledEvent, KeyEvent, CreateInterpolatedC2Event, CreateBezierPatch,
+        CreateGregoryPatchEvent, CreateIntersectionEvent> eventPublisher;
 
     Logger logger;
     Camera camera;
@@ -105,11 +108,11 @@ struct AppState {
 
     ImGuizmo::OPERATION gizmoOperation = ImGuizmo::UNIVERSAL;
 
-    bool keyboardCtrlMode;
-    bool bezierCreatorOpen;
-    bool gregoryCreatorOpen;
+    bool keyboardCtrlMode = false;
+    bool bezierCreatorOpen = false;
+    bool gregoryCreatorOpen = false;
 
-    bool draggingMouse;
+    bool draggingMouse = false;
     glm::vec2 draggingStartPos;
     glm::vec2 draggingEndPos;
 

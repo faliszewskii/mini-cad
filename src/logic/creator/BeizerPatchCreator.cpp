@@ -73,6 +73,8 @@ void BezierPatchCreator::renderPreview(Shader &shader) {
     glLineWidth(2);
     if(params.dance) updatePreview();
     glPatchParameteri(GL_PATCH_VERTICES, 16);
+    shader.setUniform("patchCountWidth", params.patchCountWidth);
+    shader.setUniform("patchCountLength", params.patchCountLength);
     previewMesh.render(2);
     glLineWidth(1);
 }

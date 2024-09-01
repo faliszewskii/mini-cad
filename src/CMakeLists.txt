@@ -22,14 +22,6 @@ set(IMGUI
         ../lib/imgui/misc/cpp/imgui_stdlib.h
         ../lib/imguizmo/ImGuizmo.cpp
         ../lib/imguizmo/ImGuizmo.h
-        ../lib/imgui-node-editor/imgui_node_editor.h
-        ../lib/imgui-node-editor/imgui_node_editor.cpp
-        ../lib/imgui-node-editor/crude_json.cpp
-        ../lib/imgui-node-editor/crude_json.h
-        ../lib/imgui-node-editor/imgui_bezier_math.h
-        ../lib/imgui-node-editor/imgui_canvas.h
-        ../lib/imgui-node-editor/imgui_canvas.cpp
-        ../lib/imgui-node-editor/imgui_node_editor_api.cpp
 )
 
 set(INCL
@@ -129,9 +121,18 @@ set(INCL
         logic/math/graph/GregoryPatchGraphVertex.h
         logic/geometry/GregoryPatch.h
         logic/events/create/CreateGregoryPatchEvent.h
-        logic/intersections/SurfaceIntersection.cpp
         logic/intersections/SurfaceIntersection.h
         logic/intersections/ParametricSurface.h
+        logic/intersections/Intersectable.h
+        logic/texture/Texture.h
+        logic/texture/Texture.cpp
+        logic/intersections/IntersectableSurface.h
+        logic/intersections/Intersection.h
+        logic/events/create/CreateIntersectionEvent.h
+        logic/algorithms/BresenhamAlgorithm.cpp
+        logic/algorithms/BresenhamAlgorithm.h
+        logic/algorithms/FloodFill.cpp
+        logic/algorithms/FloodFill.h
 )
 
 add_executable(opengl-sandbox main.cpp
@@ -142,6 +143,17 @@ add_executable(opengl-sandbox main.cpp
 set(CFLAGS -std=c++23 -fmodules-ts#[[ -O3]])
 set(LDFLAGS -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lassimp -luuid nfd)
 
-target_include_directories(opengl-sandbox PRIVATE ../lib/imgui)
+target_include_directories(opengl-sandbox PRIVATE ../lib/imgui ../lib/GLFW)
 target_compile_options(opengl-sandbox PUBLIC ${CFLAGS})
-target_link_libraries(opengl-sandbox ${LDFLAGS})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(opengl-sandbox ${LDFLAGS})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")        # Windows
+    find_package(OpenGL REQUIRED)
+    include_directories( ${OPENGL_INCLUDE_DIRS})
+    target_link_libraries(opengl-sandbox
+            glfw
+            nfd
+            ${OPENGL_LIBRARIES}
+    )
+endif()

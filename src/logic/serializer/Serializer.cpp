@@ -221,6 +221,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 appState.bezierPatchCreator.getParams().C2});
         appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
+        appState.patchC0Set[appState.lastIdCreated]->wrapped = surfaceData.uWrapped || surfaceData.vWrapped;
     }
 
     for(auto &surfaceData : scene.surfacesC2) {
@@ -258,6 +259,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
                 appState.bezierPatchCreator.getParams().C2});
         appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
+        appState.patchC2Set[appState.lastIdCreated]->wrapped = surfaceData.uWrapped || surfaceData.vWrapped;
     }
 
 }

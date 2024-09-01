@@ -16,7 +16,7 @@
 #include "../events/input/InputEventsHandler.h"
 
 AppState::AppState(Rect<int> viewport, int guiPanelLeftWidth) :
-        camera(viewport.width, viewport.height, CameraMode::ANCHOR, glm::vec3(0.0f, 3.0f, 3.0f), glm::vec3(0.f), glm::vec3(-M_PI/4,0,0)),
+        camera(viewport.width, viewport.height, CameraMode::ANCHOR, glm::vec3(0.0f, 3.0f, 3.0f), glm::vec3(0.f), glm::vec3(-std::numbers::pi/4,0,0)),
         guiFocus(true),
         vSync(true),
         keyboardCtrlMode(false),

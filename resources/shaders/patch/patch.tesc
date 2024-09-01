@@ -11,10 +11,14 @@ uniform int gridCountLength;
 in int instanceID_vert[32];
 patch out int instanceID;
 
+in int vertexID_vert[32];
+patch out int vertexID;
+
 void main()
 {
     instanceID = instanceID_vert[gl_InvocationID];
     bool b = instanceID == 0;
+
 
     gl_TessLevelOuter[0] = (b ? gridCountLength : gridCountWidth) + 1;
     gl_TessLevelOuter[1] = 400;

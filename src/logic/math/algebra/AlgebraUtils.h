@@ -5,7 +5,7 @@
 #ifndef OPENGL_SANDBOX_ALGEBRAUTILS_H
 #define OPENGL_SANDBOX_ALGEBRAUTILS_H
 
-
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <iostream>
 #include <glm/gtx/io.hpp>

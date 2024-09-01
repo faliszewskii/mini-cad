@@ -68,7 +68,8 @@ namespace SelectionEventsHandler {
                             [&](InterpolatedC2 &_) { /* ignore */ },
                             [&](PatchC0 &_) { /* ignore */ },
                             [&](PatchC2 &_) { /* ignore */ },
-                            [&](GregoryPatch &_) { /* ignore */ }
+                                [&](GregoryPatch &_) { /* ignore */ },
+                            [&](Intersection &intersection) {}
                     }, el.second);
                 }
                 center /= n;

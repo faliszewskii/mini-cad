@@ -5,6 +5,8 @@
 #ifndef OPENGL_SANDBOX_ENTITYLISTWORKSPACE_H
 #define OPENGL_SANDBOX_ENTITYLISTWORKSPACE_H
 
+#include <any>
+
 #include "../../../logic/state/AppState.h"
 #include "../../../logic/concepts/has_name.h"
 #include "../../../logic/events/selection/SelectEntityEvent.h"
@@ -13,6 +15,8 @@
 #include "../../../logic/geometry/InterpolatedC2.h"
 #include <glm/gtx/euler_angles.hpp>
 #include <variant>
+
+#include "../../../logic/algorithms/FloodFill.h"
 
 namespace EntityListWorkspace {
 
@@ -25,6 +29,7 @@ namespace EntityListWorkspace {
     void renderWorkspacePatchC0(PatchC0 &patch, AppState &appState);
     void renderWorkspacePatchC2(PatchC2 &patch, AppState &appState);
     void renderWorkspaceGregory(GregoryPatch &patch, AppState &appState);
+    void renderWorkspaceIntersection(Intersection &intersection, AppState &appState);
     void renderWorkspaceMultiple(AppState &appState);
     void collapsePoint(AppState &appState);
     template<typename T>
@@ -69,6 +74,7 @@ namespace EntityListWorkspace {
                 renderListing(appState.patchC0Set, appState, 0);
                 renderListing(appState.patchC2Set, appState, 0);
                 renderListing(appState.gregoryPatchSet, appState, 0);
+                renderListing(appState.intersectionSet, appState, 0);
                 ImGui::EndListBox();
             }
         }
@@ -143,8 +149,11 @@ namespace EntityListWorkspace {
                        },
                        [&](GregoryPatch &patch) {
                            appState.gregoryPatchSet.erase(appState.gregoryPatchSet.find(patch.id));
-                       }
-                    }, el.second);
+                       },
+                        [&](Intersection &intersection) {
+                            std::cout<<"test"; // TODO
+                        }
+                }, el.second);
             }
             appState.selectedEntities.clear(); // TODO Move to events.
         }
@@ -160,7 +169,8 @@ namespace EntityListWorkspace {
                 [&](InterpolatedC2 &interpolated) { renderWorkspaceInterpolatedC2(interpolated, appState); },
                 [&](PatchC0 &patch) { renderWorkspacePatchC0(patch, appState); },
                 [&](PatchC2 &patch) { renderWorkspacePatchC2(patch, appState); },
-                [&](GregoryPatch &patch) { renderWorkspaceGregory(patch, appState); }
+                [&](GregoryPatch &patch) { renderWorkspaceGregory(patch, appState); },
+                [&](Intersection &intersection) { renderWorkspaceIntersection(intersection, appState); }
         }, element);
     }
 
@@ -262,7 +272,7 @@ namespace EntityListWorkspace {
         int idCounter = 0;
         ImGui::SeparatorText("Patch C0");
         renderNameInput(patch);
-
+        ImGui::Text(("Wrapped: " + std::to_string(patch.wrapped)).c_str());
         ImGui::SeparatorText("Visualization");
         ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
         bool modified = false;
@@ -289,6 +299,7 @@ namespace EntityListWorkspace {
         ImGui::SeparatorText("Patch C2");
         renderNameInput(patch);
 
+        ImGui::Text(("Wrapped: " + std::to_string(patch.wrapped)).c_str());
         ImGui::SeparatorText("Visualization");
         ImGui::Checkbox("Draw Bezier Grid", &patch.drawBezierGrid);
         bool modified = false;
@@ -320,6 +331,35 @@ namespace EntityListWorkspace {
         if(patch.patchGridLength < 1) patch.patchGridLength = 1;
 
         ImGui::Checkbox("Draw Vectors", &patch.drawVectors);
+    }
+
+    inline void renderMaskImage(int textureId, std::array<std::array<glm::vec3, 256>, 256> &mask, ImVec2 size, AppState &appState, IntersectableSurface &s) {
+        if(ImGui::ImageButton((void*)(intptr_t)textureId, size,  ImVec2(0, 0),  ImVec2(1, 1), 0)) {
+            glm::vec2 coords =  {size.y - (ImGui::GetCursorScreenPos().y - ImGui::GetMousePos().y), ImGui::GetMousePos().x - ImGui::GetCursorScreenPos().x};
+            coords.x *= mask.size() / size.x;
+            coords.y *= mask[0].size() / size.y;
+            glm::vec3 sourceColor = mask[coords.x][coords.y];
+            if(sourceColor != glm::vec3(0) && sourceColor != glm::vec3(1)) return;
+            glm::vec3 destColor = glm::abs(mask[coords.x][coords.y] - glm::vec3(1));
+            floodFill(coords.x, coords.y, 0, mask.size(), 0, mask[0].size(),
+                [&](int x, int y) {mask[x][y] = destColor;},
+                [&](int x, int y) {return mask[x][y] == sourceColor;});
+            std::visit([&](auto &el){ return el.get().setMask(mask);}, s);
+        }
+    }
+
+    inline void renderWorkspaceIntersection(Intersection &intersection, AppState &appState) {
+        ImGui::SeparatorText("Intersection");
+        renderNameInput(intersection);
+        if(intersection.surfaces.size() == 1)
+            std::visit([&](auto &e) {ImGui::Text("Self-intersection of %s", e.get().name);}, intersection.surfaces.front().first);
+        else
+            std::visit([&](auto &e1, auto &e2) {ImGui::Text("Intersection between %s and %s", e1.get().name.c_str(), e2.get().name.c_str());}, intersection.surfaces[0].first, intersection.surfaces[1].first);
+        // TODO Self-intersection
+        auto maskA = std::visit([&](auto &el){ return el.get().getMask();}, intersection.surfaces[0].first);
+        auto maskB = std::visit([&](auto &el){ return el.get().getMask();}, intersection.surfaces[1].first);
+        renderMaskImage(maskA.first.get().id, maskA.second.get(), ImVec2(256, 256), appState, intersection.surfaces[0].first);
+        renderMaskImage(maskB.first.get().id, maskB.second.get(), ImVec2(256, 256), appState, intersection.surfaces[1].first);
     }
 
     template<typename T>
@@ -399,7 +439,11 @@ namespace EntityListWorkspace {
                         [&](InterpolatedC2 &_) { /* ignore */ },
                         [&](PatchC0 &_) { /* ignore */ },
                         [&](PatchC2 &_) { /* ignore */ },
-                        [&](GregoryPatch &_) { /* ignore */}
+                        [&](GregoryPatch &_) { /* ignore */},
+                        [&](Intersection &intersection) {
+                            std::cout<<"test";
+                        }
+
                 }, el.second);
             }
         }
@@ -483,8 +527,8 @@ namespace EntityListWorkspace {
         bool modified = false;
         modified |= ImGui::DragFloat("Radius", &torus.radius, 0.01, torus.thickness < 0.001 ? 0.001: torus.thickness, FLT_MAX);
         modified |= ImGui::DragFloat("Thickness", &torus.thickness, 0.01, 0.0009, torus.radius);
-        modified |= ImGui::DragInt("Radial Resolution", &torus.radialResolution, 1, 3, FLT_MAX);
-        modified |= ImGui::DragInt("Tubular Resolution", &torus.tubularResolution, 1, 3, FLT_MAX);
+        modified |= ImGui::DragInt("Radial Resolution", &torus.radialResolution, 1, 3, INT_MAX);
+        modified |= ImGui::DragInt("Tubular Resolution", &torus.tubularResolution, 1, 3, INT_MAX);
         if(modified) torus.generate();
     }
 

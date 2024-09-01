@@ -59,7 +59,7 @@ public:
     }
 
     std::vector<TVertex> getVertices() { return vertices; };
-    std::optional<std::vector<unsigned int>> getIndices() { return indices; };
+    std::optional<std::vector<unsigned int>> getIndices() const { return indices; };
 
 private:
     //  render data

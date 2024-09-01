@@ -23,7 +23,7 @@ public:
     explicit WireframeRenderModule(int workspaceWidth) : workspaceWidth(workspaceWidth),
             shader(Shader(
                             IOUtils::getResource("shaders/basic/position.vert"),
-                            IOUtils::getResource("shaders/basic/selection.frag"))),
+                            IOUtils::getResource("shaders/basic/masked.frag"))),
             pointShader(Shader(
                            IOUtils::getResource("shaders/basic/point.vert"),
                            IOUtils::getResource("shaders/basic/selection.frag"))),
@@ -41,12 +41,12 @@ public:
                  IOUtils::getResource("shaders/patch/patch.vert"),
                  IOUtils::getResource("shaders/patch/patch.tesc"),
                  IOUtils::getResource("shaders/patch/patch.tese"),
-                 IOUtils::getResource("shaders/patch/patch.frag"))),
+                 IOUtils::getResource("shaders/patch/patchMask.frag"))),
             patchC2Shader(Shader(
                  IOUtils::getResource("shaders/patch/patch.vert"),
                  IOUtils::getResource("shaders/patch/patch.tesc"),
                  IOUtils::getResource("shaders/patch/patchC2.tese"),
-                 IOUtils::getResource("shaders/patch/patch.frag"))),
+                 IOUtils::getResource("shaders/patch/patchMask.frag"))),
             gregoryShader(Shader(
                  IOUtils::getResource("shaders/patch/patch.vert"),
                  IOUtils::getResource("shaders/patch/gregory.tesc"),
@@ -88,6 +88,7 @@ public:
         shader.setUniform("view", view);
         shader.setUniform("selected", false);
         shader.setUniform("color", glm::vec4(0, 0, 0, 1));
+        shader.setUniform("usingMask", false);
         for(auto &torus : std::views::values(appState.torusSet))
             torus->render(shader);
         shader.setUniform("color", glm::vec4(0.2, 0.4, 0.5, 0.8));
@@ -99,6 +100,9 @@ public:
             patch->renderVectors(shader);
         for(auto &bezier : std::views::values(appState.bezierC0Set))
             bezier->renderSeiler(shader);
+        shader.setUniform("color", glm::vec4(0, 1, 0, 1));
+        for(auto &intersection : std::views::values(appState.intersectionSet))
+            intersection->render(shader);
 
 
         pointShader.use();

@@ -27,7 +27,7 @@ namespace CreateEventsHandler {
 
         // Add all currently selected points;
         for(auto &el : selectedEntities) { // TODO Consider separating selected entities into object types.
-            if(holds_alternative<std::reference_wrapper<Point>>(el.second)) {
+            if(std::holds_alternative<std::reference_wrapper<Point>>(el.second)) {
                 Point &point = std::get<std::reference_wrapper<Point>>(el.second);
                 result.first->second->addPoint(point);
             }
@@ -124,6 +124,18 @@ namespace CreateEventsHandler {
                     );
             appState.lastIdCreated = gregory->id;
             appState.gregoryPatchSet.emplace(gregory->id, std::move(gregory));
+        });
+
+        appState.eventPublisher.subscribe([&](const CreateIntersectionEvent &event) {
+            // TODO DEBUG
+            // for(int i = 0; i < event.intersectionPoints.size(); i++) {
+                // float ratio = static_cast<float>(i) / event.intersectionPoints.size();
+                // appState.eventPublisher.publish(CreatePointEvent{event.intersectionPoints[i]});
+                // appState.pointSet[appState.lastIdCreated]->color = glm::vec4(ratio, ratio, ratio, 1);
+            // }
+            auto intersection = std::make_unique<Intersection>(event.intersectionPoints, event.surfaces, event.wrapped);
+            appState.lastIdCreated = intersection->id;
+            appState.intersectionSet.emplace(intersection->id, std::move(intersection));
         });
     }
 }

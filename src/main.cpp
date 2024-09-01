@@ -1,8 +1,9 @@
 
 #include <memory>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include "logic/io/stb_image.h"
 #include "../../lib/glad/glad_glfw.h"
 #include "logic/opengl/OpenGLInstance.h"
