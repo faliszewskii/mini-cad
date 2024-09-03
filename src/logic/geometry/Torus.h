@@ -91,8 +91,6 @@ public:
     static bool wrapV() { return true; }
 
     [[nodiscard]] glm::vec3 evaluate(float u, float v) const {
-        // u *= std::numbers::pi * 2.0f;
-        // v *= std::numbers::pi * 2.0f;
         float x = (radius + thickness * std::cos(v)) * std::cos(u);
         float y = thickness * std::sin(v);
         float z = (radius + thickness * std::cos(v)) * std::sin(u);
@@ -100,8 +98,6 @@ public:
     }
 
     [[nodiscard]] glm::vec3 evaluateDU(float u, float v) const {
-        // u *= std::numbers::pi * 2.0f;
-        // v *= std::numbers::pi * 2.0f;
         float x = (radius + thickness * std::cos(v)) * -std::sin(u);
         float y = 0;
         float z = (radius + thickness * std::cos(v)) * std::cos(u);
@@ -109,8 +105,6 @@ public:
     }
 
     [[nodiscard]] glm::vec3 evaluateDV(float u, float v) const {
-        // u *= std::numbers::pi * 2.0f;
-        // v *= std::numbers::pi * 2.0f;
         float x = thickness * -std::sin(v) * std::cos(u);
         float y = thickness * std::cos(v);
         float z = thickness * -std::sin(v) * std::sin(u);
@@ -140,6 +134,12 @@ public:
                 flattenedArray.push_back(1);
             }
         }
+        mask.update2D(flattenedArray.data());
+    }
+
+    void clearMask() {
+        maskData = {};
+        std::array<float, 256 * 256 * 4> flattenedArray{};
         mask.update2D(flattenedArray.data());
     }
 };

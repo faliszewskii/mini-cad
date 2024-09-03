@@ -33,14 +33,71 @@ namespace PointEventsHandler {
                         interpolated.second->updatePoint(event.point, i);
             }
             for(auto &patch : appState.patchC0Set) {
+                bool patchChanged = false;
                 for (int i = 0; i < patch.second->controlPoints.size(); i++)
-                    if (patch.second->controlPoints[i].first == event.point.id)
+                    if (patch.second->controlPoints[i].first == event.point.id) {
+                        patchChanged = true;
                         patch.second->updatePoint(event.point, i);
+                    }
+                if (patchChanged) {
+                    for(auto &pIntersection : appState.intersectionSet) {
+                        Intersection &intersection = *pIntersection.second;
+                        if(std::visit(overloaded{[&](auto &e){ return e.get().id == patch.first;}}, intersection.surfaces[0].first) ||
+                            std::visit(overloaded{[&](auto &e){ return e.get().id == patch.first;}}, intersection.surfaces[1].first)) {
+                            for(auto &pSurface : intersection.surfaces) {
+                                IntersectableSurface surface = pSurface.first;
+                                std::visit(overloaded{
+                                    [&](auto &s) {
+                                        s.get().clearMask();
+                                        for(auto &pOtherIntersection : appState.intersectionSet) {
+                                            if(pOtherIntersection.first == intersection.id)  continue;
+                                            Intersection &otherIntersection = *pOtherIntersection.second;
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[0].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 0);
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[1].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 1);
+                                        }
+                                    }
+                                }, surface);
+                            }
+                            appState.intersectionSet.erase(appState.intersectionSet.find(intersection.id));
+                        }
+                    }
+                }
+
             }
             for(auto &patch : appState.patchC2Set) {
+                bool patchChanged = false;
                 for (int i = 0; i < patch.second->controlPoints.size(); i++)
-                    if (patch.second->controlPoints[i].first == event.point.id)
+                    if (patch.second->controlPoints[i].first == event.point.id) {
+                        patchChanged = true;
                         patch.second->updatePoint(event.point, i);
+                    }
+                if (patchChanged) {
+                    for(auto &pIntersection : appState.intersectionSet) {
+                        Intersection &intersection = *pIntersection.second;
+                        if(std::visit(overloaded{[&](auto &e){ return e.get().id == patch.first;}}, intersection.surfaces[0].first) ||
+                            std::visit(overloaded{[&](auto &e){ return e.get().id == patch.first;}}, intersection.surfaces[1].first)) {
+                            for(auto &pSurface : intersection.surfaces) {
+                                IntersectableSurface surface = pSurface.first;
+                                std::visit(overloaded{
+                                    [&](auto &s) {
+                                        s.get().clearMask();
+                                        for(auto &pOtherIntersection : appState.intersectionSet) {
+                                            if(pOtherIntersection.first == intersection.id)  continue;
+                                            Intersection &otherIntersection = *pOtherIntersection.second;
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[0].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 0);
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[1].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 1);
+                                        }
+                                    }
+                                }, surface);
+                            }
+                            appState.intersectionSet.erase(appState.intersectionSet.find(intersection.id));
+                        }
+                    }
+                }
             }
 
             for(auto &gregory : appState.gregoryPatchSet)

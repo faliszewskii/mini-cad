@@ -250,6 +250,13 @@ public:
         }
         mask.update2D(flattenedArray.data());
     }
+
+    void clearMask() {
+        maskData = {};
+        std::array<float, 256 * 256 * 4> flattenedArray{};
+        mask.update2D(flattenedArray.data());
+    }
+
 };
 
 #endif //OPENGL_SANDBOX_PATCHC0_H

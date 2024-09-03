@@ -9,11 +9,13 @@
 #include "imgui.h"
 #include "creator/BezierPatchCreatorUI.h"
 #include "creator/GregoryPatchCreatorUI.h"
+#include "intersections/IntersectionGui.h"
 
 class GUI {
     AppState &appState;
     BezierPatchCreatorUI bezierPatchCreatorUi;
     GregoryPatchCreatorUI gregoryPatchCreatorUi;
+    IntersectionGui intersectionGui;
 public:
     explicit GUI(AppState &appState, GLFWwindow *window);
 

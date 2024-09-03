@@ -27,8 +27,8 @@ public:
     std::vector<std::pair<IntersectableSurface, std::vector<glm::vec2>>> surfaces;
     bool wrapped;
 
-    Intersection(std::vector<glm::vec3> points, std::vector<std::pair<IntersectableSurface, std::vector<glm::vec2>>> surfaces, bool wrapped) :
-        id(IdCounter::nextId()), name("Intersection ("+std::to_string(id)+")"), selected(false), wrapped(wrapped),
+    Intersection(std::vector<glm::vec3> ipoints, std::vector<std::pair<IntersectableSurface, std::vector<glm::vec2>>> surfaces, bool wrapped) :
+        id(IdCounter::nextId()), name("Intersection ("+std::to_string(id)+")"), selected(false), wrapped(wrapped), points(std::move(ipoints)),
         surfaces(std::move(surfaces)), mesh(Mesh<PositionVertex>({}, {}, GL_POINTS)) {
         std::vector<PositionVertex> vertices;
         std::transform(points.begin(), points.end(), std::back_inserter(vertices), [](glm::vec3 p) {return PositionVertex({p.x, p.y, p.z});});

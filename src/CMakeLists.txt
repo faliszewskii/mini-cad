@@ -133,6 +133,8 @@ set(INCL
         logic/algorithms/BresenhamAlgorithm.h
         logic/algorithms/FloodFill.cpp
         logic/algorithms/FloodFill.h
+        presentation/gui/intersections/IntersectionGui.cpp
+        presentation/gui/intersections/IntersectionGui.h
 )
 
 add_executable(opengl-sandbox main.cpp

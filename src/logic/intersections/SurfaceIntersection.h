@@ -12,18 +12,37 @@
 
 class SurfaceIntersection {
 public:
-    int subdivisionCount = 64;
-    int subdivisionIterations = 100;
+    const int subdivisionCountDefault = 64;
+    const int subdivisionIterationsDefault = 100;
 
-    int gradientIterationLimit = 2000;
-    float gradientStartStep = 0.1;
-    float gradientPrecision = std::numeric_limits<float>::epsilon() * 1000;
+    const int gradientIterationLimitDefault = 2000;
+    const float gradientStartStepDefault = 0.01;
+    const int gradientPrecisionEpsilonDefault = 1000;
 
-    float intersectionPointsDistance = 0.1;
-    int intersectionIterations = 1000;
-    float intersectionPrecision = std::numeric_limits<float>::epsilon() * 100;
-    int maxIntersectionPoints = 1000;
-    int smallerStepTriesLimit = 10;
+    const float intersectionPointsDistanceDefault = 0.05;
+    const int intersectionIterationsDefault = 1000;
+    const int intersectionPrecisionEpsilonDefault = 100;
+    const int maxIntersectionPointsDefault = 1000;
+    const int smallerStepTriesLimitDefault = 10;
+    const float intersectionTangentDotProductDefault = 0.0;
+
+    const float repulserExponentDefault = 0.5;
+
+    int subdivisionCount = subdivisionCountDefault;
+    int subdivisionIterations = subdivisionIterationsDefault;
+
+    int gradientIterationLimit = gradientIterationLimitDefault;
+    float gradientStartStep = gradientStartStepDefault;
+    int gradientPrecisionEpsilon = gradientPrecisionEpsilonDefault;
+
+    float intersectionPointsDistance = intersectionPointsDistanceDefault;
+    int intersectionIterations = intersectionIterationsDefault;
+    int intersectionPrecisionEpsilon = intersectionPrecisionEpsilonDefault;
+    int maxIntersectionPoints = maxIntersectionPointsDefault;
+    int smallerStepTriesLimit = smallerStepTriesLimitDefault;
+    float intersectionTangentDotProduct = intersectionTangentDotProductDefault;
+
+    float repulserExponent = repulserExponentDefault;
 
     struct IntersectionResult {
         std::vector<glm::vec3> intersectionPoints;
@@ -45,7 +64,7 @@ public:
                 for(int j = 0; j < subdivisionCount; j++) {
                     float u = minU + divU/2.f + i * divU;
                     float v = minV + divV/2.f + j * divV;
-                    float repulsion = repulser.has_value()? std::pow( glm::distance(glm::vec2(u,v), repulser.value()), 1): 0;
+                    float repulsion = repulser.has_value()? std::pow( glm::distance(glm::vec2(u,v), repulser.value()), repulserExponent): 0;
                     float dist = glm::distance(surfaceA.evaluate(u, v), referencePoint) - repulsion;
 //                    std::cout <<"u: " << u << ", v: " << v << ". Dist: " << dist << std::endl;
                     if(dist < minDist) {
@@ -118,7 +137,7 @@ public:
 
 
 
-        for(int k = 0; k < gradientIterationLimit && prevDist > gradientPrecision; k++) {
+        for(int k = 0; k < gradientIterationLimit && prevDist > std::numeric_limits<float>::epsilon()*gradientPrecisionEpsilon; k++) {
             glm::vec4 gradient = getGradient(surfaceA, pointA.x, pointA.y, surfaceB, pointB.x, pointB.y);
 
             float newU = pointA.x - gradient.x * step;
@@ -129,10 +148,6 @@ public:
             cap(newV, 0, surfaceA.rangeV(), surfaceA.wrapV());
             cap(newS, 0, surfaceB.rangeU(), surfaceB.wrapU());
             cap(newT, 0, surfaceB.rangeV(), surfaceB.wrapV());
-            pointA.x = newU;
-            pointA.y = newV;
-            pointB.x = newS;
-            pointB.y = newT;
             // float currDist = glm::distance(surfaceA.evaluate(pointA.x - gradient.x * step, pointA.y - gradient.y * step), surfaceB.evaluate(pointB.x - gradient.z * step, pointB.y - gradient.w * step));
             float currDist = glm::distance(surfaceA.evaluate(newU, newV), surfaceB.evaluate(newS, newT));
             if(currDist > prevDist) {
@@ -143,6 +158,10 @@ public:
             }
             prevDist = currDist;
 
+            pointA.x = newU;
+            pointA.y = newV;
+            pointB.x = newS;
+            pointB.y = newT;
             // pointA.x -= gradient.x * step;
             // pointA.y -= gradient.y * step;
             // pointB.x -= gradient.z * step;
@@ -153,7 +172,7 @@ public:
             // cap(pointA.y, 0, surfaceA.rangeV(), surfaceA.wrapV());
             // cap(pointB.x, 0, surfaceB.rangeU(), surfaceB.wrapU());
             // cap(pointB.y, 0, surfaceB.rangeV(), surfaceB.wrapV());
-            // step = gradientStartStep;
+            step = gradientStartStep;
             // intersectionPoints.push_back(surfaceA.evaluate(pointA.x, pointA.y)); // First point on the intersection
             // intersectionPoints.push_back(surfaceB.evaluate(pointB.x, pointB.y)); // First point on the intersection
         }
@@ -172,7 +191,7 @@ public:
         // };
         // // TODO DEBUG
 
-        if(prevDist > gradientPrecision)
+        if(prevDist > std::numeric_limits<float>::epsilon() * gradientPrecisionEpsilon)
             return std::unexpected<std::string>("Couldn't find an intersection close to the cursor with desired precision");
 
         intersectionPoints.push_back(surfaceA.evaluate(pointA.x, pointA.y)); // First point on the intersection
@@ -236,7 +255,7 @@ public:
              //         vec
              //     };
              // }
-             bool signChanged = glm::dot(T, newT) < -0.0 ;
+             bool signChanged = glm::dot(T, newT) < intersectionTangentDotProduct ;
              // std::cout << glm::dot(T, newT) << std::endl;
              T = newT;
              T *= signChanged? -1 : 1;
@@ -251,9 +270,24 @@ public:
 
                  glm::vec4 f = glm::vec4(p - q, glm::dot(p - p0, T) - step);
                  float currDist = glm::length(f);
-                 if(currDist < intersectionPrecision || it == intersectionIterations-1) {
-                     if(it == intersectionIterations - 1)
-                         return std::unexpected<std::string>("Reached intersection iteration limit!");
+                 if(currDist <  std::numeric_limits<float>::epsilon() * intersectionPrecisionEpsilon || it == intersectionIterations-1) {
+                     if(it == intersectionIterations - 1) {
+                         // return std::unexpected<std::string>("Reached intersection iteration limit!");
+                         // TODO DEBUG
+                         intersectionPoints.push_back(surfaceA.evaluate(pointA.x, pointA.y));
+                         intersectionUV1.emplace_back(pointA.x, pointA.y);
+                         intersectionPoints.push_back(surfaceA.evaluate(pointB.x, pointB.y));
+                         intersectionUV2.emplace_back(pointB.x, pointB.y);
+                         std::vector<std::pair<IntersectableSurface, std::vector<glm::vec2>>> vec1;
+                         vec1.push_back(std::make_pair(std::ref(surfaceA), intersectionUV1));
+                         vec1.push_back(std::make_pair(std::ref(surfaceB), intersectionUV2));
+                         return IntersectionResult{
+                             intersectionPoints,
+                             vec1,
+                             true
+                         };
+                         // TODO DEBUG
+                     }
                      pointA.x = u;
                      pointA.y = v;
                      pointB.x = s;
@@ -333,18 +367,18 @@ public:
                  wasCapped |= cap(v, 0, surfaceA.rangeV(), surfaceA.wrapV());
                  wasCapped |= cap(s, 0, surfaceB.rangeU(), surfaceB.wrapU());
                  wasCapped |= cap(t, 0, surfaceB.rangeV(), surfaceB.wrapV());
-                 if(wasCapped || glm::length(dx) < intersectionPrecision)
+                 if(wasCapped || glm::length(dx) <  std::numeric_limits<float>::epsilon() * intersectionPrecisionEpsilon)
                      break;
              }
-             // if(positiveDirection) {
+             if(positiveDirection) {
                  intersectionPoints.push_back(surfaceA.evaluate(u, v));
                  intersectionUV1.emplace_back(u, v);
                  intersectionUV2.emplace_back(s, t);
-             // } else {
-                 // intersectionPoints.insert(intersectionPoints.begin(), surfaceA.evaluate(u, v));
-                 // intersectionUV1.insert(intersectionUV1.begin(), {u, v});
-                 // intersectionUV2.insert(intersectionUV1.begin(), {s, t});
-             // }
+             } else {
+                 intersectionPoints.insert(intersectionPoints.begin(), surfaceA.evaluate(u, v));
+                 intersectionUV1.insert(intersectionUV1.begin(), {u, v});
+                 intersectionUV2.insert(intersectionUV2.begin(), {s, t});
+             }
 
              // intersectionPoints.push_back(surfaceB.evaluate(s, t));
 

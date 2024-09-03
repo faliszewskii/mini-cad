@@ -111,12 +111,11 @@ struct AppState {
     bool keyboardCtrlMode = false;
     bool bezierCreatorOpen = false;
     bool gregoryCreatorOpen = false;
+    bool intersectionGuiOpen = false;
 
     bool draggingMouse = false;
     glm::vec2 draggingStartPos;
     glm::vec2 draggingEndPos;
-
-
 };
 
 #endif //OPENGL_SANDBOX_APPSTATE_H

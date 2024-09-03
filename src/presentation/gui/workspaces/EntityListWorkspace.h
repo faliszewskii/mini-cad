@@ -20,8 +20,8 @@
 
 namespace EntityListWorkspace {
 
-    void renderWorkspaceTorus(Torus &torus);
-    void renderWorkspaceTransform(Transformation &transform);
+    void renderWorkspaceTorus(Torus &torus, AppState &appState);
+    bool renderWorkspaceTransform(Transformation &transform);
     void renderWorkspacePoint(Point &point, AppState &appState);
     void renderWorkspaceBezierC0(BezierC0 &bezier, AppState &appState);
     void renderWorkspaceBezierC2(BezierC2 &bezier, AppState &appState);
@@ -151,7 +151,23 @@ namespace EntityListWorkspace {
                            appState.gregoryPatchSet.erase(appState.gregoryPatchSet.find(patch.id));
                        },
                         [&](Intersection &intersection) {
-                            std::cout<<"test"; // TODO
+                            for(auto &pSurface : intersection.surfaces) {
+                                IntersectableSurface surface = pSurface.first;
+                                std::visit(overloaded{
+                                    [&](auto &s) {
+                                        s.get().clearMask();
+                                        for(auto &pOtherIntersection : appState.intersectionSet) {
+                                            if(pOtherIntersection.first == intersection.id)  continue;
+                                            Intersection &otherIntersection = *pOtherIntersection.second;
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[0].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 0);
+                                            if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[1].first))
+                                                appState.surfaceIntersection.addToMask(surface, otherIntersection, 1);
+                                        }
+                                    }
+                                }, surface);
+                            }
+                            appState.intersectionSet.erase(appState.intersectionSet.find(intersection.id));
                         }
                 }, el.second);
             }
@@ -162,7 +178,7 @@ namespace EntityListWorkspace {
 
     inline void renderWorkspaces(AppState &appState, EntityType element) {
         visit(overloaded{
-                [](Torus &torus) { renderWorkspaceTorus(torus); },
+                [&](Torus &torus) { renderWorkspaceTorus(torus, appState); },
                 [&](Point &point) { renderWorkspacePoint(point, appState); },
                 [&](BezierC0 &bezier) { renderWorkspaceBezierC0(bezier, appState); },
                 [&](BezierC2 &bezier) { renderWorkspaceBezierC2(bezier, appState); },
@@ -351,6 +367,20 @@ namespace EntityListWorkspace {
     inline void renderWorkspaceIntersection(Intersection &intersection, AppState &appState) {
         ImGui::SeparatorText("Intersection");
         renderNameInput(intersection);
+        if(ImGui::Button("Convert to interpolated curve")) {
+            appState.eventPublisher.publish(CreateInterpolatedC2Event{});
+            InterpolatedC2 &interpolated = *appState.interpolatedC2Set[appState.lastIdCreated];
+            for(auto &point : intersection.points) {
+                appState.eventPublisher.publish(CreatePointEvent{point});
+                Point &newPoint = *appState.pointSet[appState.lastIdCreated];
+                interpolated.addPoint(newPoint);
+            }
+            if(intersection.wrapped) {
+                appState.eventPublisher.publish(CreatePointEvent{intersection.points.front()});
+                Point &newPoint = *appState.pointSet[appState.lastIdCreated];
+                interpolated.addPoint(newPoint);
+            }
+        }
         if(intersection.surfaces.size() == 1)
             std::visit([&](auto &e) {ImGui::Text("Self-intersection of %s", e.get().name);}, intersection.surfaces.front().first);
         else
@@ -422,6 +452,30 @@ namespace EntityListWorkspace {
                             torus.transform.setScale(torus.transform.scale * scaleRatio);
                             torus.transform.setTranslation(torus.transform.translation +
                                                            (torus.transform.translation - centerTransform.translation) * (scaleRatio - glm::vec3(1)));
+
+                            for(auto &pIntersection : appState.intersectionSet) {
+                                Intersection &intersection = *pIntersection.second;
+                                if(std::visit(overloaded{[&](auto &e){ return e.get().id == torus.id;}}, intersection.surfaces[0].first) ||
+                                    std::visit(overloaded{[&](auto &e){ return e.get().id == torus.id;}}, intersection.surfaces[1].first)) {
+                                    for(auto &pSurface : intersection.surfaces) {
+                                        IntersectableSurface surface = pSurface.first;
+                                        std::visit(overloaded{
+                                            [&](auto &s) {
+                                                s.get().clearMask();
+                                                for(auto &pOtherIntersection : appState.intersectionSet) {
+                                                    if(pOtherIntersection.first == intersection.id)  continue;
+                                                    Intersection &otherIntersection = *pOtherIntersection.second;
+                                                    if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[0].first))
+                                                        appState.surfaceIntersection.addToMask(surface, otherIntersection, 0);
+                                                    if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[1].first))
+                                                        appState.surfaceIntersection.addToMask(surface, otherIntersection, 1);
+                                                }
+                                            }
+                                        }, surface);
+                                    }
+                                    appState.intersectionSet.erase(appState.intersectionSet.find(intersection.id));
+                                }
+                            }
                         },
                         [&](Point &point) {
                             if(moved.contains(point.id)) return;
@@ -517,11 +571,36 @@ namespace EntityListWorkspace {
         }
     }
 
-    inline void renderWorkspaceTorus(Torus &torus) {
+    inline void renderWorkspaceTorus(Torus &torus, AppState &appState) {
         ImGui::SeparatorText(torus.name.c_str());
         renderNameInput(torus);
 
-        renderWorkspaceTransform(torus.transform);
+        if(renderWorkspaceTransform(torus.transform)) {
+            for(auto &pIntersection : appState.intersectionSet) {
+                Intersection &intersection = *pIntersection.second;
+                if(std::visit(overloaded{[&](auto &e){ return e.get().id == torus.id;}}, intersection.surfaces[0].first) ||
+                    std::visit(overloaded{[&](auto &e){ return e.get().id == torus.id;}}, intersection.surfaces[1].first)) {
+                    for(auto &pSurface : intersection.surfaces) {
+                        IntersectableSurface surface = pSurface.first;
+                        std::visit(overloaded{
+                            [&](auto &s) {
+                                s.get().clearMask();
+                                for(auto &pOtherIntersection : appState.intersectionSet) {
+                                    if(pOtherIntersection.first == intersection.id)  continue;
+                                    Intersection &otherIntersection = *pOtherIntersection.second;
+                                    if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[0].first))
+                                        appState.surfaceIntersection.addToMask(surface, otherIntersection, 0);
+                                    if(std::visit(overloaded{[&](auto &e){ return e.get().id == s.get().id;}}, otherIntersection.surfaces[1].first))
+                                        appState.surfaceIntersection.addToMask(surface, otherIntersection, 1);
+                                }
+                            }
+                        }, surface);
+                    }
+                    appState.intersectionSet.erase(appState.intersectionSet.find(intersection.id));
+                    }
+            }
+        }
+
 
         ImGui::SeparatorText("Parameters");
         bool modified = false;
@@ -581,31 +660,39 @@ namespace EntityListWorkspace {
         if(pointMoved) appState.eventPublisher.publish(PointMovedEvent{point, point.position - prevPosition});
     }
 
-    inline void renderWorkspaceTransform(Transformation &transform) {
+    inline bool renderWorkspaceTransform(Transformation &transform) {
         ImGui::SeparatorText("Transform");
+        bool modified = false;
 
         auto position = static_cast<float *>(glm::value_ptr(transform.getTranslationRef()));
         ImGui::Text("Position:");
-        ImGui::DragScalar("x##position", ImGuiDataType_Float, position + 0, 0.01f);
-        ImGui::DragScalar("y##position", ImGuiDataType_Float, position + 1, 0.01f);
-        ImGui::DragScalar("z##position", ImGuiDataType_Float, position + 2, 0.01f);
+        modified |= ImGui::DragScalar("x##position", ImGuiDataType_Float, position + 0, 0.01f);
+        modified |= ImGui::DragScalar("y##position", ImGuiDataType_Float, position + 1, 0.01f);
+        modified |= ImGui::DragScalar("z##position", ImGuiDataType_Float, position + 2, 0.01f);
 
         auto oldAngle = transform.getRotationAngles();
         auto newAngle = glm::vec3(oldAngle);
         auto angleRef = static_cast<float *>(glm::value_ptr(newAngle));
         ImGui::Text("Rotation:");
-        if(ImGui::DragScalar("x##orientation", ImGuiDataType_Float, angleRef + 0, 0.01f))
+        if(ImGui::DragScalar("x##orientation", ImGuiDataType_Float, angleRef + 0, 0.01f)) {
+            modified |= true;
             transform.addRotation(glm::vec3(newAngle.x - oldAngle.x, 0, 0));
-        if(ImGui::DragScalar("y##orientation", ImGuiDataType_Float, angleRef + 1, 0.01f))
+        }
+        if(ImGui::DragScalar("y##orientation", ImGuiDataType_Float, angleRef + 1, 0.01f)) {
+            modified |= true;
             transform.addRotation(glm::vec3(0, newAngle.y - oldAngle.y, 0));
-        if(ImGui::DragScalar("z##orientation", ImGuiDataType_Float, angleRef + 2, 0.01f))
+        }
+        if(ImGui::DragScalar("z##orientation", ImGuiDataType_Float, angleRef + 2, 0.01f)) {
+            modified |= true;
             transform.addRotation(glm::vec3(0, 0, newAngle.z - oldAngle.z));
+        }
 
         auto scale = static_cast<float *>(glm::value_ptr(transform.getScaleRef()));
         ImGui::Text("Scale:");
-        ImGui::DragFloat("x##scale", scale + 0, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragFloat("y##scale", scale + 1, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragFloat("z##scale", scale + 2, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        modified |= ImGui::DragFloat("x##scale", scale + 0, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        modified |= ImGui::DragFloat("y##scale", scale + 1, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        modified |= ImGui::DragFloat("z##scale", scale + 2, 0.001f, 0.0001f, 1000, nullptr,ImGuiSliderFlags_AlwaysClamp);
+        return modified;
     }
 
     template<typename T> requires has_name<T> && has_id<T>

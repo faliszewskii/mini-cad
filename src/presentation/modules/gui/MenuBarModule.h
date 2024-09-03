@@ -71,29 +71,6 @@ public:
         NFD_Quit();
     }
 
-    static bool isIntersectionEnabled(const std::vector<std::pair<int, EntityType>>& selected) {
-        if( selected.empty() || selected.size() > 2)
-            return false;
-        if(!std::visit([](auto& a) {
-            return ParametricSurface<decltype(a.get())> && Intersectable<decltype(a.get())>;
-        }, selected[0].second))
-            return false;
-        if(selected.size() == 2 && !std::visit([](auto& b) {
-            return ParametricSurface<decltype(b.get())> && Intersectable<decltype(b.get())>;
-        }, selected[1].second))
-            return false;
-        return true;
-    }
-
-    static std::optional<IntersectableSurface> getIfIntersectableSurface(EntityType entity) {
-        return std::visit([](auto& a) -> std::optional<IntersectableSurface> {
-            using T = std::decay_t<decltype(a.get())>;
-            if constexpr (ParametricSurface<T> && Intersectable<T>)
-                return a;
-            return {};
-        }, entity);
-    }
-
     void run(AppState &appState) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -129,31 +106,8 @@ public:
                     appState.gregoryPatchCreator.reset();
                 }
                 ImGui::Separator();
-                bool intersectionEnabled = isIntersectionEnabled(appState.selectedEntities);
-                if(ImGui::MenuItem("Find Any Intersection", "", false, intersectionEnabled)) {
-                    auto& [idA, entityA] = appState.selectedEntities[0];
-                    auto& [idB, entityB] = appState.selectedEntities[1 % appState.selectedEntities.size()];
-                    auto sA = getIfIntersectableSurface(entityA).value();
-                    auto sB = getIfIntersectableSurface(entityB).value();
-                    std::visit([&](auto& a, auto& b) {
-                        auto result = appState.surfaceIntersection.findIntersection(a.get(), b.get(), idA == idB, appState.cursorPosition);
-                        if(!result.has_value()) {
-                            appState.logger.logError(result.error());
-                            return;
-                        }
-                        auto points = result->intersectionPoints;
-                        appState.eventPublisher.publish(CreateIntersectionEvent(
-                            result->intersectionPoints,
-                            result->surfaces,
-                            result->wrapped
-                            ));
-                        // TODO DEBUG
-                        appState.surfaceIntersection.addToMask(sA, *appState.intersectionSet[appState.lastIdCreated], 0);
-                        appState.surfaceIntersection.addToMask(sB, *appState.intersectionSet[appState.lastIdCreated], 1);
-                    }, sA, sB);
-                }
-                if(ImGui::MenuItem("Find Intersection Near Cursor", "", false, intersectionEnabled)) {
-                   // TODO
+                if(ImGui::MenuItem("Intersection Gui", "", appState.intersectionGuiOpen, true)) {
+                    appState.intersectionGuiOpen = true;
                 }
                 ImGui::EndMenu();
             }

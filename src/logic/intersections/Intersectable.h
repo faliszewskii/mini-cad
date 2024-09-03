@@ -11,11 +11,9 @@ class Texture;
 template<typename T>
 concept Intersectable = requires(T intersectable, int id, std::vector<glm::vec2> intersection,
     std::array<std::array<glm::vec3, 256>, 256> mask, float u, float v) {
-    // { intersectable.addIntersection(id, intersection) } -> void;
-    // { intersectable.removeIntersection(id) } -> void;
-    // { intersectable.getIntersections(id) } -> std::vector<std::vector<glm::vec2>>;
     { intersectable.setMask(mask) } -> std::same_as<void>;
     { intersectable.getMask() } -> std::same_as<std::pair<std::reference_wrapper<Texture>, std::reference_wrapper<std::array<std::array<glm::vec3, 256>, 256>>>>;
+    { intersectable.clearMask() } -> std::same_as<void>;
 };
 
 #endif //INTERSECTABLE_H
