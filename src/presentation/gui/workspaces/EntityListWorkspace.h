@@ -338,7 +338,7 @@ namespace EntityListWorkspace {
     }
 
     inline void renderWorkspaceGregory(GregoryPatch &patch, AppState &appState) {
-        ImGui::SeparatorText("Patch C2");
+        ImGui::SeparatorText("Gregory Patch");
         renderNameInput(patch);
 
         ImGui::InputInt("Grid Count Width", &patch.patchGridWidth);

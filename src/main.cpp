@@ -31,10 +31,6 @@ std::unique_ptr<AppState> initializeAppState() {
 
     auto appState = std::make_unique<AppState>(viewport, GUI_PANEL_LEFT_WIDTH);
 
-    appState->logger.logInfo("Test Info");
-    appState->logger.logDebug("Test Debug");
-    appState->logger.logError("Test Error");
-
     return appState;
 }
 
