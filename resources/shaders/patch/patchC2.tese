@@ -57,6 +57,50 @@ vec3 deCasteljau2D(vec3[4][4] coefficients, float u, float v)
     return result;
 }
 
+vec3 evaluateDU(vec3[4][4] coefficients, float u, float v) {
+    // Tablica punktów kontrolnych w postaci 1D
+    vec3 uCoeffs3 = vec3(descendingAlgorithm(u, 2));
+    vec4 vCoeffs4 = descendingAlgorithm(v, 3);
+
+    vec3 partResult[4];
+    vec3 tangent1 = vec3(0);
+    for (int k = 0; k < 4; k++) {
+        partResult[k] = vec3(0.0, 0.0, 0.0);
+        partResult[k] += coefficients[k][0] * vCoeffs4[0];
+        partResult[k] += coefficients[k][1] * vCoeffs4[1];
+        partResult[k] += coefficients[k][2] * vCoeffs4[2];
+        partResult[k] += coefficients[k][3] * vCoeffs4[3];
+    }
+    tangent1 += (partResult[1] - partResult[0]) * uCoeffs3[0];
+    tangent1 += (partResult[2] - partResult[1]) * uCoeffs3[1];
+    tangent1 += (partResult[3] - partResult[2]) * uCoeffs3[2];
+    tangent1 *= 3;
+
+    return tangent1;
+}
+
+vec3 evaluateDV(vec3[4][4] coefficients, float u, float v) {
+    vec3 vCoeffs3 = vec3(descendingAlgorithm(v, 2));
+    vec4 uCoeffs4 = descendingAlgorithm(u, 3);
+
+    vec3 partResult[4];
+    vec3 tangent2 = vec3(0);
+    for (int k = 0; k < 4; k++) {
+        partResult[k] = vec3(0.0, 0.0, 0.0);
+        partResult[k] += coefficients[0][k] * uCoeffs4[0];
+        partResult[k] += coefficients[1][k] * uCoeffs4[1];
+        partResult[k] += coefficients[2][k] * uCoeffs4[2];
+        partResult[k] += coefficients[3][k] * uCoeffs4[3];
+    }
+    tangent2 += (partResult[1] - partResult[0]) * vCoeffs3[0];
+    tangent2 += (partResult[2] - partResult[1]) * vCoeffs3[1];
+    tangent2 += (partResult[3] - partResult[2]) * vCoeffs3[2];
+    tangent2 *= 3;
+
+    return tangent2;
+}
+
+
 void main()
 {
     bool b = instanceID == 0;
@@ -74,7 +118,11 @@ void main()
     vec3[4](gl_in[12].gl_Position.xyz, gl_in[13].gl_Position.xyz, gl_in[14].gl_Position.xyz, gl_in[15].gl_Position.xyz)
     };
 
-    vec4 pos = vec4(deCasteljau2D(coefficients, u, v), 1.f);
+
+    vec3 normal = cross(evaluateDU(coefficients, u, v), evaluateDV(coefficients, u, v));
+    normal = normalize(normal);
+    vec4 pos = vec4(deCasteljau2D(coefficients, u, v) /*- normal * 1*/, 1.f);
+
     gl_Position = projection * view * pos;
     float uPatch = gl_PrimitiveID / patchCountWidth;
     float vPatch = gl_PrimitiveID % patchCountWidth;

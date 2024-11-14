@@ -297,6 +297,14 @@ namespace EntityListWorkspace {
         modified = ImGui::InputInt("Grid Count Length", &patch.bezierPatchGridLength);
         if(modified && patch.bezierPatchGridLength < 1) patch.bezierPatchGridLength = 1;
 
+        if(ImGui::Button("Select points")) {
+            auto temp = appState.keyboardCtrlMode;
+            appState.keyboardCtrlMode = true;
+            for(auto &point : patch.controlPoints)
+                appState.eventPublisher.publish(SelectEntityEvent{point.second, 0});
+            appState.keyboardCtrlMode = temp;
+        }
+
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {
             for(auto &pPoint : patch.controlPoints) {
@@ -323,6 +331,14 @@ namespace EntityListWorkspace {
         if(modified && patch.bezierPatchGridWidth < 1) patch.bezierPatchGridWidth = 1;
         modified = ImGui::InputInt("Grid Count Length", &patch.bezierPatchGridLength);
         if(modified && patch.bezierPatchGridLength < 1) patch.bezierPatchGridLength = 1;
+
+        if(ImGui::Button("Select points")) {
+            auto temp = appState.keyboardCtrlMode;
+            appState.keyboardCtrlMode = true;
+            for(auto &point : patch.controlPoints)
+                appState.eventPublisher.publish(SelectEntityEvent{point.second, 0});
+            appState.keyboardCtrlMode = temp;
+        }
 
         ImGui::SeparatorText("Control Points");
         if (ImGui::BeginListBox("Control points#Workspace", ImVec2(-FLT_MIN, 0))) {

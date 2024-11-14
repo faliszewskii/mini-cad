@@ -80,6 +80,24 @@ void Serializer::exportScene(AppState &appState, const std::string &path) {
         scene.interpolatedC2.push_back(interpolatedData);
     }
 
+    for(auto &interpolated : appState.intersectionSet) {
+        MG1::InterpolatedC2 interpolatedData;
+
+        interpolatedData.SetId(id++);
+        interpolatedData.name = interpolated.second->name;
+        for(auto &point : interpolated.second->points) {
+            MG1::Point pointData;
+            pointData.SetId(id++);
+            pointData.name = "p";
+            pointData.position.x = point.x;
+            pointData.position.y = point.y;
+            pointData.position.z = point.z;
+            scene.points.push_back(pointData);
+            interpolatedData.controlPoints.emplace_back(pointData.GetId());
+        }
+        scene.interpolatedC2.push_back(interpolatedData);
+    }
+
     for(auto &patch : appState.patchC0Set) {
         MG1::BezierSurfaceC0 surface;
         surface.SetId(id++);
@@ -222,6 +240,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
         appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC0Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
         appState.patchC0Set[appState.lastIdCreated]->wrapped = surfaceData.uWrapped || surfaceData.vWrapped;
+        appState.patchC0Set[appState.lastIdCreated]->name = surfaceData.name;
     }
 
     for(auto &surfaceData : scene.surfacesC2) {
@@ -260,6 +279,7 @@ void Serializer::importScene(AppState &appState, const std::string &path) {
         appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridWidth = surfaceData.patches[0].samples.x - 1;
         appState.patchC2Set[appState.lastIdCreated]->bezierPatchGridLength = surfaceData.patches[0].samples.y - 1;
         appState.patchC2Set[appState.lastIdCreated]->wrapped = surfaceData.uWrapped || surfaceData.vWrapped;
+        appState.patchC2Set[appState.lastIdCreated]->name = surfaceData.name;
     }
 
 }

@@ -126,18 +126,18 @@ public:
 
     void addPoint(Point &newPoint) { // TODO Add reaction to the event of deleting a point from pointSet.
         controlPoints.emplace_back(newPoint.id, newPoint);
-        recalculateBernsteinPoints();
+//        recalculateBernsteinPoints();
         updateMesh();
     }
 
     void removePoint(int i) {
         controlPoints.erase(controlPoints.begin() + i);
-        recalculateBernsteinPoints();
+//        recalculateBernsteinPoints();
         updateMesh();
     }
 
     void updatePoint(Point &point, int i) {
-        recalculateBernsteinPoints();
+//        recalculateBernsteinPoints();
         updateMesh();
     }
 
