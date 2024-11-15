@@ -189,7 +189,7 @@ public:
                         + uN[2] * ( vN[0]*p[2][0] + vN[1]*p[2][1] + vN[2]*p[2][2] + vN[3]*p[2][3] )
                         + uN[3] * ( vN[0]*p[3][0] + vN[1]*p[3][1] + vN[2]*p[3][2] + vN[3]*p[3][3] );
 
-        return point + ((name != "planeXZ")? normal : glm::vec3());
+        return point; // ((name != "planeXZ")? normal : glm::vec3());
 
     }
     glm::vec3 evaluateDU(float u, float v) {

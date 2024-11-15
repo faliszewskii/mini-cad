@@ -120,8 +120,9 @@ void main()
 
 
     vec3 normal = cross(evaluateDU(coefficients, u, v), evaluateDV(coefficients, u, v));
+    normal = vec3(normal.x, 0, normal.z);
     normal = normalize(normal);
-    vec4 pos = vec4(deCasteljau2D(coefficients, u, v) /*- normal * 1*/, 1.f);
+    vec4 pos = vec4(deCasteljau2D(coefficients, u, v) /*+ normal * 1*/, 1.f);
 
     gl_Position = projection * view * pos;
     float uPatch = gl_PrimitiveID / patchCountWidth;

@@ -85,8 +85,18 @@ void IntersectionGui::render() {
                     return;
                 }
                 auto points = result->intersectionPoints;
+                for(int i = 0; i < points.size(); i++) {
+                    glm::vec3 &p = points[i];
+                    glm::vec2 uv = result->surfaces[1].second[i];
+                    glm::vec3 t1 = b.get().evaluateDU(uv.x, uv.y);
+                    glm::vec3 t2 = b.get().evaluateDV(uv.x, uv.y);
+                    glm::vec3 n = glm::cross(t1, t2);
+                    n = glm::vec3(n.x, 0, n.z);
+                    n = glm::normalize(n);
+                    p += n;
+                }
                 appState.eventPublisher.publish(CreateIntersectionEvent(
-                    result->intersectionPoints,
+                    points,
                     result->surfaces,
                     result->wrapped
                     ));
