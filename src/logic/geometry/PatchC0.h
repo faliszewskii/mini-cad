@@ -143,15 +143,17 @@ public:
         glm::vec3 t1 = evaluateDU(u, v);
         glm::vec3 t2 = evaluateDV(u, v);
         auto normal = glm::cross(t1, t2);
-        normal = glm::normalize(glm::vec3{normal.x, 0, normal.z});
-        normal *= glm::vec3(5/5.7243,1,5/5.235);
+        normal = glm::normalize(normal);
+        normal *= glm::vec3(5/5.7243,5/6.57439232,5/5.235);
 
 
         glm::vec3 coefficients[4][4];
         convertToSinglePatch(u, v, coefficients);
 
 
-        return deCasteljau2D(coefficients, u, v) + ((name != "planeXZ")? normal : glm::vec3());
+        float swap = name == "planeXZ" ? -1 : 1;
+
+        return deCasteljau2D(coefficients, u, v) + normal * swap;
     }
 
     [[nodiscard]] glm::vec3 evaluateDU(float u, float v) const {

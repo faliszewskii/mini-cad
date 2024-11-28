@@ -17,6 +17,8 @@
 #include <variant>
 
 #include "../../../logic/algorithms/FloodFill.h"
+#include "../../../logic/io/stb_image_write.h"
+#include "nfd.h"
 
 namespace EntityListWorkspace {
 
@@ -365,6 +367,34 @@ namespace EntityListWorkspace {
         ImGui::Checkbox("Draw Vectors", &patch.drawVectors);
     }
 
+    inline void saveNfdMask(const std::function<void(const std::string &)> &func) {
+        NFD_Init();
+
+        nfdu8char_t *outPath;
+        nfdu8filteritem_t filters[1] = { { "Intersection mask", "png" } };
+        nfdsavedialogu8args_t args = {0};
+        args.filterList = filters;
+        args.filterCount = 1;
+        args.defaultName = "mask.png";
+        nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args);
+        if (result == NFD_OKAY)
+        {
+            std::string s(outPath);
+            func(s);
+            NFD_FreePath(outPath);
+        }
+        else if (result == NFD_CANCEL)
+        {
+            puts("User pressed cancel.");
+        }
+        else
+        {
+            printf("Error: %s\n", NFD_GetError());
+        }
+
+        NFD_Quit();
+    }
+
     inline void renderMaskImage(int textureId, std::array<std::array<glm::vec3, 256>, 256> &mask, ImVec2 size, AppState &appState, IntersectableSurface &s) {
         if(ImGui::ImageButton((void*)(intptr_t)textureId, size,  ImVec2(0, 0),  ImVec2(1, 1), 0)) {
             glm::vec2 coords =  {size.y - (ImGui::GetCursorScreenPos().y - ImGui::GetMousePos().y), ImGui::GetMousePos().x - ImGui::GetCursorScreenPos().x};
@@ -377,6 +407,18 @@ namespace EntityListWorkspace {
                 [&](int x, int y) {mask[x][y] = destColor;},
                 [&](int x, int y) {return mask[x][y] == sourceColor;});
             std::visit([&](auto &el){ return el.get().setMask(mask);}, s);
+        }
+        if(ImGui::Button("Save to file")) {
+            std::vector<unsigned char> pixels;
+            std::for_each(mask.begin(), mask.end(), [&](auto &row) {
+                std::for_each(row.begin(), row.end(), [&](auto &v) {
+                    pixels.push_back(v.x*255);
+                    pixels.push_back(v.y*255);
+                    pixels.push_back(v.z*255);
+                    pixels.push_back(255);
+                });
+            });
+            saveNfdMask([&](std::string name){stbi_write_png(name.c_str(), 256, 256, 4, pixels.data(), 4*256);});
         }
     }
 

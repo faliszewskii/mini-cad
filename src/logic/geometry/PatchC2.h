@@ -162,8 +162,9 @@ public:
         glm::vec3 t1 = evaluateDU(u, v);
         glm::vec3 t2 = evaluateDV(u, v);
         auto normal = glm::cross(t1, t2);
-        normal = glm::normalize(glm::vec3{normal.x, 0, normal.z});
-        normal *= glm::vec3(5/5.7243,1,5/5.235);
+        normal = glm::normalize(normal);
+        float radius = 4;
+        normal *= glm::vec3(radius/5.7243f,radius/6.57439232f,radius/5.235f);
 
         glm::vec3 p[4][4];
         convertToSinglePatch(u, v, p);
@@ -189,7 +190,7 @@ public:
                         + uN[2] * ( vN[0]*p[2][0] + vN[1]*p[2][1] + vN[2]*p[2][2] + vN[3]*p[2][3] )
                         + uN[3] * ( vN[0]*p[3][0] + vN[1]*p[3][1] + vN[2]*p[3][2] + vN[3]*p[3][3] );
 
-        return point; // ((name != "planeXZ")? normal : glm::vec3());
+        return point + normal ;
 
     }
     glm::vec3 evaluateDU(float u, float v) {
