@@ -164,6 +164,7 @@ public:
         auto normal = glm::cross(t1, t2);
         normal = glm::normalize(normal);
         float radius = 4;
+        // normal *= glm::vec3(radius/5.7243f,radius/6.57439232f,radius/5.235f);
         normal *= glm::vec3(radius/5.7243f,radius/6.57439232f,radius/5.235f);
 
         glm::vec3 p[4][4];
@@ -190,7 +191,8 @@ public:
                         + uN[2] * ( vN[0]*p[2][0] + vN[1]*p[2][1] + vN[2]*p[2][2] + vN[3]*p[2][3] )
                         + uN[3] * ( vN[0]*p[3][0] + vN[1]*p[3][1] + vN[2]*p[3][2] + vN[3]*p[3][3] );
 
-        return point + normal ;
+        float swap = name == "fin" ? -1 : 1;
+        return point + normal * swap;
 
     }
     glm::vec3 evaluateDU(float u, float v) {

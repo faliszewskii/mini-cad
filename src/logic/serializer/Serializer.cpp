@@ -85,13 +85,13 @@ void Serializer::exportScene(AppState &appState, const std::string &path) {
 
         interpolatedData.SetId(id++);
         interpolatedData.name = interpolated.second->name;
-        for(auto &point : interpolated.second->points) {
+        for(auto &point : interpolated.second->surfaces[0].second) {
             MG1::Point pointData;
             pointData.SetId(id++);
             pointData.name = "p";
             pointData.position.x = point.x;
             pointData.position.y = point.y;
-            pointData.position.z = point.z;
+            pointData.position.z = 0;
             scene.points.push_back(pointData);
             interpolatedData.controlPoints.emplace_back(pointData.GetId());
         }
