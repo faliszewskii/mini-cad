@@ -7,6 +7,9 @@ A Computer-aided design software for modelling smooth 3D surfaces
 ## Example model (A flying fish of the family Exocoetidae)
 ![image](https://github.com/user-attachments/assets/d3730196-6a3d-40a4-b4bc-d7ef3608a84f)
 
+## Real-life model milled using generated paths
+![Rybka](https://github.com/user-attachments/assets/a153136d-9155-4c30-a68e-dee23b391d3b)
+
 ## Precise surface manipulation and connections
 ![image](https://github.com/user-attachments/assets/65e7decd-a035-49ec-ad86-6a0f3ed4364d)
 
