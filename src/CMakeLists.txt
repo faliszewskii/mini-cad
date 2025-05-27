@@ -137,7 +137,7 @@ set(INCL
         presentation/gui/intersections/IntersectionGui.h
 )
 
-add_executable(opengl-sandbox main.cpp
+add_executable(mini-cad main.cpp
         ${IMGUI}
         ${INCL}
 )
@@ -145,15 +145,15 @@ add_executable(opengl-sandbox main.cpp
 set(CFLAGS -std=c++23 -fmodules-ts#[[ -O3]])
 set(LDFLAGS -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lassimp -luuid nfd)
 
-target_include_directories(opengl-sandbox PRIVATE ../lib/imgui ../lib/GLFW)
-target_compile_options(opengl-sandbox PUBLIC ${CFLAGS})
+target_include_directories(mini-cad PRIVATE ../lib/imgui ../lib/GLFW)
+target_compile_options(mini-cad PUBLIC ${CFLAGS})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_link_libraries(opengl-sandbox ${LDFLAGS})
+    target_link_libraries(mini-cad ${LDFLAGS})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")        # Windows
     find_package(OpenGL REQUIRED)
     include_directories( ${OPENGL_INCLUDE_DIRS})
-    target_link_libraries(opengl-sandbox
+    target_link_libraries(mini-cad
             glfw
             nfd
             ${OPENGL_LIBRARIES}

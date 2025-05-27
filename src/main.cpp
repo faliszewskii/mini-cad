@@ -56,7 +56,6 @@ int main() {
             appState->runModules();
 
             glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-            ImGui::ShowDemoWindow();
             gui.render();
 
             openGlInstance.swapBuffers();

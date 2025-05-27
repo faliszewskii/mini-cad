@@ -23,7 +23,7 @@ int OpenGLInstance::init(
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL Sandbox", 0, NULL);
+    window = glfwCreateWindow(screenWidth, screenHeight, "Mini CAD", 0, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
